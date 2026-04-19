@@ -32,20 +32,23 @@
           <p>Acesso rapido para continuar seu planejamento.</p>
         </header>
 
-        <form id="loginForm" class="login-form" action="PHP/login.php" method="post" novalidate>
+        <form id="loginForm" class="login-form" action="PHP/login.php" method="post">
           <label for="username">Apelido</label>
-          <input type="text" id="username" name="username" placeholder="Digite seu apelido (opcional)"
-            autocomplete="username" />
+          <input type="text" id="username" name="username" placeholder="Digite seu apelido" autocomplete="username"
+            required />
 
           <label for="password">Senha</label>
-          <input type="password" id="password" name="password" placeholder="Digite sua senha (opcional)"
-            autocomplete="current-password" />
+          <input type="password" id="password" name="password" placeholder="Digite sua senha"
+            autocomplete="current-password" required />
 
           <label for="rememberLogin">
             <input type="checkbox" id="rememberLogin" name="rememberLogin" /> Lembrar neste dispositivo
           </label>
 
           <button type="submit" class="bt">Entrar na central</button>
+          <button type="button" id="forgetLogin" class="bt bt--secondary">Esquecer apelido e senha neste
+            dispositivo</button>
+          <p id="loginStorageStatus" class="login-form__status" aria-live="polite"></p>
         </form>
 
         <footer class="login-card__footer">

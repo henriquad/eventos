@@ -1,4 +1,11 @@
 var STORAGE_KEY = "eventos.periodoReferencia";
+var LOGIN_LOCAL_KEY = "eventos.login.persistido";
+var LOGIN_SESSION_KEY = "eventos.login.sessao";
+
+function limparCredenciaisPersistidas() {
+  window.sessionStorage.removeItem(LOGIN_SESSION_KEY);
+  window.localStorage.removeItem(LOGIN_LOCAL_KEY);
+}
 
 function apenasDigitos(valor) {
   return String(valor || "")
@@ -487,6 +494,57 @@ function inicializarMenuEventos() {
   );
   inicializarLinkComPeriodo("#linkResumoMensal", "PHP/ResumoMensal.php");
   inicializarSumariosExclusivos();
+
+  var botaoLimparDadosLocais = document.getElementById("clearLocalData");
+  if (botaoLimparDadosLocais) {
+    botaoLimparDadosLocais.addEventListener("click", function () {
+      var dataIEl = document.getElementById("DataI");
+      var dataFEl = document.getElementById("DataF");
+      var saldoAnteriorEl = document.getElementById("SaldoAnterior");
+      var statusEl = document.getElementById("periodoStatus");
+
+      var confirmou = window.confirm(
+        "Deseja realmente limpar os dados locais de período e saldo deste navegador?",
+      );
+      if (!confirmou) {
+        if (statusEl) {
+          definirStatus(statusEl, "", "Limpeza cancelada pelo usuário.");
+        }
+        return;
+      }
+
+      window.localStorage.removeItem(STORAGE_KEY);
+
+      if (dataIEl) {
+        dataIEl.value = "";
+        atualizarClasseCampo(dataIEl, "");
+      }
+
+      if (dataFEl) {
+        dataFEl.value = "";
+        atualizarClasseCampo(dataFEl, "");
+      }
+
+      if (saldoAnteriorEl) {
+        saldoAnteriorEl.value = "";
+      }
+
+      if (statusEl) {
+        definirStatus(
+          statusEl,
+          "is-valid",
+          "Dados locais de período e saldo foram removidos deste navegador.",
+        );
+      }
+    });
+  }
+
+  var linkLogout = document.querySelector(".menu-shell__logout");
+  if (linkLogout) {
+    linkLogout.addEventListener("click", function () {
+      limparCredenciaisPersistidas();
+    });
+  }
 }
 
 if (document.readyState === "loading") {

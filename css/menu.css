@@ -153,6 +153,28 @@ table {
   width: max-content;
 }
 
+.menu-shell__header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.menu-shell__clear {
+  border: 1px solid rgba(33, 76, 120, 0.28);
+  border-radius: 999px;
+  padding: 0.85rem 1.15rem;
+  background: #fff8ef;
+  color: var(--brand-dark);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.menu-shell__clear:hover {
+  background: #f7ebdb;
+}
+
 #menu-h {
   margin-bottom: 1.25rem;
 }
@@ -425,6 +447,10 @@ label {
 
   .menu-shell__header {
     gap: 0.75rem;
+  }
+
+  .menu-shell__header-actions {
+    justify-content: flex-start;
   }
 
   .periodo-card__fields {

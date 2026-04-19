@@ -53,7 +53,11 @@
                     <h2>Ações principais</h2>
                     <p>Escolha uma área para incluir, consultar ou revisar informações da agenda.</p>
                 </div>
-                <a class="menu-shell__logout" href="PHP/logout.php">Trocar usuário</a>
+                <div class="menu-shell__header-actions">
+                    <button type="button" id="clearLocalData" class="menu-shell__clear">Limpar período e saldo
+                        salvos</button>
+                    <a class="menu-shell__logout" href="PHP/logout.php?limpar=1">Trocar usuário</a>
+                </div>
             </div>
 
             <nav id="menu-h" aria-label="Menu principal">

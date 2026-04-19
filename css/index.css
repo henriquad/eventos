@@ -194,6 +194,32 @@ body {
   filter: brightness(1.05);
 }
 
+.bt--secondary {
+  margin-top: 0.55rem;
+  background: linear-gradient(120deg, #f7ecdf, #ebdcc8);
+  color: var(--brand-dark);
+  border: 1px solid #cfbfae;
+}
+
+.bt--secondary:hover {
+  filter: brightness(1.02);
+}
+
+.login-form__status {
+  min-height: 1.25rem;
+  margin-top: 0.3rem;
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.login-form__status.is-success {
+  color: #1b5e20;
+}
+
+.login-form__status.is-info {
+  color: var(--brand-dark);
+}
+
 .login-card__footer {
   margin-top: 1rem;
   border-top: 1px solid rgba(217, 204, 187, 0.72);

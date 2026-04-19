@@ -2,6 +2,8 @@
 
 require_once __DIR__ . '/auth_session.php';
 
+$limparLogin = (string)($_GET['limpar'] ?? '') === '1';
+
 $_SESSION = array();
 
 if (ini_get('session.use_cookies')) {
@@ -19,5 +21,10 @@ if (ini_get('session.use_cookies')) {
 
 session_destroy();
 
-header('Location: ../index.html', true, 303);
+$destino = '../index.html';
+if ($limparLogin) {
+    $destino .= '?limparLogin=1';
+}
+
+header('Location: ' . $destino, true, 303);
 exit();
