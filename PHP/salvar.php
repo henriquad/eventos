@@ -1,0 +1,207 @@
+<?php
+
+require_once __DIR__ . '/auth_session.php';
+eventosExigirLogin();
+require_once __DIR__ . '/eventos_schema.php';
+
+include_once "Conectar_BaseH.php";
+
+date_default_timezone_set("America/Sao_Paulo");
+
+// Função auxiliar para pegar valores POST
+function getPostValue($name, $type = 'string')
+{
+    if (!isset($_POST[$name])) {
+        return $type === 'int' ? 0 : '';
+    }
+    $value = trim($_POST[$name]);
+    if ($type === 'int') {
+        return $value !== '' ? intval($value) : 0;
+    }
+    return $value;
+}
+
+function normalizeDecimal($value)
+{
+    $raw = trim((string)$value);
+    if ($raw === '') {
+        return 0.0;
+    }
+
+    $raw = str_replace(' ', '', $raw);
+    $hasComma = strpos($raw, ',') !== false;
+    $hasDot = strpos($raw, '.') !== false;
+
+    if ($hasComma && $hasDot) {
+        $lastComma = strrpos($raw, ',');
+        $lastDot = strrpos($raw, '.');
+        if ($lastComma > $lastDot) {
+            $raw = str_replace('.', '', $raw);
+            $raw = str_replace(',', '.', $raw);
+        } else {
+            $raw = str_replace(',', '', $raw);
+        }
+    } elseif ($hasComma) {
+        $raw = str_replace(',', '.', $raw);
+    }
+
+    return is_numeric($raw) ? (float)$raw : 0.0;
+}
+
+function nullIfDefault($value, array $defaults = array('', '0'))
+{
+    $normalized = trim((string)$value);
+    return in_array($normalized, $defaults, true) ? null : $normalized;
+}
+
+function isBlankValue($value)
+{
+    return preg_match('/^\s*$/u', (string)$value) === 1;
+}
+
+
+
+// Recebe os dados do formulário
+$evento = getPostValue('evento');
+$grupo = getPostValue('grupo');
+$valorE = normalizeDecimal(getPostValue('valorE'));
+$DC = getPostValue('DC');
+$diario = getPostValue('diario');
+$diaM = nullIfDefault(getPostValue('diaM'));
+$diaS = nullIfDefault(getPostValue('diaS'));
+$diaU = nullIfDefault(getPostValue('diaU'));
+$dataF = nullIfDefault(getPostValue('dataF'));
+$prorroga = getPostValue('prorroga');
+$UPA = nullIfDefault(getPostValue('UPA'));
+$semN = nullIfDefault(getPostValue('semN'));
+$semM = nullIfDefault(getPostValue('semM'));
+$semD = nullIfDefault(getPostValue('semD'));
+$diaR = nullIfDefault(getPostValue('diaR'));
+$mesR = nullIfDefault(getPostValue('mesR'));
+$decendio = nullIfDefault(getPostValue('decendio'));
+$ativo = getPostValue('ativo');
+$diaHora = date('Y-m-d H:i:s');
+$apelido = eventosApelidoSessao();
+$senha = eventosSenhaSessao();
+
+if ($DC !== 'D' && $DC !== 'C') {
+    $DC = null;
+}
+
+if ($diario !== 'Sim' && $diario !== 'Não') {
+    $diario = null;
+}
+
+if ($ativo !== 'Sim' && $ativo !== 'Não') {
+    $ativo = null;
+}
+
+if ($prorroga !== 'Sim' && $prorroga !== 'Não' && $prorroga !== 'Nulo') {
+    $prorroga = null;
+}
+
+$camposObrigatorios = array();
+
+if (isBlankValue($evento)) {
+    $camposObrigatorios[] = 'Evento';
+}
+
+if (isBlankValue($grupo)) {
+    $camposObrigatorios[] = 'Grupo';
+}
+
+if ($DC === null) {
+    $camposObrigatorios[] = 'DC';
+}
+
+if ($prorroga === null) {
+    $camposObrigatorios[] = 'Prorroga';
+}
+
+if (!empty($camposObrigatorios)) {
+    $campos = urlencode(implode(', ', $camposObrigatorios));
+    mysqli_close($dbcon);
+    header('Location: ListaEventos.php?erro=1&msg=campos_obrigatorios&campos=' . $campos);
+    exit();
+}
+
+if (isBlankValue($grupo)) {
+    mysqli_close($dbcon);
+    header('Location: ListaEventos.php?erro=1&msg=grupo_obrigatorio');
+    exit();
+}
+
+// Converte data no formato dd/mm/aaaa para yyyy-mm-dd
+if (!empty($dataF) && preg_match('/^(\d{2})\/(\d{2})\/(\d{4})$/', $dataF, $matches)) {
+    $DataF = "{$matches[3]}-{$matches[2]}-{$matches[1]}";
+} else {
+    $DataF = null;
+}
+
+
+
+eventosGarantirSchema($dbcon);
+
+// Insere os dados com prepared statement (proteção contra SQL Injection)
+$sql = "INSERT INTO eventos(
+   evento, valorE, grupo, apelido, senha, DC, prorroga, diario, 
+    diaM, diaS, diaU, UPA, dataF, semN, semM, semD, diaR, mesR, ativo, decendio, diaHora
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+$stmt = mysqli_prepare($dbcon, $sql);
+if (!$stmt) {
+    die('Erro na preparação da query: ' . mysqli_error($dbcon));
+}
+
+// s = string, d = double, i = int
+mysqli_stmt_bind_param(
+    $stmt,
+    "sdsssssssssssssssssis",
+    $evento,
+    $valorE,
+    $grupo,
+    $apelido,
+    $senha,
+    $DC,
+    $prorroga,
+    $diario,
+    $diaM,
+    $diaS,
+    $diaU,
+    $UPA,
+    $DataF,
+    $semN,
+    $semM,
+    $semD,
+    $diaR,
+    $mesR,
+    $ativo,
+    $decendio,
+    $diaHora
+);
+
+if (!mysqli_stmt_execute($stmt)) {
+    die('Erro ao salvar: ' . mysqli_stmt_error($stmt));
+}
+
+$lastId = mysqli_insert_id($dbcon);
+
+mysqli_stmt_close($stmt);
+mysqli_close($dbcon);
+
+// Redireciona para a lista apos incluir
+$destino = '/eventos/PHP/ListaEventos.php?incluido=1&id=' . $lastId;
+
+if (!headers_sent()) {
+    header('Location: ' . $destino, true, 303);
+    exit();
+}
+
+echo '<!doctype html><html lang="pt-br"><head><meta charset="UTF-8">';
+echo '<meta http-equiv="refresh" content="0;url=' . htmlspecialchars($destino, ENT_QUOTES, 'UTF-8') . '">';
+echo '<title>Redirecionando...</title></head><body>';
+echo '<script>window.location.href=' . json_encode($destino) . ';</script>';
+echo '<p>Redirecionando para a lista de eventos... ';
+echo '<a href="' . htmlspecialchars($destino, ENT_QUOTES, 'UTF-8') . '">clique aqui</a>.</p>';
+echo '</body></html>';
+exit();

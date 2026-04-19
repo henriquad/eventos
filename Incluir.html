@@ -1,0 +1,333 @@
+﻿<!doctype html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/incluir.css?v=20260418g" />
+  <title>Eventos-Inclusão</title>
+</head>
+
+<body>
+  <header class="incluir-hero">
+
+    <h1>Fluxo de caixa - Inclusão de eventos</h1>
+    <p class="incluir-hero__text">Cadastre eventos com recorrências e regras de prorrogação para manter sua agenda
+      financeira organizada.</p>
+    <div class="button_linha">
+
+      <button type="submit" form="formIncluir" class="icon-button" title="Salvar evento">
+        <img src="images/salvar.png" alt="Salvar"></button>
+
+      <a class="menu-shell__logout" href="menu.html">Voltar ao menu</a>
+
+    </div>
+  </header>
+
+
+  <main>
+    <h2>Informações do evento a incluir - (*) campos obrigatórios</h2>
+
+    <form id="formIncluir" action="PHP/salvar.php" method="post">
+
+      <section>
+        <fieldset>
+          <legend>Informações do evento</legend>
+
+          <div class="linha-evento-grupo-valor">
+            <input type="text" name="evento" id="evento" placeholder="(*) nome do evento..." />
+            <input type="text" id="grupo" name="grupo" placeholder="(*) digite grupo ou conta..." />
+            <input type="text" name="valorE" id="valorE" placeholder="valor R$ apenas digitos..." />
+          </div>
+          <div class="radio-option">
+            <input type="radio" id="ativo" name="ativo" checked="True" value="Sim" />
+            <label for="ativo">Ativo</label>
+          </div>
+          <div class="radio-option">
+            <input type="radio" id="inativo" name="ativo" value="Não" />
+            <label for="inativo">Não ativo, aguardando outras considerações</label>
+          </div>
+        </fieldset>
+
+        <div class="linha-dc-prorroga">
+          <fieldset>
+            <legend>DC</legend>
+            <div class="radio-option">
+              <input type="radio" id="DD" name="DC" checked="True" value="D" />
+              <label for="DD">Débito ou Despesa ou Saída ou Cheque ou Pagamento...</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" id="CC" name="DC" value="C" />
+              <label for="CC">Crédito ou Receita ou Entrada ou Depósito ou Recebimento...</label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Prorrogação</legend>
+            <div class="radio-option">
+              <input type="radio" id="prorrogaS" checked="True" value="Sim" name="prorroga" />
+              <label for="prorrogaS">Sim, prorroga, pois paga ou recebe depois do feriado ou fim de semana</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" id="prorrogaN" value="Não" name="prorroga" />
+              <label for="prorrogaN">Não, não prorroga, pois tem que pagar ou receber antes do feriado ou fim de
+                semana</label>
+            </div>
+            <div class="radio-option">
+              <input id="prorrogaNulo" type="radio" value="Nulo" name="prorroga" />
+              <label for="prorrogaNulo">Nulo, pois evento não ocorre se for feriado ou fim de semana</label>
+            </div>
+          </fieldset>
+        </div>
+
+      </section>
+
+      <h2>(*) Recorrências do evento</h2>
+
+      <section>
+
+        <fieldset>
+          <legend>escolha apenas uma das 6 opções...</legend>
+
+          <div class="radio-option">
+            <input type="radio" id="diarioS" value="Sim" name="diario" />
+            <label for="diarioS">Sim, ocorre todos os dias...</label>
+          </div>
+          <div class="radio-option">
+            <input type="radio" id="diarioN" checked="True" value="Não" name="diario" />
+            <label for="diarioN">Não, não é diario...</label>
+          </div>
+
+
+
+
+          <select id="diaM" name="diaM">
+            <option value="0">escolha o dia do mês...</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+            <option value="13">13</option>
+            <option value="14">14</option>
+            <option value="15">15</option>
+            <option value="16">16</option>
+            <option value="17">17</option>
+            <option value="18">18</option>
+            <option value="19">19</option>
+            <option value="20">20</option>
+            <option value="21">21</option>
+            <option value="22">22</option>
+            <option value="23">23</option>
+            <option value="24">24</option>
+            <option value="25">25</option>
+            <option value="26">26</option>
+            <option value="27">27</option>
+            <option value="28">28</option>
+            <option value="29">29</option>
+            <option value="30">30</option>
+            <option value="31">31</option>
+          </select>
+
+
+
+          <select id="diaS" name="diaS">
+            <option value="">ou escolha o dia da semana...</option>
+            <option value="Seg">Segunda-feira</option>
+            <option value="Ter">Terça-feira</option>
+            <option value="Qua">Quarta-feira</option>
+            <option value="Qui">Quinta-feira</option>
+            <option value="Sex">Sexta-feira</option>
+            <option value="Sab">Sábado</option>
+            <option value="Dom">Domingo</option>
+          </select>
+
+
+
+
+
+
+
+          <select id="diaU" name="diaU">
+            <option value="0">ou escolha o dia útil no mês...</option>
+            <option value="1">1º</option>
+            <option value="2">2º</option>
+            <option value="3">3º</option>
+            <option value="4">4º</option>
+            <option value="5">5º</option>
+            <option value="6">6º</option>
+            <option value="7">7º</option>
+            <option value="8">8º</option>
+            <option value="9">9º</option>
+            <option value="10">10º</option>
+            <option value="11">11º</option>
+            <option value="12">12º</option>
+            <option value="13">13º</option>
+            <option value="14">14º</option>
+            <option value="15">15º</option>
+            <option value="16">16º</option>
+            <option value="17">17º</option>
+            <option value="18">18º</option>
+            <option value="19">19º</option>
+            <option value="20">20º</option>
+            <option value="21">21º</option>
+            <option value="22">22º</option>
+            <option value="23">23º</option>
+          </select>
+
+
+
+          <select id="UPA" name="UPA">
+            <option value="0">ou escolha o fim do mês...</option>
+            <option value="7">Antepenúltimo dia útil</option>
+            <option value="8">Penúltimo dia útil</option>
+            <option value="9">Último dia útil</option>
+          </select>
+
+
+
+          <select id="decendio" name="decendio">
+            <option value="0">ou escolha o decêndio...</option>
+            <option value="1">1º</option>
+            <option value="2">2º</option>
+            <option value="3">3º</option>
+          </select>
+
+
+
+          <label for="dataF">ou escolha uma data em que o evento ocorre...</label>
+          <input type="date" id="dataF" name="dataF" placeholder="digite uma data..." />
+        </fieldset>
+      </section>
+
+
+
+      <section>
+        <fieldset>
+          <legend>ou escolha as 2 opções juntas abaixo...</legend>
+
+          <select id="diaR" name="diaR">
+            <option value="0">escolha o dia do mês que repete...</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+            <option value="13">13</option>
+            <option value="14">14</option>
+            <option value="15">15</option>
+            <option value="16">16</option>
+            <option value="17">17</option>
+            <option value="18">18</option>
+            <option value="19">19</option>
+            <option value="20">20</option>
+            <option value="21">21</option>
+            <option value="22">22</option>
+            <option value="23">23</option>
+            <option value="24">24</option>
+            <option value="25">25</option>
+            <option value="26">26</option>
+            <option value="27">27</option>
+            <option value="28">28</option>
+            <option value="29">29</option>
+            <option value="30">30</option>
+            <option value="31">31</option>
+          </select>
+
+
+
+          <select id="mesR" name="mesR">
+            <option value="0">e escolha o mês que repete...</option>
+            <option value="Jan">Janeiro</option>
+            <option value="Fev">Fevereiro</option>
+            <option value="Mar">Março</option>
+            <option value="Abr">Abril</option>
+            <option value="Mai">Maio</option>
+            <option value="Jun">Junho</option>
+            <option value="Jul">Julho</option>
+            <option value="Ago">Agosto</option>
+            <option value="Set">Setembro</option>
+            <option value="Out">Outubro</option>
+            <option value="Nov">Novembro</option>
+            <option value="Dez">Dezembro</option>
+          </select>
+        </fieldset>
+
+      </section>
+
+      <section>
+
+
+        <fieldset>
+          <legend>ou escolha as 3 opções juntas abaixo...</legend>
+
+
+
+          <select id="semN" name="semN">
+            <option value="">escolha a semana do mês...</option>
+            <option value="1">1ª semana do mês</option>
+            <option value="2">2ª semana do mês</option>
+            <option value="3">3ª semana do mês</option>
+            <option value="4">4ª semana do mês</option>
+            <option value="5">5ª semana do mês</option>
+            <option value="9">Última semana do mês</option>
+          </select>
+
+
+
+          <select id="semD" name="semD">
+            <option value="">e escolha o dia da semana...</option>
+            <option value="Seg">Segunda-feira</option>
+            <option value="Ter">Terça-feira</option>
+            <option value="Qua">Quarta-feira</option>
+            <option value="Qui">Quinta-feira</option>
+            <option value="Sex">Sexta-feira</option>
+            <option value="Sáb">Sábado</option>
+            <option value="Dom">Domingo</option>
+          </select>
+
+
+
+
+          <select id="semM" name="semM">
+            <option value="">e escolha o mês que repete...</option>
+            <option value="Jan">Janeiro</option>
+            <option value="Fev">Fevereiro</option>
+            <option value="Mar">Março</option>
+            <option value="Abr">Abril</option>
+            <option value="Mai">Maio</option>
+            <option value="Jun">Junho</option>
+            <option value="Jul">Julho</option>
+            <option value="Ago">Agosto</option>
+            <option value="Set">Setembro</option>
+            <option value="Out">Outubro</option>
+            <option value="Nov">Novembro</option>
+            <option value="Dez">Dezembro</option>
+          </select>
+        </fieldset>
+      </section>
+    </form>
+  </main>
+
+  <footer>
+    <a href="#">Voltar ao topo</a>
+  </footer>
+
+  <script src="js/incluir.js?v=20260418d"></script>
+</body>
+
+</html>
