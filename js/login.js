@@ -36,6 +36,37 @@ function salvarLogin(login, lembrarNoDispositivo) {
   }
 }
 
+function excluirRegistrosRelacionados(apelido, senha) {
+  var params = new URLSearchParams();
+  params.append("username", apelido);
+  params.append("password", senha);
+
+  return fetch("PHP/excluir_credenciais.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    },
+    body: params.toString(),
+  }).then(function (response) {
+    return response
+      .json()
+      .catch(function () {
+        return { success: false, message: "Resposta invalida do servidor." };
+      })
+      .then(function (payload) {
+        if (!response.ok || !payload.success) {
+          throw new Error(
+            payload && payload.message
+              ? payload.message
+              : "Nao foi possivel excluir os registros relacionados.",
+          );
+        }
+
+        return payload;
+      });
+  });
+}
+
 function tratarSolicitacaoLimpezaLogin() {
   var params = new URLSearchParams(window.location.search);
   var deveLimpar = params.get("limparLogin") === "1";
@@ -88,15 +119,51 @@ function inicializarPersistenciaLogin() {
 
   if (botaoEsquecer) {
     botaoEsquecer.addEventListener("click", function () {
-      limparLoginSalvo();
-      inputApelido.value = "";
-      inputSenha.value = "";
-      lembrarCheckbox.checked = false;
-      definirStatus(
-        "Apelido e senha removidos deste dispositivo.",
-        "is-success",
+      var apelidoDigitado = inputApelido.value.trim();
+      var senhaDigitada = inputSenha.value.trim();
+
+      if (!apelidoDigitado || !senhaDigitada) {
+        limparLoginSalvo();
+        inputApelido.value = "";
+        inputSenha.value = "";
+        lembrarCheckbox.checked = false;
+        definirStatus(
+          "Apelido e senha removidos deste dispositivo.",
+          "is-success",
+        );
+        inputApelido.focus();
+        return;
+      }
+
+      var confirmarExclusao = window.confirm(
+        "Excluir tambem todos os registros vinculados a este apelido e senha?",
       );
-      inputApelido.focus();
+
+      if (!confirmarExclusao) {
+        return;
+      }
+
+      botaoEsquecer.disabled = true;
+      definirStatus("Excluindo registros relacionados...", "is-info");
+
+      excluirRegistrosRelacionados(apelidoDigitado, senhaDigitada)
+        .then(function () {
+          limparLoginSalvo();
+          inputApelido.value = "";
+          inputSenha.value = "";
+          lembrarCheckbox.checked = false;
+          definirStatus(
+            "Apelido e senha removidos. Registros relacionados excluidos.",
+            "is-success",
+          );
+          inputApelido.focus();
+        })
+        .catch(function (error) {
+          definirStatus(error.message, "is-info");
+        })
+        .finally(function () {
+          botaoEsquecer.disabled = false;
+        });
     });
   }
 

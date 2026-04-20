@@ -59,6 +59,7 @@
                     <a class="menu-shell__logout" href="PHP/logout.php?limpar=1">Trocar usuário</a>
                 </div>
             </div>
+            <p id="logoutStatus" class="periodo-status" aria-live="polite"></p>
 
             <nav id="menu-h" aria-label="Menu principal">
                 <ul>
@@ -290,7 +291,7 @@
 
     </main>
 
-    <script src="js/menu.js?v=20260418"></script>
+    <script src="js/menu.js?v=20260419"></script>
     <script>
         (function () {
             if (typeof window.inicializarPeriodo === "function") {
@@ -306,7 +307,7 @@
             }
 
             var script = document.createElement("script");
-            script.src = caminho.slice(0, indice + marcador.length) + "js/menu.js?v=20260418";
+            script.src = caminho.slice(0, indice + marcador.length) + "js/menu.js?v=20260419";
             document.body.appendChild(script);
         })();
     </script>

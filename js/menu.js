@@ -7,6 +7,157 @@ function limparCredenciaisPersistidas() {
   window.localStorage.removeItem(LOGIN_LOCAL_KEY);
 }
 
+function lerCredenciaisPersistidas() {
+  try {
+    var sessao = window.sessionStorage.getItem(LOGIN_SESSION_KEY);
+    if (sessao) {
+      return JSON.parse(sessao);
+    }
+
+    var local = window.localStorage.getItem(LOGIN_LOCAL_KEY);
+    if (local) {
+      return JSON.parse(local);
+    }
+  } catch (error) {
+    return null;
+  }
+
+  return null;
+}
+
+function excluirRegistrosRelacionados(apelido, senha) {
+  var params = new URLSearchParams();
+
+  if (apelido) {
+    params.append("username", apelido);
+  }
+
+  if (senha) {
+    params.append("password", senha);
+  }
+
+  return fetch("PHP/excluir_credenciais.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    },
+    body: params.toString(),
+  }).then(function (response) {
+    return response
+      .json()
+      .catch(function () {
+        return { success: false, message: "Resposta invalida do servidor." };
+      })
+      .then(function (payload) {
+        if (!response.ok || !payload.success) {
+          throw new Error(
+            payload && payload.message
+              ? payload.message
+              : "Nao foi possivel excluir os registros relacionados.",
+          );
+        }
+
+        return payload;
+      });
+  });
+}
+
+function redirecionarComAtraso(url, atrasoMs) {
+  window.setTimeout(function () {
+    window.location.href = url;
+  }, atrasoMs);
+}
+
+function confirmarComNao(mensagem) {
+  return new Promise(function (resolve) {
+    var overlay = document.createElement("div");
+    overlay.style.position = "fixed";
+    overlay.style.inset = "0";
+    overlay.style.background = "rgba(0, 0, 0, 0.42)";
+    overlay.style.display = "flex";
+    overlay.style.alignItems = "center";
+    overlay.style.justifyContent = "center";
+    overlay.style.zIndex = "9999";
+
+    var caixa = document.createElement("div");
+    caixa.style.width = "min(92vw, 460px)";
+    caixa.style.background = "#fff";
+    caixa.style.borderRadius = "12px";
+    caixa.style.padding = "18px";
+    caixa.style.boxShadow = "0 12px 36px rgba(0, 0, 0, 0.22)";
+
+    var texto = document.createElement("p");
+    texto.textContent = mensagem;
+    texto.style.margin = "0 0 14px 0";
+    texto.style.color = "#3f3328";
+    texto.style.lineHeight = "1.45";
+
+    var acoes = document.createElement("div");
+    acoes.style.display = "flex";
+    acoes.style.justifyContent = "flex-end";
+    acoes.style.gap = "8px";
+
+    var botaoNao = document.createElement("button");
+    botaoNao.type = "button";
+    botaoNao.textContent = "Não";
+    botaoNao.style.border = "1px solid #cabaa8";
+    botaoNao.style.background = "#f5ede2";
+    botaoNao.style.color = "#544538";
+    botaoNao.style.borderRadius = "10px";
+    botaoNao.style.padding = "8px 14px";
+    botaoNao.style.cursor = "pointer";
+
+    var botaoSim = document.createElement("button");
+    botaoSim.type = "button";
+    botaoSim.textContent = "Sim";
+    botaoSim.style.border = "1px solid #5f7f50";
+    botaoSim.style.background = "#6b8f5a";
+    botaoSim.style.color = "#fff";
+    botaoSim.style.borderRadius = "10px";
+    botaoSim.style.padding = "8px 14px";
+    botaoSim.style.cursor = "pointer";
+
+    function finalizar(escolha) {
+      document.removeEventListener("keydown", onKeyDown);
+      if (overlay.parentNode) {
+        overlay.parentNode.removeChild(overlay);
+      }
+      resolve(escolha);
+    }
+
+    function onKeyDown(event) {
+      if (event.key === "Escape") {
+        finalizar(false);
+      }
+    }
+
+    botaoNao.addEventListener("click", function () {
+      finalizar(false);
+    });
+
+    botaoSim.addEventListener("click", function () {
+      finalizar(true);
+    });
+
+    overlay.addEventListener("click", function (event) {
+      if (event.target === overlay) {
+        finalizar(false);
+      }
+    });
+
+    document.addEventListener("keydown", onKeyDown);
+
+    acoes.appendChild(botaoNao);
+    acoes.appendChild(botaoSim);
+    caixa.appendChild(texto);
+    caixa.appendChild(acoes);
+    overlay.appendChild(caixa);
+    document.body.appendChild(overlay);
+
+    botaoNao.focus();
+  });
+}
+
 function apenasDigitos(valor) {
   return String(valor || "")
     .replace(/\D/g, "")
@@ -540,9 +691,75 @@ function inicializarMenuEventos() {
   }
 
   var linkLogout = document.querySelector(".menu-shell__logout");
+  var statusLogoutEl = document.getElementById("logoutStatus");
   if (linkLogout) {
-    linkLogout.addEventListener("click", function () {
-      limparCredenciaisPersistidas();
+    linkLogout.addEventListener("click", async function (event) {
+      event.preventDefault();
+
+      var destinoLogout = linkLogout.getAttribute("href") || "PHP/logout.php";
+      var credenciais = lerCredenciaisPersistidas();
+      var apelido =
+        credenciais && credenciais.apelido
+          ? String(credenciais.apelido).trim()
+          : "";
+      var senha =
+        credenciais && credenciais.senha
+          ? String(credenciais.senha).trim()
+          : "";
+
+      var desejaExcluirRegistros = await confirmarComNao(
+        "Excluir tambem todos os registros vinculados a este apelido e senha antes de trocar usuario?",
+      );
+
+      if (!desejaExcluirRegistros) {
+        limparCredenciaisPersistidas();
+        window.location.href = destinoLogout;
+        return;
+      }
+
+      linkLogout.style.pointerEvents = "none";
+      linkLogout.setAttribute("aria-disabled", "true");
+
+      var seguirParaLogout = true;
+
+      try {
+        await excluirRegistrosRelacionados(apelido, senha);
+
+        if (statusLogoutEl) {
+          definirStatus(
+            statusLogoutEl,
+            "is-valid",
+            "Registros relacionados excluídos com sucesso. Redirecionando para troca de usuário...",
+          );
+        }
+      } catch (error) {
+        if (statusLogoutEl) {
+          definirStatus(
+            statusLogoutEl,
+            "is-invalid",
+            "Falha ao excluir registros relacionados: " + error.message,
+          );
+        }
+
+        var continuarSemExcluir = await confirmarComNao(
+          "Falha ao excluir registros relacionados: " +
+            error.message +
+            " Deseja trocar usuario mesmo assim?",
+        );
+
+        if (!continuarSemExcluir) {
+          seguirParaLogout = false;
+        }
+      } finally {
+        if (seguirParaLogout) {
+          limparCredenciaisPersistidas();
+          redirecionarComAtraso(destinoLogout, 1000);
+          return;
+        }
+
+        linkLogout.style.pointerEvents = "";
+        linkLogout.removeAttribute("aria-disabled");
+      }
     });
   }
 }
