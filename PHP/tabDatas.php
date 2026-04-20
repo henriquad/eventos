@@ -2,7 +2,7 @@
 $conn = new mysqli('MYSQL8002.site4now.net', 'a90b7e_baseh', 'Amanti_#9', 'db_a90b7e_baseh');
 mysqli_set_charset($conn, 'utf8');
 
-$sql = 'SELECT * FROM datas';
+$sql = "SELECT * FROM datas WHERE CAST(IFNULL(NULLIF(TRIM(DiaUtil), ''), '0') AS UNSIGNED) <> 0";
 $query = mysqli_query($conn, $sql);
 
 $erroConsulta = false;
@@ -302,7 +302,7 @@ mysqli_close($conn);
 			<?php elseif (empty($campos)): ?>
 				<p class="periodo-status">Nao existem colunas disponiveis para exibicao.</p>
 			<?php elseif (empty($linhasPaginadas)): ?>
-				<p class="periodo-status">Nao existem registros na tabela de datas.</p>
+				<p class="periodo-status">Nao existem registros com DiaUtil diferente de zero para os filtros informados.</p>
 			<?php else: ?>
 				<p class="resultado-resumo">
 					Exibindo <?php echo $primeiroRegistro; ?> a <?php echo $ultimoRegistro; ?> de <?php echo $totalRegistros; ?> registro(s).

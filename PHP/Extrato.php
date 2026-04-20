@@ -123,10 +123,18 @@ if ($dataInicial > $dataFinal) {
 
 extratoPrepararMovtos($dbcon, $apelido, $senha, $dataInicial, $dataFinal);
 
-$sqlLista = "SELECT id, dataM, evento, grupo, DC, ValorE
-             FROM movtos
-             WHERE Apelido = ? AND senha = ? AND dataM BETWEEN ? AND ?
-             ORDER BY dataM ASC, id ASC";
+$sqlLista = "SELECT m.id, d.DataMes AS dataM, m.evento, m.grupo, m.DC, m.ValorE
+                         FROM movtos m
+                         INNER JOIN datas d
+                             ON CAST(IFNULL(d.DiaUtil, 0) AS UNSIGNED) = CAST(IFNULL(m.diaCorreto, 0) AS UNSIGNED)
+                            AND CAST(d.M AS UNSIGNED) = CAST(m.M AS UNSIGNED)
+                            AND CAST(d.A AS UNSIGNED) = CAST(m.A AS UNSIGNED)
+                         WHERE m.Apelido = ?
+                             AND m.senha = ?
+                             AND d.DataMes BETWEEN ? AND ?
+                             AND IFNULL(m.diaCorreto, 0) > 0
+                             AND CAST(IFNULL(d.Util, 0) AS UNSIGNED) = 1
+                         ORDER BY d.DataMes ASC, m.id ASC";
 $stmtLista = mysqli_prepare($dbcon, $sqlLista);
 if (!$stmtLista) {
     extratoFalha($dbcon, 'Falha ao preparar SQL da lista: ' . mysqli_error($dbcon));
