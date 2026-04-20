@@ -260,14 +260,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                         <br>
 
 
-
-                        <select id="decendio" name="decendio">
-                            <option value="0">ou escolha o decêndio...</option>
-                            <option value="1" <?php echo selectedAttr($evento['decendio'] ?? '0', '1'); ?>>1º</option>
-                            <option value="2" <?php echo selectedAttr($evento['decendio'] ?? '0', '2'); ?>>2º</option>
-                            <option value="3" <?php echo selectedAttr($evento['decendio'] ?? '0', '3'); ?>>3º</option>
-                        </select>
-
                         <br>
                         <br>
                         <label for="dataF">ou escolha uma data em que o evento ocorre...</label>
@@ -398,7 +390,7 @@ $semM = nullIfDefault(getPostValue('semM'));
 $semD = nullIfDefault(getPostValue('semD'));
 $diaR = nullIfDefault(getPostValue('diaR'));
 $mesR = nullIfDefault(getPostValue('mesR'));
-$decendio = nullIfDefault(getPostValue('decendio'));
+
 
 if ($DC !== 'D' && $DC !== 'C') {
     $DC = null;
@@ -508,8 +500,7 @@ $sql = "UPDATE eventos SET
     semD = ?,
     diaR = ?,
     mesR = ?,
-    ativo = ?,
-    decendio = ?,    
+    ativo = ?,    
     diaHora = ?
 WHERE id = ? AND apelido = ? AND senha = ?";
 
@@ -523,7 +514,7 @@ if (!$stmt) {
 
 mysqli_stmt_bind_param(
     $stmt,
-    "sdsssssssssssssssssiss",
+    "sdssssssssssssssssiss",
     $evento,
     $valorE,
     $grupo,
@@ -541,7 +532,6 @@ mysqli_stmt_bind_param(
     $diaR,
     $mesR,
     $ativo,
-    $decendio,
     $diaHora,
     $id,
     $apelido,

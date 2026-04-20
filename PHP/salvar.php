@@ -78,7 +78,6 @@ $semM = nullIfDefault(getPostValue('semM'));
 $semD = nullIfDefault(getPostValue('semD'));
 $diaR = nullIfDefault(getPostValue('diaR'));
 $mesR = nullIfDefault(getPostValue('mesR'));
-$decendio = nullIfDefault(getPostValue('decendio'));
 $ativo = getPostValue('ativo');
 $diaHora = date('Y-m-d H:i:s');
 $apelido = eventosApelidoSessao();
@@ -145,8 +144,8 @@ eventosGarantirSchema($dbcon);
 // Insere os dados com prepared statement (proteção contra SQL Injection)
 $sql = "INSERT INTO eventos(
    evento, valorE, grupo, apelido, senha, DC, prorroga, diario, 
-    diaM, diaS, diaU, UPA, dataF, semN, semM, semD, diaR, mesR, ativo, decendio, diaHora
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    diaM, diaS, diaU, UPA, dataF, semN, semM, semD, diaR, mesR, ativo,  diaHora
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 $stmt = mysqli_prepare($dbcon, $sql);
 if (!$stmt) {
@@ -156,7 +155,7 @@ if (!$stmt) {
 // s = string, d = double, i = int
 mysqli_stmt_bind_param(
     $stmt,
-    "sdsssssssssssssssssis",
+    "sdssssssssssssssssss",
     $evento,
     $valorE,
     $grupo,
@@ -176,7 +175,6 @@ mysqli_stmt_bind_param(
     $diaR,
     $mesR,
     $ativo,
-    $decendio,
     $diaHora
 );
 

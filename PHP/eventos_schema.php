@@ -40,7 +40,6 @@ function eventosGarantirSchema($dbcon)
         diaR VARCHAR(2) NULL,
         mesR VARCHAR(3) NULL,
         ativo BOOLEAN NULL,
-        decendio INT NULL,
         diaHora DATETIME NOT NULL,
         INDEX idx_evento (evento),
         INDEX idx_grupo (grupo)

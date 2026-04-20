@@ -63,8 +63,8 @@ function extratoNormalizarData($valor)
 
 function extratoPrepararMovtos($dbcon, $apelido, $senha, $dataInicial, $dataFinal)
 {
-    $insertBase = "INSERT INTO movtos (dataM, diaCorreto, diaU, Util, evento, M, A, Apelido, ValorE, Prorroga, senha, grupo, DC, Ativo, `COL 16`) ";
-    $selectBase = "SELECT datas.DataMes, CAST(datas.DiaUtil AS UNSIGNED), IFNULL(eventos.diaU, 0), CAST(datas.Util AS UNSIGNED), eventos.evento, CAST(datas.M AS UNSIGNED), CAST(datas.A AS UNSIGNED), eventos.apelido, eventos.valorE, eventos.prorroga, eventos.senha, eventos.grupo, eventos.DC, eventos.ativo, datas.DiaUtil FROM eventos ";
+    $insertBase = "INSERT INTO movtos (dataM, diaCorreto, diaU, Util, evento, M, A, Apelido, ValorE, Prorroga, senha, grupo, DC, Ativo ) ";
+    $selectBase = "SELECT datas.DataMes, CAST(datas.DiaUtil AS UNSIGNED), IFNULL(eventos.diaU, 0), CAST(datas.Util AS UNSIGNED), eventos.evento, CAST(datas.M AS UNSIGNED), CAST(datas.A AS UNSIGNED), eventos.apelido, eventos.valorE, eventos.prorroga, eventos.senha, eventos.grupo, eventos.DC, eventos.ativo FROM eventos ";
     $filtroAtivos = " WHERE eventos.apelido = ? AND eventos.senha = ? AND eventos.ativo = 'Sim'";
     $filtroPeriodoDatas = " AND datas.DataMes BETWEEN ? AND ?";
     $caseMesNumero = "CASE eventos.mesR WHEN 'Jan' THEN 1 WHEN 'Fev' THEN 2 WHEN 'Mar' THEN 3 WHEN 'Abr' THEN 4 WHEN 'Mai' THEN 5 WHEN 'Jun' THEN 6 WHEN 'Jul' THEN 7 WHEN 'Ago' THEN 8 WHEN 'Set' THEN 9 WHEN 'Out' THEN 10 WHEN 'Nov' THEN 11 WHEN 'Dez' THEN 12 ELSE 0 END";
