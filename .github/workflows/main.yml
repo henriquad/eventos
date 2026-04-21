@@ -6,12 +6,14 @@ jobs:
     name: Build package and deploy to SmarterASP.NET
     runs-on: windows-latest
     steps:
-      - name: build file
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Sync files
+      - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: winxxxx.site4now.net
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          remote-folder: /
+          local-dir: ./
