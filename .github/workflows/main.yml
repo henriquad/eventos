@@ -12,7 +12,7 @@ jobs:
       - name: Sync files
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-         server: win8135.site4now.net/eventos
+         server: win8135.site4now.net/eventosHTML
           username: ${{ secrets_USERNAME }}
           password: ${{ secrets_SENHA }}
           local-dir: ./publish/
