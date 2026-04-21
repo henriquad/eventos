@@ -86,6 +86,18 @@ function resumoValor($valor)
     return number_format((float)$valor, 2, ',', '.');
 }
 
+function resumoCsvValor($valor)
+{
+    return number_format((float)$valor, 2, ',', '');
+}
+
+function resumoCsvCampo($valor)
+{
+    $texto = (string)$valor;
+    $texto = str_replace('"', '""', $texto);
+    return '"' . $texto . '"';
+}
+
 function resumoNormalizarValorMonetario($valor)
 {
     $texto = trim((string)$valor);
@@ -237,57 +249,48 @@ mysqli_stmt_close($stmt);
 mysqli_close($dbcon);
 
 if ($exportarExcel) {
-    $nomeArquivo = 'resumo_mensal_' . str_replace('-', '', $dataInicial) . '_a_' . str_replace('-', '', $dataFinal) . '.xls';
+    $nomeArquivo = 'resumo_mensal_' . str_replace('-', '', $dataInicial) . '_a_' . str_replace('-', '', $dataFinal) . '.csv';
 
-    header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
+    header('Content-Type: text/csv; charset=UTF-8');
     header('Content-Disposition: attachment; filename="' . $nomeArquivo . '"');
     header('Pragma: no-cache');
     header('Expires: 0');
 
     echo "\xEF\xBB\xBF";
-    echo '<table border="1">';
-    echo '<thead><tr><th>Mês</th><th>Grupo</th><th>Débito total (R$)</th><th>Crédito total (R$)</th><th>Saldo do grupo (R$)</th></tr></thead><tbody>';
+    echo "Mes;Grupo;Debito total (R$);Credito total (R$);Saldo do grupo (R$)\r\n";
 
     if (count($grupos) === 0) {
-        echo '<tr><td colspan="5">Nenhum valor encontrado no período selecionado.</td></tr>';
+        echo resumoCsvCampo('Nenhum valor encontrado no periodo selecionado.') . ";;;;\r\n";
     } else {
         foreach ($grupos as $mes => $grupoMes) {
             foreach ($grupoMes['itens'] as $item) {
-                echo '<tr>';
-                echo '<td>' . htmlspecialchars(resumoMesRotulo($mes), ENT_QUOTES, 'UTF-8') . '</td>';
-                echo '<td>' . htmlspecialchars($item['grupo'], ENT_QUOTES, 'UTF-8') . '</td>';
-                echo '<td>' . resumoValor($item['debito']) . '</td>';
-                echo '<td>' . resumoValor($item['credito']) . '</td>';
-                echo '<td>' . resumoValor($item['saldo']) . '</td>';
-                echo '</tr>';
+                echo resumoCsvCampo(resumoMesRotulo($mes)) . ';'
+                    . resumoCsvCampo($item['grupo']) . ';'
+                    . resumoCsvCampo(resumoCsvValor($item['debito'])) . ';'
+                    . resumoCsvCampo(resumoCsvValor($item['credito'])) . ';'
+                    . resumoCsvCampo(resumoCsvValor($item['saldo'])) . "\r\n";
             }
 
-            echo '<tr>';
-            echo '<td>' . htmlspecialchars(resumoMesRotulo($mes), ENT_QUOTES, 'UTF-8') . '</td>';
-            echo '<td><strong>Total do mês</strong></td>';
-            echo '<td><strong>' . resumoValor($grupoMes['debito']) . '</strong></td>';
-            echo '<td><strong>' . resumoValor($grupoMes['credito']) . '</strong></td>';
-            echo '<td><strong>' . resumoValor($grupoMes['saldo']) . '</strong></td>';
-            echo '</tr>';
+            echo resumoCsvCampo(resumoMesRotulo($mes)) . ';'
+                . resumoCsvCampo('Total do mes') . ';'
+                . resumoCsvCampo(resumoCsvValor($grupoMes['debito'])) . ';'
+                . resumoCsvCampo(resumoCsvValor($grupoMes['credito'])) . ';'
+                . resumoCsvCampo(resumoCsvValor($grupoMes['saldo'])) . "\r\n";
         }
 
-        echo '<tr>';
-        echo '<td><strong>Saldo anterior</strong></td>';
-        echo '<td><strong>-</strong></td>';
-        echo '<td><strong>-</strong></td>';
-        echo '<td><strong>' . resumoValor($saldoAnterior) . '</strong></td>';
-        echo '</tr>';
+        echo resumoCsvCampo('Saldo anterior') . ';'
+            . resumoCsvCampo('-') . ';'
+            . resumoCsvCampo('-') . ';'
+            . resumoCsvCampo('-') . ';'
+            . resumoCsvCampo(resumoCsvValor($saldoAnterior)) . "\r\n";
 
-        echo '<tr>';
-        echo '<td><strong>Total do período</strong></td>';
-        echo '<td><strong>Geral</strong></td>';
-        echo '<td><strong>' . resumoValor($totalPeriodoDebito) . '</strong></td>';
-        echo '<td><strong>' . resumoValor($totalPeriodoCredito) . '</strong></td>';
-        echo '<td><strong>' . resumoValor($totalPeriodoSaldo) . '</strong></td>';
-        echo '</tr>';
+        echo resumoCsvCampo('Total do periodo') . ';'
+            . resumoCsvCampo('Geral') . ';'
+            . resumoCsvCampo(resumoCsvValor($totalPeriodoDebito)) . ';'
+            . resumoCsvCampo(resumoCsvValor($totalPeriodoCredito)) . ';'
+            . resumoCsvCampo(resumoCsvValor($totalPeriodoSaldo)) . "\r\n";
     }
 
-    echo '</tbody></table>';
     exit;
 }
 
@@ -300,6 +303,10 @@ body{font-family:Arial,sans-serif;background:#f2f4f7;margin:0;padding:20px;color
 .topo a{background:#1f4f82;color:#fff;padding:7px 12px;text-decoration:none;border-radius:4px}
 h2{margin:0 0 12px 0}
 .filtro{background:#fff;border:1px solid #dbe2ea;border-radius:6px;padding:10px 12px;margin-bottom:14px}
+.saldo-form{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.saldo-form label{font-size:13px;color:#344054;display:block;margin-bottom:4px}
+.saldo-form input{height:36px;padding:6px 10px;border:1px solid #cfd8e3;border-radius:6px;min-width:220px}
+.saldo-form button{height:36px;min-width:140px;padding:0 14px;border:none;border-radius:6px;background:#1f4f82;color:#fff;cursor:pointer}
 .bloco-mes{background:#fff;border:1px solid #dbe2ea;border-radius:8px;overflow:hidden;margin-bottom:16px}
 .bloco-mes h3{margin:0;padding:12px 14px;background:#1f4f82;color:#fff;font-size:18px}
 table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #dbe2ea;border-radius:8px;overflow:hidden}
@@ -321,7 +328,13 @@ echo '<a href="Extrato.php?DataI=' . urlencode(resumoDataBr($dataInicial)) . '&D
 echo '<a href="ResumoMensal.php?DataI=' . urlencode(resumoDataBr($dataInicial)) . '&DataF=' . urlencode(resumoDataBr($dataFinal)) . '&SaldoAnterior=' . urlencode((string)$saldoAnterior) . '&export=excel">Exportar Excel</a>';
 echo '</div>';
 echo '<div class="filtro">Período: <strong>' . htmlspecialchars(resumoDataBr($dataInicial), ENT_QUOTES, 'UTF-8') . '</strong> até <strong>' . htmlspecialchars(resumoDataBr($dataFinal), ENT_QUOTES, 'UTF-8') . '</strong></div>';
-echo '<div class="filtro">Saldo anterior ao período: <strong>R$ ' . resumoValor($saldoAnterior) . '</strong></div>';
+echo '<div class="filtro">Saldo anerior ao período (R$): <strong>' . resumoValor($saldoAnterior) . '</strong></div>';
+echo '<form class="filtro saldo-form" method="get" action="ResumoMensal.php">';
+echo '<input type="hidden" name="DataI" value="' . htmlspecialchars($dataInicial, ENT_QUOTES, 'UTF-8') . '">';
+echo '<input type="hidden" name="DataF" value="' . htmlspecialchars($dataFinal, ENT_QUOTES, 'UTF-8') . '">';
+echo '<div><label for="SaldoAnterior">Saldo anerior ao período (R$)</label><input id="SaldoAnterior" name="SaldoAnterior" type="text" inputmode="decimal" maxlength="20" placeholder="0,00" value="' . htmlspecialchars(resumoValor($saldoAnterior), ENT_QUOTES, 'UTF-8') . '"></div>';
+echo '<button type="submit">Aplicar saldo</button>';
+echo '</form>';
 
 if (count($grupos) === 0) {
     echo '<table>';

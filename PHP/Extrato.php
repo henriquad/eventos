@@ -35,6 +35,18 @@ function extratoValorFormatado($valor)
     return number_format((float)$valor, 2, ',', '.');
 }
 
+function extratoCsvValor($valor)
+{
+    return number_format((float)$valor, 2, ',', '');
+}
+
+function extratoCsvCampo($valor)
+{
+    $texto = (string)$valor;
+    $texto = str_replace('"', '""', $texto);
+    return '"' . $texto . '"';
+}
+
 function extratoNormalizarValorMonetario($valor)
 {
     $texto = trim((string)$valor);
@@ -167,21 +179,20 @@ while ($resultadoLista && ($linha = mysqli_fetch_assoc($resultadoLista))) {
 mysqli_stmt_close($stmtLista);
 
 if ($exportarExcel) {
-    $nomeArquivo = 'extrato_' . str_replace('-', '', $dataInicial) . '_a_' . str_replace('-', '', $dataFinal) . '.xls';
+    $nomeArquivo = 'extrato_' . str_replace('-', '', $dataInicial) . '_a_' . str_replace('-', '', $dataFinal) . '.csv';
 
     mysqli_close($dbcon);
 
-    header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
+    header('Content-Type: text/csv; charset=UTF-8');
     header('Content-Disposition: attachment; filename="' . $nomeArquivo . '"');
     header('Pragma: no-cache');
     header('Expires: 0');
 
     echo "\xEF\xBB\xBF";
-    echo '<table border="1">';
-    echo '<thead><tr><th>Data</th><th>DiaUtil</th><th>Evento</th><th>Grupo</th><th>Débito (R$)</th><th>Crédito (R$)</th><th>Saldo Acumulado (R$)</th></tr></thead><tbody>';
+    echo "Data;DiaUtil;Evento;Grupo;Debito (R$);Credito (R$);Saldo Acumulado (R$)\r\n";
 
     if (count($movimentos) === 0) {
-        echo '<tr><td colspan="7">Nenhum movimento encontrado para o período selecionado.</td></tr>';
+        echo extratoCsvCampo('Nenhum movimento encontrado para o periodo selecionado.') . ";;;;;;\r\n";
     } else {
         $saldoAcumulado = $saldoAnterior;
         foreach ($movimentos as $mov) {
@@ -190,26 +201,19 @@ if ($exportarExcel) {
             $valorComSinal = ($dc === 'D') ? ($valor * -1) : $valor;
             $saldoAcumulado += $valorComSinal;
 
-            echo '<tr>';
-            echo '<td>' . htmlspecialchars(extratoFormatoDataComSemana((string)$mov['dataM']), ENT_QUOTES, 'UTF-8') . '</td>';
-            echo '<td>' . (int)$mov['diaUtil'] . '</td>';
-            echo '<td>' . htmlspecialchars((string)$mov['evento'], ENT_QUOTES, 'UTF-8') . '</td>';
-            echo '<td>' . htmlspecialchars((string)$mov['grupo'], ENT_QUOTES, 'UTF-8') . '</td>';
+            $debito = ($dc === 'D') ? extratoCsvValor($valor) : '-';
+            $credito = ($dc === 'D') ? '-' : extratoCsvValor($valor);
 
-            if ($dc === 'D') {
-                echo '<td>' . extratoValorFormatado($valor) . '</td>';
-                echo '<td>-</td>';
-            } else {
-                echo '<td>-</td>';
-                echo '<td>' . extratoValorFormatado($valor) . '</td>';
-            }
-
-            echo '<td>' . extratoValorFormatado($saldoAcumulado) . '</td>';
-            echo '</tr>';
+            echo extratoCsvCampo(extratoFormatoDataComSemana((string)$mov['dataM'])) . ';'
+                . extratoCsvCampo((int)$mov['diaUtil']) . ';'
+                . extratoCsvCampo((string)$mov['evento']) . ';'
+                . extratoCsvCampo((string)$mov['grupo']) . ';'
+                . extratoCsvCampo($debito) . ';'
+                . extratoCsvCampo($credito) . ';'
+                . extratoCsvCampo(extratoCsvValor($saldoAcumulado)) . "\r\n";
         }
     }
 
-    echo '</tbody></table>';
     exit;
 }
 
@@ -288,11 +292,11 @@ echo '<a href="ListaEventos.php">Lista de eventos</a>';
 echo '<a href="' . htmlspecialchars($exportUrl, ENT_QUOTES, 'UTF-8') . '">Exportar Excel</a>';
 echo '</div>';
 echo '<div class="filtro">Período: <strong>' . htmlspecialchars(extratoFormatoBr($dataInicial), ENT_QUOTES, 'UTF-8') . '</strong> até <strong>' . htmlspecialchars(extratoFormatoBr($dataFinal), ENT_QUOTES, 'UTF-8') . '</strong></div>';
-echo '<div class="filtro">Saldo anterior ao período: <strong>R$ ' . extratoValorFormatado($saldoAnterior) . '</strong></div>';
+echo '<div class="filtro">Saldo anterior ao período (R$): <strong>' . extratoValorFormatado($saldoAnterior) . '</strong></div>';
 echo '<form class="filtro filtro-form" method="get" action="Extrato.php">';
 echo '<input type="hidden" name="DataI" value="' . htmlspecialchars($dataInicial, ENT_QUOTES, 'UTF-8') . '">';
 echo '<input type="hidden" name="DataF" value="' . htmlspecialchars($dataFinal, ENT_QUOTES, 'UTF-8') . '">';
-echo '<input type="hidden" name="SaldoAnterior" value="' . htmlspecialchars((string)$saldoAnterior, ENT_QUOTES, 'UTF-8') . '">';
+echo '<div><label for="SaldoAnterior">Saldo anterior ao período (R$)</label><input id="SaldoAnterior" name="SaldoAnterior" type="text" inputmode="decimal" maxlength="20" placeholder="0,00" value="' . htmlspecialchars(extratoValorFormatado($saldoAnterior), ENT_QUOTES, 'UTF-8') . '"></div>';
 echo '<div><label for="Evento">Filtrar por evento</label><input id="Evento" name="Evento" type="text" maxlength="100" placeholder="Digite parte do nome do evento" value="' . htmlspecialchars($eventoFiltro, ENT_QUOTES, 'UTF-8') . '"></div>';
 echo '<button type="submit" class="filtro-acao">Aplicar filtro</button>';
 echo '<a class="filtro-acao" href="' . htmlspecialchars($limparEventoUrl, ENT_QUOTES, 'UTF-8') . '">Limpar filtro</a>';
