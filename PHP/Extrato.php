@@ -105,6 +105,8 @@ function extratoNormalizarValorMonetario($valor)
 $dataInicial = extratoNormalizarData($_GET['DataI'] ?? '');
 $dataFinal = extratoNormalizarData($_GET['DataF'] ?? '');
 $saldoAnterior = extratoNormalizarValorMonetario($_GET['SaldoAnterior'] ?? '');
+$eventoFiltro = trim((string)($_GET['Evento'] ?? ''));
+$eventoFiltro = substr($eventoFiltro, 0, 100);
 $exportarExcel = (($_GET['export'] ?? '') === 'excel');
 
 if (!$dataInicial || !$dataFinal) {
@@ -123,7 +125,7 @@ if ($dataInicial > $dataFinal) {
 
 extratoPrepararMovtos($dbcon, $apelido, $senha, $dataInicial, $dataFinal);
 
-$sqlLista = "SELECT m.id, d.DataMes AS dataM, m.evento, m.grupo, m.DC, m.ValorE
+$sqlLista = "SELECT m.id, d.DataMes AS dataM, CAST(IFNULL(d.DiaUtil, 0) AS UNSIGNED) AS diaUtil, m.evento, m.grupo, m.DC, m.ValorE
                          FROM movtos m
                          INNER JOIN datas d
                              ON CAST(IFNULL(d.DiaUtil, 0) AS UNSIGNED) = CAST(IFNULL(m.diaCorreto, 0) AS UNSIGNED)
@@ -133,14 +135,25 @@ $sqlLista = "SELECT m.id, d.DataMes AS dataM, m.evento, m.grupo, m.DC, m.ValorE
                              AND m.senha = ?
                              AND d.DataMes BETWEEN ? AND ?
                              AND IFNULL(m.diaCorreto, 0) > 0
-                             AND CAST(IFNULL(d.Util, 0) AS UNSIGNED) = 1
-                         ORDER BY d.DataMes ASC, m.id ASC";
+                             AND CAST(IFNULL(d.Util, 0) AS UNSIGNED) = 1";
+
+$eventoFiltroLike = '';
+if ($eventoFiltro !== '') {
+    $sqlLista .= " AND m.evento LIKE ?";
+    $eventoFiltroLike = '%' . $eventoFiltro . '%';
+}
+
+$sqlLista .= " ORDER BY d.DataMes ASC, m.id ASC";
 $stmtLista = mysqli_prepare($dbcon, $sqlLista);
 if (!$stmtLista) {
     extratoFalha($dbcon, 'Falha ao preparar SQL da lista: ' . mysqli_error($dbcon));
 }
 
-mysqli_stmt_bind_param($stmtLista, 'ssss', $apelido, $senha, $dataInicial, $dataFinal);
+if ($eventoFiltro !== '') {
+    mysqli_stmt_bind_param($stmtLista, 'sssss', $apelido, $senha, $dataInicial, $dataFinal, $eventoFiltroLike);
+} else {
+    mysqli_stmt_bind_param($stmtLista, 'ssss', $apelido, $senha, $dataInicial, $dataFinal);
+}
 if (!mysqli_stmt_execute($stmtLista)) {
     $erroLista = mysqli_stmt_error($stmtLista);
     extratoFalha($dbcon, 'Falha ao executar SQL da lista: ' . $erroLista, $stmtLista);
@@ -165,10 +178,10 @@ if ($exportarExcel) {
 
     echo "\xEF\xBB\xBF";
     echo '<table border="1">';
-    echo '<thead><tr><th>Data</th><th>Evento</th><th>Grupo</th><th>Débito (R$)</th><th>Crédito (R$)</th><th>Saldo Acumulado (R$)</th></tr></thead><tbody>';
+    echo '<thead><tr><th>Data</th><th>DiaUtil</th><th>Evento</th><th>Grupo</th><th>Débito (R$)</th><th>Crédito (R$)</th><th>Saldo Acumulado (R$)</th></tr></thead><tbody>';
 
     if (count($movimentos) === 0) {
-        echo '<tr><td colspan="6">Nenhum movimento encontrado para o período selecionado.</td></tr>';
+        echo '<tr><td colspan="7">Nenhum movimento encontrado para o período selecionado.</td></tr>';
     } else {
         $saldoAcumulado = $saldoAnterior;
         foreach ($movimentos as $mov) {
@@ -179,6 +192,7 @@ if ($exportarExcel) {
 
             echo '<tr>';
             echo '<td>' . htmlspecialchars(extratoFormatoDataComSemana((string)$mov['dataM']), ENT_QUOTES, 'UTF-8') . '</td>';
+            echo '<td>' . (int)$mov['diaUtil'] . '</td>';
             echo '<td>' . htmlspecialchars((string)$mov['evento'], ENT_QUOTES, 'UTF-8') . '</td>';
             echo '<td>' . htmlspecialchars((string)$mov['grupo'], ENT_QUOTES, 'UTF-8') . '</td>';
 
@@ -225,7 +239,14 @@ foreach ($resumoGrafico as $dataChave => $saldoDia) {
 $graficoLabelsJson = json_encode($graficoLabels, JSON_UNESCAPED_UNICODE);
 $graficoSaldosJson = json_encode($graficoSaldos);
 
-$exportUrl = 'Extrato.php?DataI=' . urlencode($dataInicial) . '&DataF=' . urlencode($dataFinal) . '&SaldoAnterior=' . urlencode((string)$saldoAnterior) . '&export=excel';
+$baseExtratoUrl = 'Extrato.php?DataI=' . urlencode($dataInicial) . '&DataF=' . urlencode($dataFinal) . '&SaldoAnterior=' . urlencode((string)$saldoAnterior);
+
+if ($eventoFiltro !== '') {
+    $baseExtratoUrl .= '&Evento=' . urlencode($eventoFiltro);
+}
+
+$exportUrl = $baseExtratoUrl . '&export=excel';
+$limparEventoUrl = 'Extrato.php?DataI=' . urlencode($dataInicial) . '&DataF=' . urlencode($dataFinal) . '&SaldoAnterior=' . urlencode((string)$saldoAnterior);
 
 mysqli_close($dbcon);
 
@@ -238,6 +259,11 @@ h2{margin:0 0 12px 0}
 .topo{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
 .topo a{background:#1f4f82;color:#fff;padding:7px 12px;text-decoration:none;border-radius:4px}
 .filtro{background:#fff;border:1px solid #dbe2ea;border-radius:6px;padding:10px 12px;margin-bottom:12px}
+.filtro-form{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.filtro-form label{font-size:13px;color:#344054;display:block;margin-bottom:4px}
+.filtro-form input{height:36px;padding:6px 10px;border:1px solid #cfd8e3;border-radius:6px;min-width:260px}
+.filtro-form button{height:36px;padding:0 14px;border:none;border-radius:6px;background:#1f4f82;color:#fff;cursor:pointer}
+.filtro-form a{height:36px;padding:8px 14px;border-radius:6px;background:#eef2f7;color:#1f4f82;text-decoration:none;display:inline-flex;align-items:center}
 .acoes-grafico{margin:0 0 12px 0}
 .btn-grafico{background:#067647;color:#fff;border:none;border-radius:6px;padding:9px 14px;font-size:14px;cursor:pointer}
 .btn-grafico:hover{background:#055d38}
@@ -262,6 +288,17 @@ echo '<a href="' . htmlspecialchars($exportUrl, ENT_QUOTES, 'UTF-8') . '">Export
 echo '</div>';
 echo '<div class="filtro">Período: <strong>' . htmlspecialchars(extratoFormatoBr($dataInicial), ENT_QUOTES, 'UTF-8') . '</strong> até <strong>' . htmlspecialchars(extratoFormatoBr($dataFinal), ENT_QUOTES, 'UTF-8') . '</strong></div>';
 echo '<div class="filtro">Saldo anterior ao período: <strong>R$ ' . extratoValorFormatado($saldoAnterior) . '</strong></div>';
+echo '<form class="filtro filtro-form" method="get" action="Extrato.php">';
+echo '<input type="hidden" name="DataI" value="' . htmlspecialchars($dataInicial, ENT_QUOTES, 'UTF-8') . '">';
+echo '<input type="hidden" name="DataF" value="' . htmlspecialchars($dataFinal, ENT_QUOTES, 'UTF-8') . '">';
+echo '<input type="hidden" name="SaldoAnterior" value="' . htmlspecialchars((string)$saldoAnterior, ENT_QUOTES, 'UTF-8') . '">';
+echo '<div><label for="Evento">Filtrar por evento</label><input id="Evento" name="Evento" type="text" maxlength="100" placeholder="Digite parte do nome do evento" value="' . htmlspecialchars($eventoFiltro, ENT_QUOTES, 'UTF-8') . '"></div>';
+echo '<button type="submit">Aplicar filtro</button>';
+echo '<a href="' . htmlspecialchars($limparEventoUrl, ENT_QUOTES, 'UTF-8') . '">Limpar filtro</a>';
+echo '</form>';
+if ($eventoFiltro !== '') {
+    echo '<div class="filtro">Evento filtrado: <strong>' . htmlspecialchars($eventoFiltro, ENT_QUOTES, 'UTF-8') . '</strong></div>';
+}
 echo '<div class="acoes-grafico"><button type="button" id="toggleGraficoBtn" class="btn-grafico">Ocultar gráfico</button></div>';
 
 echo '<div class="grafico" id="grafico">';
@@ -274,10 +311,10 @@ if (count($movimentos) === 0) {
 echo '</div>';
 
 echo '<table>';
-echo '<thead><tr><th>Data</th><th>Evento</th><th>Grupo</th><th>Débito (R$)</th><th>Crédito (R$)</th><th>Saldo Acumulado (R$)</th></tr></thead><tbody>';
+echo '<thead><tr><th>Data</th><th>DiaUtil</th><th>Evento</th><th>Grupo</th><th>Débito (R$)</th><th>Crédito (R$)</th><th>Saldo Acumulado (R$)</th></tr></thead><tbody>';
 
 if (count($movimentos) === 0) {
-    echo '<tr><td colspan="6">Nenhum movimento encontrado para o período selecionado.</td></tr>';
+    echo '<tr><td colspan="7">Nenhum movimento encontrado para o período selecionado.</td></tr>';
 } else {
     $saldoAcumulado = $saldoAnterior;
     foreach ($movimentos as $mov) {
@@ -289,6 +326,7 @@ if (count($movimentos) === 0) {
 
         echo '<tr>';
         echo '<td>' . htmlspecialchars(extratoFormatoDataComSemana((string)$mov['dataM']), ENT_QUOTES, 'UTF-8') . '</td>';
+        echo '<td>' . (int)$mov['diaUtil'] . '</td>';
         echo '<td>' . htmlspecialchars((string)$mov['evento'], ENT_QUOTES, 'UTF-8') . '</td>';
         echo '<td>' . htmlspecialchars((string)$mov['grupo'], ENT_QUOTES, 'UTF-8') . '</td>';
 

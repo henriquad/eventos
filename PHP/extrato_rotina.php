@@ -63,6 +63,8 @@ function extratoNormalizarData($valor)
 
 function extratoPrepararMovtos($dbcon, $apelido, $senha, $dataInicial, $dataFinal)
 {
+    extratoGarantirColunaProrrogaMovtos($dbcon);
+
     $insertBase = "INSERT INTO movtos (dataM, diaCorreto, diaU, Util, evento, M, A, Apelido, ValorE, Prorroga, senha, grupo, DC, Ativo ) ";
     $selectBase = "SELECT datas.DataMes, CAST(datas.DiaUtil AS UNSIGNED), IFNULL(eventos.diaU, 0), CAST(datas.Util AS UNSIGNED), eventos.evento, CAST(datas.M AS UNSIGNED), CAST(datas.A AS UNSIGNED), eventos.apelido, eventos.valorE, eventos.prorroga, eventos.senha, eventos.grupo, eventos.DC, eventos.ativo FROM eventos ";
     $filtroAtivos = " WHERE eventos.apelido = ? AND eventos.senha = ? AND eventos.ativo = 'Sim'";
@@ -167,7 +169,7 @@ function extratoPrepararMovtos($dbcon, $apelido, $senha, $dataInicial, $dataFina
             WHEN IFNULL(diaU, 0) > 0 THEN diaCorreto
             WHEN IFNULL(Util, 0) = 1 THEN diaCorreto
             WHEN Prorroga = 'Sim' THEN diaCorreto + 1
-            WHEN Prorroga = 'Não' THEN diaCorreto - 1
+            WHEN Prorroga = 'Não' THEN diaCorreto
             WHEN Prorroga = 'Nulo' THEN 0
             ELSE diaCorreto
         END
@@ -201,5 +203,29 @@ function extratoPrepararMovtos($dbcon, $apelido, $senha, $dataInicial, $dataFina
         mysqli_close($dbcon);
         http_response_code(500);
         exit('Falha ao gerar extrato: ' . $erro->getMessage());
+    }
+}
+
+function extratoGarantirColunaProrrogaMovtos($dbcon)
+{
+    $resultado = mysqli_query($dbcon, "SHOW COLUMNS FROM movtos LIKE 'Prorroga'");
+    if (!$resultado || mysqli_num_rows($resultado) === 0) {
+        extratoFalha($dbcon, 'Falha ao validar coluna Prorroga da tabela movtos: coluna não encontrada.');
+    }
+
+    $coluna = mysqli_fetch_assoc($resultado);
+    mysqli_free_result($resultado);
+
+    $tipo = isset($coluna['Type']) ? strtolower((string)$coluna['Type']) : '';
+    $precisaAjustar = true;
+
+    if (preg_match('/^varchar\((\d+)\)$/', $tipo, $matches) === 1) {
+        $precisaAjustar = ((int)$matches[1] < 4);
+    }
+
+    if ($precisaAjustar) {
+        if (!mysqli_query($dbcon, "ALTER TABLE movtos MODIFY COLUMN Prorroga VARCHAR(4) NULL")) {
+            extratoFalha($dbcon, 'Falha ao ajustar coluna Prorroga da tabela movtos: ' . mysqli_error($dbcon));
+        }
     }
 }

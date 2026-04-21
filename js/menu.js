@@ -386,9 +386,11 @@ function inicializarLinkComPeriodo(selector, base) {
   var dataIEl = document.getElementById("DataI");
   var dataFEl = document.getElementById("DataF");
   var saldoAnteriorEl = document.getElementById("SaldoAnterior");
+  var eventoEl = document.getElementById("EventoExtrato");
   var incluirSaldoAnterior =
     base.indexOf("Extrato.php") !== -1 ||
     base.indexOf("ResumoMensal.php") !== -1;
+  var incluirEvento = base.indexOf("Extrato.php") !== -1;
 
   if (!link || !dataIEl || !dataFEl) {
     return;
@@ -413,6 +415,13 @@ function inicializarLinkComPeriodo(selector, base) {
         }
       }
 
+      if (incluirEvento && eventoEl) {
+        var eventoTexto = String(eventoEl.value || "").trim();
+        if (eventoTexto) {
+          url += "&Evento=" + encodeURIComponent(eventoTexto);
+        }
+      }
+
       return url;
     }
 
@@ -432,6 +441,10 @@ function inicializarLinkComPeriodo(selector, base) {
   if (saldoAnteriorEl) {
     saldoAnteriorEl.addEventListener("input", atualizarHref);
     saldoAnteriorEl.addEventListener("blur", atualizarHref);
+  }
+  if (eventoEl) {
+    eventoEl.addEventListener("input", atualizarHref);
+    eventoEl.addEventListener("blur", atualizarHref);
   }
 
   link.addEventListener("click", function (event) {
@@ -494,6 +507,7 @@ function inicializarMenuEventos() {
       var dataIEl = document.getElementById("DataI");
       var dataFEl = document.getElementById("DataF");
       var saldoAnteriorEl = document.getElementById("SaldoAnterior");
+      var eventoEl = document.getElementById("EventoExtrato");
       var statusEl = document.getElementById("periodoStatus");
 
       var confirmou = window.confirm(
@@ -520,6 +534,10 @@ function inicializarMenuEventos() {
 
       if (saldoAnteriorEl) {
         saldoAnteriorEl.value = "";
+      }
+
+      if (eventoEl) {
+        eventoEl.value = "";
       }
 
       if (statusEl) {

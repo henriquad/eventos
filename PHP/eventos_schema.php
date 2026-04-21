@@ -27,7 +27,7 @@ function eventosGarantirSchema($dbcon)
         valorE DOUBLE NULL,
         grupo VARCHAR(50) NULL,
         DC VARCHAR(1) NULL,
-        prorroga VARCHAR(3) NULL,
+        prorroga VARCHAR(4) NULL,
         diario VARCHAR(4) NULL,
         diaM VARCHAR(2) NULL,
         diaS VARCHAR(3) NULL,
@@ -59,5 +59,10 @@ function eventosGarantirSchema($dbcon)
         if (!mysqli_query($dbcon, "ALTER TABLE eventos ADD COLUMN senha VARCHAR(255) NOT NULL DEFAULT '' AFTER apelido")) {
             die('Erro ao criar coluna senha: ' . mysqli_error($dbcon));
         }
+    }
+
+    // Garante compatibilidade com os valores Sim/Não/Nulo.
+    if (!mysqli_query($dbcon, "ALTER TABLE eventos MODIFY COLUMN prorroga VARCHAR(4) NULL")) {
+        die('Erro ao ajustar coluna prorroga: ' . mysqli_error($dbcon));
     }
 }
