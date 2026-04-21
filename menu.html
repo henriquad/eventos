@@ -54,8 +54,6 @@
                     <p>Escolha uma área para incluir, consultar ou revisar informações da agenda.</p>
                 </div>
                 <div class="menu-shell__header-actions">
-                    <button type="button" id="clearLocalData" class="menu-shell__clear">Limpar período e saldo
-                        salvos</button>
                     <a class="menu-shell__logout" href="PHP/logout.php">Trocar usuário</a>
                 </div>
             </div>
@@ -115,8 +113,12 @@
                             placeholder="Digite parte do nome do evento" autocomplete="off" />
                     </div>
                 </div>
-                <p id="periodoStatus" class="periodo-status" aria-live="polite">Informe as duas datas para validar o
-                    intervalo.</p>
+                <div class="periodo-status-row">
+                    <p id="periodoStatus" class="periodo-status" aria-live="polite">Informe as duas datas para validar o
+                        intervalo.</p>
+                    <button type="button" id="clearLocalData" class="menu-shell__clear">Limpar período e saldo
+                        salvos</button>
+                </div>
             </section>
         </section>
 

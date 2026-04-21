@@ -318,6 +318,17 @@ table {
   background: #fff5f2;
 }
 
+.periodo-status-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  grid-column: 1 / -1;
+}
+
+.periodo-status-row .periodo-status {
+  flex: 1;
+}
+
 .periodo-status {
   margin-top: 1rem;
   padding: 0.9rem 1rem;
@@ -326,7 +337,6 @@ table {
   color: var(--muted);
   font-size: 0.98rem;
   line-height: 1.5;
-  grid-column: 1 / -1;
 }
 
 .periodo-status.is-valid {

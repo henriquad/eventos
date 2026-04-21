@@ -196,6 +196,7 @@ mysqli_close($conn);
 			display: inline-flex;
 			align-items: center;
 			justify-content: center;
+			min-width: 140px;
 			padding: 0.7rem 1rem;
 			border-radius: 999px;
 			border: 0;

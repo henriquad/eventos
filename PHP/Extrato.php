@@ -262,8 +262,9 @@ h2{margin:0 0 12px 0}
 .filtro-form{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
 .filtro-form label{font-size:13px;color:#344054;display:block;margin-bottom:4px}
 .filtro-form input{height:36px;padding:6px 10px;border:1px solid #cfd8e3;border-radius:6px;min-width:260px}
-.filtro-form button{height:36px;padding:0 14px;border:none;border-radius:6px;background:#1f4f82;color:#fff;cursor:pointer}
-.filtro-form a{height:36px;padding:8px 14px;border-radius:6px;background:#eef2f7;color:#1f4f82;text-decoration:none;display:inline-flex;align-items:center}
+.filtro-form .filtro-acao{height:36px;min-width:140px;padding:0 14px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box}
+.filtro-form button{border:none;background:#1f4f82;color:#fff;cursor:pointer}
+.filtro-form a{background:#eef2f7;color:#1f4f82;text-decoration:none}
 .acoes-grafico{margin:0 0 12px 0}
 .btn-grafico{background:#067647;color:#fff;border:none;border-radius:6px;padding:9px 14px;font-size:14px;cursor:pointer}
 .btn-grafico:hover{background:#055d38}
@@ -293,8 +294,8 @@ echo '<input type="hidden" name="DataI" value="' . htmlspecialchars($dataInicial
 echo '<input type="hidden" name="DataF" value="' . htmlspecialchars($dataFinal, ENT_QUOTES, 'UTF-8') . '">';
 echo '<input type="hidden" name="SaldoAnterior" value="' . htmlspecialchars((string)$saldoAnterior, ENT_QUOTES, 'UTF-8') . '">';
 echo '<div><label for="Evento">Filtrar por evento</label><input id="Evento" name="Evento" type="text" maxlength="100" placeholder="Digite parte do nome do evento" value="' . htmlspecialchars($eventoFiltro, ENT_QUOTES, 'UTF-8') . '"></div>';
-echo '<button type="submit">Aplicar filtro</button>';
-echo '<a href="' . htmlspecialchars($limparEventoUrl, ENT_QUOTES, 'UTF-8') . '">Limpar filtro</a>';
+echo '<button type="submit" class="filtro-acao">Aplicar filtro</button>';
+echo '<a class="filtro-acao" href="' . htmlspecialchars($limparEventoUrl, ENT_QUOTES, 'UTF-8') . '">Limpar filtro</a>';
 echo '</form>';
 if ($eventoFiltro !== '') {
     echo '<div class="filtro">Evento filtrado: <strong>' . htmlspecialchars($eventoFiltro, ENT_QUOTES, 'UTF-8') . '</strong></div>';
