@@ -1,4 +1,31 @@
 var STORAGE_KEY = "eventos.periodoReferencia";
+var MENU_INIT_FLAG = "__eventosMenuInicializado";
+
+function storageSetItem(chave, valor) {
+  try {
+    window.localStorage.setItem(chave, valor);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function storageGetItem(chave) {
+  try {
+    return window.localStorage.getItem(chave);
+  } catch (error) {
+    return null;
+  }
+}
+
+function storageRemoveItem(chave) {
+  try {
+    window.localStorage.removeItem(chave);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
 
 function apenasDigitos(valor) {
   return String(valor || "")
@@ -137,12 +164,12 @@ function salvarPeriodo(dataInicial, dataFinal, saldoAnterior) {
     dataFinal: dataFinal,
     saldoAnterior: saldoAnterior,
   });
-  window.localStorage.setItem(STORAGE_KEY, payload);
+  storageSetItem(STORAGE_KEY, payload);
 }
 
 function carregarPeriodoSalvo() {
   try {
-    var bruto = window.localStorage.getItem(STORAGE_KEY);
+    var bruto = storageGetItem(STORAGE_KEY);
     return bruto ? JSON.parse(bruto) : null;
   } catch (error) {
     return null;
@@ -197,7 +224,7 @@ function validarPeriodo(dataIEl, dataFEl, statusEl, saldoAnteriorEl) {
       "",
       "Informe as duas datas para validar o intervalo.",
     );
-    window.localStorage.removeItem(STORAGE_KEY);
+    storageRemoveItem(STORAGE_KEY);
     return;
   }
 
@@ -448,6 +475,17 @@ function inicializarLinkComPeriodo(selector, base) {
   }
 
   link.addEventListener("click", function (event) {
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+
     event.preventDefault();
     atualizarHref();
     window.location.href = construirUrl();
@@ -493,6 +531,11 @@ function inicializarSumariosExclusivos() {
 }
 
 function inicializarMenuEventos() {
+  if (window[MENU_INIT_FLAG]) {
+    return;
+  }
+  window[MENU_INIT_FLAG] = true;
+
   inicializarPeriodo();
   inicializarLinkComPeriodo(
     'a[href="PHP/Extrato.php"], a[href="./PHP/Extrato.php"], a[href*="Extrato.php"]',
@@ -520,7 +563,7 @@ function inicializarMenuEventos() {
         return;
       }
 
-      window.localStorage.removeItem(STORAGE_KEY);
+      storageRemoveItem(STORAGE_KEY);
 
       if (dataIEl) {
         dataIEl.value = "";
