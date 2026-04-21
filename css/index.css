@@ -152,6 +152,13 @@ body {
   color: var(--brand-dark);
 }
 
+.login-form label[for="rememberLogin"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: fit-content;
+}
+
 .login-form input {
   margin-bottom: 0.75rem;
   padding: 0.85rem 0.9rem;
@@ -162,6 +169,14 @@ body {
   font-size: 1rem;
   background: #fffefa;
   color: var(--ink);
+}
+
+.login-form input#rememberLogin {
+  width: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
 }
 
 .login-form input:focus {
