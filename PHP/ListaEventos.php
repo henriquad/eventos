@@ -12,7 +12,39 @@ $senha = eventosSenhaSessao();
 
 eventosGarantirSchema($conn);
 
-$sql = 'SELECT * FROM eventos WHERE apelido = ? AND senha = ? ORDER BY id DESC';
+// Primeiro, obter as colunas válidas
+$sql_test = 'SELECT * FROM eventos WHERE apelido = ? AND senha = ? LIMIT 1';
+$stmt_test = mysqli_prepare($conn, $sql_test);
+$colunas_validas = array();
+
+if ($stmt_test) {
+    mysqli_stmt_bind_param($stmt_test, 'ss', $apelido, $senha);
+    if (mysqli_stmt_execute($stmt_test)) {
+        $result_test = mysqli_stmt_get_result($stmt_test);
+        if ($result_test) {
+            $fields_temp = $result_test->fetch_fields();
+            foreach ($fields_temp as $field) {
+                $colunas_validas[] = $field->name;
+            }
+        }
+    }
+    mysqli_stmt_close($stmt_test);
+}
+
+// Parâmetros de ordenação
+$coluna_ordem = filter_input(INPUT_GET, 'ordem', FILTER_SANITIZE_STRING);
+$direcao_ordem = filter_input(INPUT_GET, 'direcao', FILTER_SANITIZE_STRING);
+
+// Validar parâmetros de ordenação
+if (empty($coluna_ordem) || !in_array($coluna_ordem, $colunas_validas, true)) {
+    $coluna_ordem = 'id';
+}
+
+if ($direcao_ordem !== 'ASC') {
+    $direcao_ordem = 'DESC';
+}
+
+$sql = 'SELECT * FROM eventos WHERE apelido = ? AND senha = ? ORDER BY `' . $coluna_ordem . '` ' . $direcao_ordem;
 $stmt = mysqli_prepare($conn, $sql);
 $query = false;
 
@@ -188,6 +220,82 @@ mysqli_close($conn);
             text-align: center;
         }
 
+        .coluna-ordenavel {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem;
+        }
+
+        .coluna-ordenavel:hover {
+            text-decoration: underline;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
+
+        .coluna-ordenavel .seta {
+            font-size: 0.8em;
+            margin-left: 0.2rem;
+        }
+
+        .coluna-ordenavel.ativo-asc .seta::after {
+            content: ' ▲';
+            color: #2d5016;
+            font-weight: bold;
+        }
+
+        .coluna-ordenavel.ativo-desc .seta::after {
+            content: ' ▼';
+            color: #2d5016;
+            font-weight: bold;
+        }
+
+        .coluna-ordenavel {
+            position: relative;
+        }
+
+        .coluna-ordenavel::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2d5016;
+            color: #fff;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: normal;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .coluna-ordenavel::before {
+            content: '';
+            position: absolute;
+            bottom: 115%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #2d5016;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 1000;
+        }
+
+        .coluna-ordenavel:hover::after,
+        .coluna-ordenavel:hover::before {
+            opacity: 1;
+        }
+
         @media (max-width: 900px) {
 
             .hero__content,
@@ -251,15 +359,52 @@ mysqli_close($conn);
                                     } ?>
                                     <?php
                                     $titulo = $field->name;
-                                    if ($index === 0) {
+                                    $tooltip = '';
+
+                                    // Mapa de títulos e tooltips
+                                    $descricoes = array(
+                                        'id' => array('título' => 'id', 'tooltip' => 'Identificador único do evento'),
+                                        'nome' => array('título' => 'Evento', 'tooltip' => 'Nome ou descrição do evento'),
+                                        'data_evento' => array('título' => 'Data', 'tooltip' => 'Data do evento'),
+                                        'valor' => array('título' => 'Valor', 'tooltip' => 'Valor financeiro do evento'),
+                                        'tipo_movimento' => array('título' => 'Tipo', 'tooltip' => 'Entrada ou saída de recursos'),
+                                        'categoria' => array('título' => 'Categoria', 'tooltip' => 'Classificação do evento'),
+                                        'observacoes' => array('título' => 'Obs.', 'tooltip' => 'Notas adicionais sobre o evento'),
+                                        'status' => array('título' => 'Status', 'tooltip' => 'Situação atual do evento'),
+                                        'data_criacao' => array('título' => 'Criação', 'tooltip' => 'Data de criação do registro'),
+                                        'data_atualizacao' => array('título' => 'Atualização', 'tooltip' => 'Data da última modificação')
+                                    );
+
+                                    if (isset($descricoes[$field->name])) {
+                                        $titulo = $descricoes[$field->name]['título'];
+                                        $tooltip = $descricoes[$field->name]['tooltip'];
+                                    } elseif ($index === 0) {
                                         $titulo = 'id';
+                                        $tooltip = 'Identificador único do evento';
                                     } elseif ($index === 1) {
                                         $titulo = 'Evento';
+                                        $tooltip = 'Nome ou descrição do evento';
                                     } elseif ($index === 3) {
                                         $titulo = 'Valor';
+                                        $tooltip = 'Valor financeiro do evento';
                                     }
+
+                                    // Determinar a próxima direção de ordenação
+                                    $proxima_direcao = 'ASC';
+                                    $classe_ativa = '';
+                                    if ($coluna_ordem === $field->name) {
+                                        $proxima_direcao = ($direcao_ordem === 'ASC') ? 'DESC' : 'ASC';
+                                        $classe_ativa = ($direcao_ordem === 'ASC') ? 'ativo-asc' : 'ativo-desc';
+                                    }
+
+                                    $url_ordenacao = '?ordem=' . urlencode($field->name) . '&direcao=' . urlencode($proxima_direcao);
                                     ?>
-                                    <th><?php echo htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'); ?></th>
+                                    <th>
+                                        <a href="<?php echo htmlspecialchars($url_ordenacao, ENT_QUOTES, 'UTF-8'); ?>" class="coluna-ordenavel <?php echo $classe_ativa; ?>" data-tooltip="<?php echo htmlspecialchars($tooltip, ENT_QUOTES, 'UTF-8'); ?>">
+                                            <span><?php echo htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'); ?></span>
+                                            <span class="seta"></span>
+                                        </a>
+                                    </th>
                                 <?php endforeach; ?>
                             </tr>
                         </thead>
