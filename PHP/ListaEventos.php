@@ -144,7 +144,7 @@ mysqli_close($conn);
     <style>
         .hero__content,
         .menu-page {
-            max-width: min(96vw, 1680px);
+            max-width: min(99vw, 2100px);
         }
 
         .hero__content {
@@ -167,11 +167,14 @@ mysqli_close($conn);
 
         .tabela-scroll {
             overflow-x: auto;
+            position: relative;
+            z-index: 0;
         }
 
         .tabela-scroll table {
-            min-width: 1480px;
+            min-width: 1800px;
             width: 100%;
+            margin-top: 0;
         }
 
         .col-acoes {
@@ -218,6 +221,18 @@ mysqli_close($conn);
 
         .tabela-scroll th {
             text-align: center;
+            position: relative;
+            overflow: visible;
+            z-index: 1;
+            padding-top: 5.2rem;
+            vertical-align: bottom;
+        }
+
+        .coluna-dc {
+            min-width: 90px;
+            white-space: normal;
+            word-break: break-word;
+            text-align: center;
         }
 
         .coluna-ordenavel {
@@ -226,14 +241,20 @@ mysqli_close($conn);
             position: relative;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 0.4rem;
-            padding: 0.5rem;
+            padding: 0.5rem 0.65rem;
+            margin: 0 auto;
+            vertical-align: bottom;
+            text-align: center;
+            width: auto;
         }
 
         .coluna-ordenavel:hover {
             text-decoration: underline;
             background: rgba(0, 0, 0, 0.05);
             border-radius: 4px;
+            z-index: 2000;
         }
 
         .coluna-ordenavel .seta {
@@ -253,47 +274,56 @@ mysqli_close($conn);
             font-weight: bold;
         }
 
-        .coluna-ordenavel {
-            position: relative;
-        }
-
-        .coluna-ordenavel::after {
-            content: attr(data-tooltip);
+        .coluna-ordenavel .tooltip-text {
             position: absolute;
-            bottom: 125%;
+            bottom: calc(100% + 0.4rem);
             left: 50%;
             transform: translateX(-50%);
             background: #2d5016;
             color: #fff;
-            padding: 0.5rem 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 0.35rem 1.35rem;
+            min-height: 50px;
             border-radius: 6px;
-            font-size: 0.85em;
+            font-size: 0.9em;
             font-weight: normal;
-            white-space: nowrap;
+            white-space: normal;
+            width: 400px;
+            max-width: 400px;
+            text-align: left !important;
+            text-align-last: left !important;
+            line-height: 1.15;
+            overflow-wrap: anywhere;
             pointer-events: none;
             opacity: 0;
+            visibility: hidden;
             transition: opacity 0.2s;
-            z-index: 1000;
+            z-index: 3000;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
-        .coluna-ordenavel::before {
+        .coluna-ordenavel .tooltip-text.tooltip-text--dc {
+            width: 400px;
+            max-width: 400px;
+        }
+
+        .coluna-ordenavel .tooltip-text::before {
             content: '';
             position: absolute;
-            bottom: 115%;
+            top: 100%;
             left: 50%;
             transform: translateX(-50%);
             border: 6px solid transparent;
             border-top-color: #2d5016;
             pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s;
-            z-index: 1000;
         }
 
-        .coluna-ordenavel:hover::after,
-        .coluna-ordenavel:hover::before {
+        .coluna-ordenavel:hover .tooltip-text,
+        .coluna-ordenavel:focus-visible .tooltip-text {
             opacity: 1;
+            visibility: visible;
         }
 
         @media (max-width: 900px) {
@@ -363,16 +393,27 @@ mysqli_close($conn);
 
                                     // Mapa de títulos e tooltips
                                     $descricoes = array(
-                                        'id' => array('título' => 'id', 'tooltip' => 'Identificador único do evento'),
-                                        'nome' => array('título' => 'Evento', 'tooltip' => 'Nome ou descrição do evento'),
-                                        'data_evento' => array('título' => 'Data', 'tooltip' => 'Data do evento'),
-                                        'valor' => array('título' => 'Valor', 'tooltip' => 'Valor financeiro do evento'),
-                                        'tipo_movimento' => array('título' => 'Tipo', 'tooltip' => 'Entrada ou saída de recursos'),
-                                        'categoria' => array('título' => 'Categoria', 'tooltip' => 'Classificação do evento'),
-                                        'observacoes' => array('título' => 'Obs.', 'tooltip' => 'Notas adicionais sobre o evento'),
-                                        'status' => array('título' => 'Status', 'tooltip' => 'Situação atual do evento'),
-                                        'data_criacao' => array('título' => 'Criação', 'tooltip' => 'Data de criação do registro'),
-                                        'data_atualizacao' => array('título' => 'Atualização', 'tooltip' => 'Data da última modificação')
+                                        'id' => array('título' => 'id', 'tooltip' => 'Identificador'),
+                                        'evento' => array('título' => 'evento', 'tooltip' => 'Nome do evento'),
+                                        'valorE' => array('título' => 'ValorE', 'tooltip' => 'Valor financeiro'),
+                                        'grupo' => array('título' => 'Grupo', 'tooltip' => 'Grupo do evento'),
+                                        'DC' => array('título' => 'DC', 'tooltip' => 'Débito ou crédito'),
+                                        'diario' => array('título' => 'diario', 'tooltip' => 'ocorre todos os dias?'),
+                                        'diaM' => array('título' => 'DiaM', 'tooltip' => 'Dia do mês'),
+                                        'diaS' => array('título' => 'diaS', 'tooltip' => 'Dia da semana'),
+                                        'diaU' => array('título' => 'diaU', 'tooltip' => 'Dia útil'),
+                                        'dataF' => array('título' => 'dataF', 'tooltip' => 'Data fixa'),
+                                        'prorroga' => array('título' => 'prorroga', 'tooltip' => 'ocorre após dia não útil'),
+                                        'UPA' => array('título' => 'UPA', 'tooltip' => 'último, penúltimo ou antepenúltimo dia do mês'),
+                                        'semN' => array('título' => 'semN', 'tooltip' => 'ordem da semana no mês '),
+                                        'semD' => array('título' => 'semD', 'tooltip' => 'dia da semana '),
+                                        'semN' => array('título' => 'semM', 'tooltip' => 'ordem da semana no mês '),
+                                        'semD' => array('título' => 'semM', 'tooltip' => 'dia da semana '),
+                                        'semM' => array('título' => 'semM', 'tooltip' => 'número do mês '),
+                                        'diaR' => array('título' => 'diaR', 'tooltip' => 'dia que repete '),
+                                        'mesR' => array('título' => 'mesR', 'tooltip' => 'mês que repete '),
+                                        'ativo' => array('título' => 'ativo', 'tooltip' => 'ativo ou inativo '),
+
                                     );
 
                                     if (isset($descricoes[$field->name])) {
@@ -380,13 +421,16 @@ mysqli_close($conn);
                                         $tooltip = $descricoes[$field->name]['tooltip'];
                                     } elseif ($index === 0) {
                                         $titulo = 'id';
-                                        $tooltip = 'Identificador único do evento';
+                                        $tooltip = 'Identificador';
                                     } elseif ($index === 1) {
                                         $titulo = 'Evento';
-                                        $tooltip = 'Nome ou descrição do evento';
-                                    } elseif ($index === 3) {
+                                        $tooltip = 'Nome do evento';
+                                    } elseif ($field->name === 'Grupo') {
+                                        $titulo = 'Grupo';
+                                        $tooltip = 'Grupo do evento';
+                                    } elseif ($field->name === 'valorE') {
                                         $titulo = 'Valor';
-                                        $tooltip = 'Valor financeiro do evento';
+                                        $tooltip = 'Valor financeiro';
                                     }
 
                                     // Determinar a próxima direção de ordenação
@@ -397,12 +441,16 @@ mysqli_close($conn);
                                         $classe_ativa = ($direcao_ordem === 'ASC') ? 'ativo-asc' : 'ativo-desc';
                                     }
 
+                                    $classe_coluna = $field->name === 'DC' ? 'coluna-dc' : '';
+                                    $classe_tooltip = $field->name === 'DC' ? 'tooltip-text tooltip-text--dc' : 'tooltip-text';
+
                                     $url_ordenacao = '?ordem=' . urlencode($field->name) . '&direcao=' . urlencode($proxima_direcao);
                                     ?>
-                                    <th>
-                                        <a href="<?php echo htmlspecialchars($url_ordenacao, ENT_QUOTES, 'UTF-8'); ?>" class="coluna-ordenavel <?php echo $classe_ativa; ?>" data-tooltip="<?php echo htmlspecialchars($tooltip, ENT_QUOTES, 'UTF-8'); ?>">
+                                    <th class="<?php echo $classe_coluna; ?>">
+                                        <a href="<?php echo htmlspecialchars($url_ordenacao, ENT_QUOTES, 'UTF-8'); ?>" class="coluna-ordenavel <?php echo $classe_ativa; ?>">
                                             <span><?php echo htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'); ?></span>
                                             <span class="seta"></span>
+                                            <span class="<?php echo $classe_tooltip; ?>"><?php echo htmlspecialchars($tooltip, ENT_QUOTES, 'UTF-8'); ?></span>
                                         </a>
                                     </th>
                                 <?php endforeach; ?>
@@ -424,10 +472,11 @@ mysqli_close($conn);
                                         <?php if (in_array($fields[$j]->name, $hiddenColumns, true)) {
                                             continue;
                                         } ?>
-                                        <?php if ($j === 3): ?>
-                                            <td class="valor-coluna"><?php echo number_format((float)$row[$j], 2, ',', '.'); ?></td>
+                                        <?php $classeColunaDado = $fields[$j]->name === 'DC' ? 'coluna-dc' : ''; ?>
+                                        <?php if ($fields[$j]->name === 'valorE'): ?>
+                                            <td class="valor-coluna <?php echo $classeColunaDado; ?>"><?php echo number_format((float)$row[$j], 2, ',', '.'); ?></td>
                                         <?php else: ?>
-                                            <td><?php echo htmlspecialchars((string)$row[$j], ENT_QUOTES, 'UTF-8'); ?></td>
+                                            <td class="<?php echo $classeColunaDado; ?>"><?php echo htmlspecialchars((string)$row[$j], ENT_QUOTES, 'UTF-8'); ?></td>
                                         <?php endif; ?>
                                     <?php endfor; ?>
                                 </tr>
