@@ -1,6 +1,21 @@
 var STORAGE_KEY = "eventos.periodoReferencia";
 var MENU_INIT_FLAG = "__eventosMenuInicializado";
 
+function completarComZero(valor) {
+  var texto = String(valor);
+  return texto.length < 2 ? "0" + texto : texto;
+}
+
+function paraCada(lista, callback) {
+  if (!lista || typeof callback !== "function") {
+    return;
+  }
+
+  for (var i = 0; i < lista.length; i += 1) {
+    callback(lista[i], i);
+  }
+}
+
 function storageSetItem(chave, valor) {
   try {
     window.localStorage.setItem(chave, valor);
@@ -89,8 +104,8 @@ function parseDataBr(valor) {
 }
 
 function formatarDataBr(data) {
-  var dia = String(data.getDate()).padStart(2, "0");
-  var mes = String(data.getMonth() + 1).padStart(2, "0");
+  var dia = completarComZero(data.getDate());
+  var mes = completarComZero(data.getMonth() + 1);
   var ano = String(data.getFullYear());
   return dia + "/" + mes + "/" + ano;
 }
@@ -155,7 +170,7 @@ function parseValorMonetario(valor) {
   }
 
   var numero = Number(texto);
-  return Number.isFinite(numero) ? numero : null;
+  return isFinite(numero) ? numero : null;
 }
 
 function salvarPeriodo(dataInicial, dataFinal, saldoAnterior) {
@@ -356,7 +371,7 @@ function inicializarPeriodo() {
     });
   }
 
-  botoes.forEach(function (botao) {
+  paraCada(botoes, function (botao) {
     botao.addEventListener("click", function () {
       var tipo = botao.getAttribute("data-periodo");
       var hoje = new Date();
@@ -504,7 +519,7 @@ function inicializarSumariosExclusivos() {
     return;
   }
 
-  itens.forEach(function (item) {
+  paraCada(itens, function (item) {
     if (item.open) {
       if (!itemAbertoInicial) {
         itemAbertoInicial = item;
@@ -519,13 +534,13 @@ function inicializarSumariosExclusivos() {
     itemAbertoInicial = itens[0];
   }
 
-  itens.forEach(function (itemAtual) {
+  paraCada(itens, function (itemAtual) {
     itemAtual.addEventListener("toggle", function () {
       if (!itemAtual.open) {
         return;
       }
 
-      itens.forEach(function (outroItem) {
+      paraCada(itens, function (outroItem) {
         if (outroItem !== itemAtual) {
           outroItem.open = false;
         }
