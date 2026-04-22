@@ -248,9 +248,10 @@ table {
 }
 
 .periodo-card__link {
-  color: var(--brand);
+  color: red;
   font-weight: 700;
   text-decoration: underline;
+  font-size: clamp(0.2rem, 1.1vw, 1.9rem);
 }
 
 .periodo-card__link:hover {
@@ -259,9 +260,17 @@ table {
 
 .periodo-card__fields {
   display: grid;
-  grid-template-columns: repeat(4, minmax(140px, 1fr));
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) minmax(
+      280px,
+      1.4fr
+    );
   gap: 1rem;
   grid-column: 1 / -1;
+}
+
+.periodo-card__status {
+  margin-top: 0;
+  align-self: end;
 }
 
 .periodo-card__actions {
