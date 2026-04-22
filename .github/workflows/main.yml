@@ -12,6 +12,7 @@ jobs:
       - name: Sync files
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
+          server: win8135.site4now.net
           website-name: https://www.smarterasp.net/
           server-computer-name: https://winxxxx.site4now.net:8172
           username: ${{ secrets.FTP_USERNAME }}
