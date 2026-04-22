@@ -186,6 +186,10 @@ function atualizarClasseCampo(input, status) {
 }
 
 function definirStatus(statusEl, tipo, texto) {
+  if (!statusEl) {
+    return;
+  }
+
   statusEl.textContent = texto;
   statusEl.classList.remove("is-valid");
   statusEl.classList.remove("is-invalid");
@@ -307,7 +311,7 @@ function inicializarPeriodo() {
   var statusEl = document.getElementById("periodoStatus");
   var botoes = document.querySelectorAll(".periodo-btn");
 
-  if (!dataIEl || !dataFEl || !statusEl) {
+  if (!dataIEl || !dataFEl) {
     return;
   }
 
@@ -541,7 +545,6 @@ function inicializarMenuEventos() {
     'a[href="PHP/Extrato.php"], a[href="./PHP/Extrato.php"], a[href*="Extrato.php"]',
     "PHP/Extrato.php",
   );
-  inicializarLinkComPeriodo("#linkResumoMensal", "PHP/ResumoMensal.php");
   inicializarSumariosExclusivos();
 
   var botaoLimparDadosLocais = document.getElementById("clearLocalData");

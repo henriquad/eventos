@@ -8,6 +8,79 @@ include_once "Conectar_BaseH.php";
 $apelido = eventosApelidoSessao();
 $senha   = eventosSenhaSessao();
 
+function normalizarValorMonetarioResumoMovtos($valor)
+{
+    $texto = trim((string)$valor);
+    if ($texto === '') {
+        return 0.0;
+    }
+
+    $texto = preg_replace('/\s+/', '', $texto);
+    if ($texto === null || $texto === '') {
+        return 0.0;
+    }
+
+    $texto = preg_replace('/^R\$/i', '', $texto);
+    $texto = preg_replace('/[^0-9,\.\-]/', '', $texto);
+    if ($texto === null || $texto === '') {
+        return 0.0;
+    }
+
+    $negativo = false;
+    if (strpos($texto, '-') === 0) {
+        $negativo = true;
+        $texto = substr($texto, 1);
+    }
+
+    if ($texto === '') {
+        return 0.0;
+    }
+
+    $temVirgula = strpos($texto, ',') !== false;
+    $temPonto = strpos($texto, '.') !== false;
+
+    if ($temVirgula && $temPonto) {
+        if (strrpos($texto, ',') > strrpos($texto, '.')) {
+            $texto = str_replace('.', '', $texto);
+            $texto = str_replace(',', '.', $texto);
+        } else {
+            $texto = str_replace(',', '', $texto);
+        }
+    } elseif ($temVirgula) {
+        $partesVirgula = explode(',', $texto);
+        if (count($partesVirgula) > 2) {
+            $texto = implode('', $partesVirgula);
+        } elseif (isset($partesVirgula[1]) && strlen($partesVirgula[1]) === 3) {
+            $texto = $partesVirgula[0] . $partesVirgula[1];
+        } else {
+            $texto = $partesVirgula[0] . '.' . ($partesVirgula[1] ?? '');
+        }
+    } elseif ($temPonto) {
+        $partesPonto = explode('.', $texto);
+        if (count($partesPonto) > 2) {
+            $texto = implode('', $partesPonto);
+        } elseif (isset($partesPonto[1]) && strlen($partesPonto[1]) === 3) {
+            $texto = $partesPonto[0] . $partesPonto[1];
+        }
+    }
+
+    if ($negativo) {
+        $texto = '-' . $texto;
+    }
+
+    if (!preg_match('/^-?\d+(\.\d+)?$/', $texto)) {
+        return 0.0;
+    }
+
+    return (float)$texto;
+}
+
+$saldoAnteriorTexto = trim((string)($_GET['SaldoAnterior'] ?? ''));
+$saldoAnterior = normalizarValorMonetarioResumoMovtos($saldoAnteriorTexto);
+$saldoAnteriorAtivo = ($saldoAnteriorTexto !== '');
+$eventoFiltro = trim((string)($_GET['EventoExtrato'] ?? ($_GET['Evento'] ?? '')));
+$eventoFiltroSql = '%' . $eventoFiltro . '%';
+
 $sql = "
     SELECT
         m.id,
@@ -25,6 +98,7 @@ $sql = "
       AND m.senha = ?
       AND IFNULL(m.diaCorreto, 0) > 0
       AND CAST(IFNULL(d.Util, 0) AS UNSIGNED) = 1
+            AND (? = '' OR m.evento LIKE ?)
     ORDER BY d.DataMes ASC, m.id ASC
 ";
 
@@ -34,12 +108,12 @@ if (!$stmt) {
     exit('Falha ao preparar consulta: ' . mysqli_error($dbcon));
 }
 
-mysqli_stmt_bind_param($stmt, 'ss', $apelido, $senha);
+mysqli_stmt_bind_param($stmt, 'ssss', $apelido, $senha, $eventoFiltro, $eventoFiltroSql);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 
 $linhas = [];
-$saldo  = 0.0;
+$saldo  = $saldoAnterior;
 
 while ($row = mysqli_fetch_assoc($result)) {
     $valor = (float)$row['ValorE'];
@@ -65,6 +139,15 @@ function fmtData(string $d): string
 function fmtVal(float $v): string
 {
     return number_format($v, 2, ',', '.');
+}
+
+$mensagemStatus = 'Sem filtro de evento. Saldo acumulado iniciado em R$ 0,00.';
+if ($saldoAnteriorAtivo && $eventoFiltro !== '') {
+    $mensagemStatus = 'Filtro de evento ativo e saldo acumulado iniciado em R$ ' . fmtVal($saldoAnterior) . '.';
+} elseif ($saldoAnteriorAtivo) {
+    $mensagemStatus = 'Saldo acumulado iniciado em R$ ' . fmtVal($saldoAnterior) . '.';
+} elseif ($eventoFiltro !== '') {
+    $mensagemStatus = 'Filtro de evento ativo. Saldo acumulado iniciado em R$ 0,00.';
 }
 ?>
 <!DOCTYPE html>
@@ -92,6 +175,105 @@ function fmtVal(float $v): string
             max-width: 900px;
             margin: 24px auto;
             padding: 0 16px;
+        }
+
+        .filtros {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+            padding: 14px;
+            margin-bottom: 14px;
+            display: flex;
+            gap: 14px;
+            align-items: flex-end;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .filtros-bloco {
+            display: flex;
+            gap: 10px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .filtros-bloco--esquerda {
+            justify-content: flex-start;
+            flex: 1 1 320px;
+        }
+
+        .filtros-bloco--direita {
+            justify-content: flex-end;
+            flex: 1 1 320px;
+        }
+
+        .campo-grupo {
+            min-width: 220px;
+        }
+
+        .filtros label {
+            display: block;
+            font-size: 12px;
+            color: #2c5282;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .filtros input {
+            width: 100%;
+            border: 1px solid #cfd8e3;
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-size: 13px;
+        }
+
+        .filtros button,
+        .filtros a {
+            height: 36px;
+            border: none;
+            border-radius: 6px;
+            background: #2c5282;
+            color: #fff;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 12px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .filtros a {
+            background: #6c7f95;
+        }
+
+        .periodo-status-row {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .periodo-status {
+            margin: 0;
+            color: #2c5282;
+            font-size: 12px;
+        }
+
+        .menu-shell__clear {
+            border: none;
+            border-radius: 6px;
+            background: #6c7f95;
+            color: #fff;
+            padding: 8px 12px;
+            font-size: 13px;
+            cursor: pointer;
         }
 
         /* cabeçalho estilo banco */
@@ -283,6 +465,30 @@ function fmtVal(float $v): string
             <a href="ListaEventos.php">Lista de Eventos</a>
         </div>
 
+        <form class="filtros" method="get" action="ResumoMovtos.php">
+            <div class="filtros-bloco filtros-bloco--esquerda">
+                <div class="campo-grupo">
+                    <label for="EventoExtrato">Evento (filtro do extrato)</label>
+                    <input type="text" id="EventoExtrato" name="EventoExtrato" placeholder="Digite parte do nome do evento" autocomplete="off" value="<?= htmlspecialchars($eventoFiltro, ENT_QUOTES, 'UTF-8') ?>" />
+                </div>
+                <button type="submit" name="acao" value="filtrar">Aplicar filtro</button>
+            </div>
+
+            <div class="filtros-bloco filtros-bloco--direita">
+                <div class="campo-grupo">
+                    <label for="SaldoAnterior">AAAAAAAAAASaldo anterior do período (R$)</label>
+                    <input type="text" id="SaldoAnterior" name="SaldoAnterior" placeholder="0,00" inputmode="decimal" autocomplete="off" value="<?= htmlspecialchars($saldoAnteriorTexto === '' ? '' : fmtVal($saldoAnterior), ENT_QUOTES, 'UTF-8') ?>" />
+                </div>
+                <button type="submit" name="acao" value="recalcular">Recalcular</button>
+                <a href="ResumoMovtos.php">Limpar</a>
+            </div>
+        </form>
+
+        <div class="periodo-status-row">
+            <p id="periodoStatus" class="periodo-status" aria-live="polite"><?= htmlspecialchars($mensagemStatus, ENT_QUOTES, 'UTF-8') ?></p>
+            <button type="button" id="clearLocalData" class="menu-shell__clear">Limpar texto e saldo digitados</button>
+        </div>
+
         <div class="extrato-header">
             <h1>Extrato de Movimentos</h1>
             <div class="sub">Conta: <?= htmlspecialchars($apelido) ?></div>
@@ -302,6 +508,16 @@ function fmtVal(float $v): string
                     </tr>
                 </thead>
                 <tbody>
+                    <?php if ($saldoAnteriorAtivo): ?>
+                        <tr>
+                            <td class="data">-</td>
+                            <td class="desc">Saldo anterior aplicado</td>
+                            <td class="grupo">-</td>
+                            <td class="vazio">&mdash;</td>
+                            <td class="vazio">&mdash;</td>
+                            <td class="<?= $saldoAnterior >= 0 ? 'saldo-pos' : 'saldo-neg' ?>"><?= fmtVal($saldoAnterior) ?></td>
+                        </tr>
+                    <?php endif; ?>
                     <?php
                     foreach ($linhas as $l):
                         $dc      = $l['DC'];
@@ -343,6 +559,31 @@ function fmtVal(float $v): string
         </div>
 
     </div>
+
+    <script>
+        (function() {
+            var botaoLimpar = document.getElementById('clearLocalData');
+            if (!botaoLimpar) {
+                return;
+            }
+
+            botaoLimpar.addEventListener('click', function() {
+                var saldoEl = document.getElementById('SaldoAnterior');
+                var eventoEl = document.getElementById('EventoExtrato');
+                var statusEl = document.getElementById('periodoStatus');
+
+                if (saldoEl) {
+                    saldoEl.value = '';
+                }
+                if (eventoEl) {
+                    eventoEl.value = '';
+                }
+                if (statusEl) {
+                    statusEl.textContent = 'Campos limpos nesta tela.';
+                }
+            });
+        })();
+    </script>
 </body>
 
 </html>

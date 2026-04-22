@@ -116,10 +116,12 @@ function extratoNormalizarValorMonetario($valor)
 
 $dataInicial = extratoNormalizarData($_GET['DataI'] ?? '');
 $dataFinal = extratoNormalizarData($_GET['DataF'] ?? '');
+$saldoAnteriorInformado = array_key_exists('SaldoAnterior', $_GET);
 $saldoAnterior = extratoNormalizarValorMonetario($_GET['SaldoAnterior'] ?? '');
 $eventoFiltro = trim((string)($_GET['Evento'] ?? ''));
 $eventoFiltro = substr($eventoFiltro, 0, 100);
 $exportarExcel = (($_GET['export'] ?? '') === 'excel');
+$usarCache = (($_GET['usarCache'] ?? '') === '1');
 
 if (!$dataInicial || !$dataFinal) {
     $hoje = new DateTime('today');
@@ -135,48 +137,83 @@ if ($dataInicial > $dataFinal) {
     $dataFinal = $tmp;
 }
 
-extratoPrepararMovtos($dbcon, $apelido, $senha, $dataInicial, $dataFinal);
-
-$sqlLista = "SELECT m.id, d.DataMes AS dataM, CAST(IFNULL(d.DiaUtil, 0) AS UNSIGNED) AS diaUtil, m.evento, m.grupo, m.DC, m.ValorE
-                         FROM movtos m
-                         INNER JOIN datas d
-                             ON CAST(IFNULL(d.DiaUtil, 0) AS UNSIGNED) = CAST(IFNULL(m.diaCorreto, 0) AS UNSIGNED)
-                            AND CAST(d.M AS UNSIGNED) = CAST(m.M AS UNSIGNED)
-                            AND CAST(d.A AS UNSIGNED) = CAST(m.A AS UNSIGNED)
-                         WHERE m.Apelido = ?
-                             AND m.senha = ?
-                             AND d.DataMes BETWEEN ? AND ?
-                             AND IFNULL(m.diaCorreto, 0) > 0
-                             AND CAST(IFNULL(d.Util, 0) AS UNSIGNED) = 1";
-
-$eventoFiltroLike = '';
-if ($eventoFiltro !== '') {
-    $sqlLista .= " AND m.evento LIKE ?";
-    $eventoFiltroLike = '%' . $eventoFiltro . '%';
-}
-
-$sqlLista .= " ORDER BY d.DataMes ASC, m.id ASC";
-$stmtLista = mysqli_prepare($dbcon, $sqlLista);
-if (!$stmtLista) {
-    extratoFalha($dbcon, 'Falha ao preparar SQL da lista: ' . mysqli_error($dbcon));
-}
-
-if ($eventoFiltro !== '') {
-    mysqli_stmt_bind_param($stmtLista, 'sssss', $apelido, $senha, $dataInicial, $dataFinal, $eventoFiltroLike);
-} else {
-    mysqli_stmt_bind_param($stmtLista, 'ssss', $apelido, $senha, $dataInicial, $dataFinal);
-}
-if (!mysqli_stmt_execute($stmtLista)) {
-    $erroLista = mysqli_stmt_error($stmtLista);
-    extratoFalha($dbcon, 'Falha ao executar SQL da lista: ' . $erroLista, $stmtLista);
-}
-
-$resultadoLista = mysqli_stmt_get_result($stmtLista);
 $movimentos = array();
-while ($resultadoLista && ($linha = mysqli_fetch_assoc($resultadoLista))) {
-    $movimentos[] = $linha;
+$cacheExtrato = isset($_SESSION['extrato_cache']) && is_array($_SESSION['extrato_cache'])
+    ? $_SESSION['extrato_cache']
+    : null;
+$cacheValido = false;
+
+if ($usarCache && $cacheExtrato) {
+    $cacheValido = (string)($cacheExtrato['apelido'] ?? '') === $apelido
+        && (string)($cacheExtrato['senha'] ?? '') === $senha
+        && (string)($cacheExtrato['dataInicial'] ?? '') === $dataInicial
+        && (string)($cacheExtrato['dataFinal'] ?? '') === $dataFinal
+        && (string)($cacheExtrato['eventoFiltro'] ?? '') === $eventoFiltro
+        && isset($cacheExtrato['movimentos'])
+        && is_array($cacheExtrato['movimentos']);
+
+    if ($cacheValido) {
+        $movimentos = $cacheExtrato['movimentos'];
+        if (!$saldoAnteriorInformado) {
+            $saldoAnterior = (float)($cacheExtrato['saldoAnterior'] ?? 0.0);
+        }
+    }
 }
-mysqli_stmt_close($stmtLista);
+
+if (!$cacheValido) {
+    extratoPrepararMovtos($dbcon, $apelido, $senha, $dataInicial, $dataFinal);
+
+    $sqlLista = "SELECT m.id, d.DataMes AS dataM, CAST(IFNULL(d.DiaUtil, 0) AS UNSIGNED) AS diaUtil, m.evento, m.grupo, m.DC, m.ValorE
+                             FROM movtos m
+                             INNER JOIN datas d
+                                 ON CAST(IFNULL(d.DiaUtil, 0) AS UNSIGNED) = CAST(IFNULL(m.diaCorreto, 0) AS UNSIGNED)
+                                AND CAST(d.M AS UNSIGNED) = CAST(m.M AS UNSIGNED)
+                                AND CAST(d.A AS UNSIGNED) = CAST(m.A AS UNSIGNED)
+                             WHERE m.Apelido = ?
+                                 AND m.senha = ?
+                                 AND d.DataMes BETWEEN ? AND ?
+                                 AND IFNULL(m.diaCorreto, 0) > 0
+                                 AND CAST(IFNULL(d.Util, 0) AS UNSIGNED) = 1";
+
+    $eventoFiltroLike = '';
+    if ($eventoFiltro !== '') {
+        $sqlLista .= " AND m.evento LIKE ?";
+        $eventoFiltroLike = '%' . $eventoFiltro . '%';
+    }
+
+    $sqlLista .= " ORDER BY d.DataMes ASC, m.id ASC";
+    $stmtLista = mysqli_prepare($dbcon, $sqlLista);
+    if (!$stmtLista) {
+        extratoFalha($dbcon, 'Falha ao preparar SQL da lista: ' . mysqli_error($dbcon));
+    }
+
+    if ($eventoFiltro !== '') {
+        mysqli_stmt_bind_param($stmtLista, 'sssss', $apelido, $senha, $dataInicial, $dataFinal, $eventoFiltroLike);
+    } else {
+        mysqli_stmt_bind_param($stmtLista, 'ssss', $apelido, $senha, $dataInicial, $dataFinal);
+    }
+    if (!mysqli_stmt_execute($stmtLista)) {
+        $erroLista = mysqli_stmt_error($stmtLista);
+        extratoFalha($dbcon, 'Falha ao executar SQL da lista: ' . $erroLista, $stmtLista);
+    }
+
+    $resultadoLista = mysqli_stmt_get_result($stmtLista);
+    while ($resultadoLista && ($linha = mysqli_fetch_assoc($resultadoLista))) {
+        $movimentos[] = $linha;
+    }
+    mysqli_stmt_close($stmtLista);
+
+    $_SESSION['extrato_cache'] = array(
+        'apelido' => $apelido,
+        'senha' => $senha,
+        'dataInicial' => $dataInicial,
+        'dataFinal' => $dataFinal,
+        'saldoAnterior' => $saldoAnterior,
+        'eventoFiltro' => $eventoFiltro,
+        'geradoEm' => date('c'),
+        'movimentos' => $movimentos,
+    );
+}
 
 if ($exportarExcel) {
     $nomeArquivo = 'extrato_' . str_replace('-', '', $dataInicial) . '_a_' . str_replace('-', '', $dataFinal) . '.csv';
@@ -244,9 +281,11 @@ $graficoLabelsJson = json_encode($graficoLabels, JSON_UNESCAPED_UNICODE);
 $graficoSaldosJson = json_encode($graficoSaldos);
 
 $baseExtratoUrl = 'Extrato.php?DataI=' . urlencode($dataInicial) . '&DataF=' . urlencode($dataFinal) . '&SaldoAnterior=' . urlencode((string)$saldoAnterior);
+$resumoMensalUrl = 'ResumoMensal.php?DataI=' . urlencode($dataInicial) . '&DataF=' . urlencode($dataFinal) . '&SaldoAnterior=' . urlencode((string)$saldoAnterior);
 
 if ($eventoFiltro !== '') {
     $baseExtratoUrl .= '&Evento=' . urlencode($eventoFiltro);
+    $resumoMensalUrl .= '&Evento=' . urlencode($eventoFiltro);
 }
 
 $exportUrl = $baseExtratoUrl . '&export=excel';
@@ -289,14 +328,23 @@ echo '<h2>Extrato - Lista de Movimentos</h2>';
 echo '<div class="topo">';
 echo '<a href="../menu.html">Menu</a>';
 echo '<a href="ListaEventos.php">Lista de eventos</a>';
+echo '<a href="' . htmlspecialchars($resumoMensalUrl, ENT_QUOTES, 'UTF-8') . '">Resumo mensal</a>';
 echo '<a href="' . htmlspecialchars($exportUrl, ENT_QUOTES, 'UTF-8') . '">Exportar Excel</a>';
 echo '</div>';
 echo '<div class="filtro">Período: <strong>' . htmlspecialchars(extratoFormatoBr($dataInicial), ENT_QUOTES, 'UTF-8') . '</strong> até <strong>' . htmlspecialchars(extratoFormatoBr($dataFinal), ENT_QUOTES, 'UTF-8') . '</strong></div>';
-echo '<div class="filtro">Saldo anterior ao período (R$): <strong>' . extratoValorFormatado($saldoAnterior) . '</strong></div>';
+
 echo '<form class="filtro filtro-form" method="get" action="Extrato.php">';
 echo '<input type="hidden" name="DataI" value="' . htmlspecialchars($dataInicial, ENT_QUOTES, 'UTF-8') . '">';
 echo '<input type="hidden" name="DataF" value="' . htmlspecialchars($dataFinal, ENT_QUOTES, 'UTF-8') . '">';
+echo '<input type="hidden" name="Evento" value="' . htmlspecialchars($eventoFiltro, ENT_QUOTES, 'UTF-8') . '">';
 echo '<div><label for="SaldoAnterior">Saldo anterior ao período (R$)</label><input id="SaldoAnterior" name="SaldoAnterior" type="text" inputmode="decimal" maxlength="20" placeholder="0,00" value="' . htmlspecialchars(extratoValorFormatado($saldoAnterior), ENT_QUOTES, 'UTF-8') . '"></div>';
+echo '<button type="submit" class="filtro-acao">Incluir saldo anterior</button>';
+echo '</form>';
+
+echo '<form class="filtro filtro-form" method="get" action="Extrato.php">';
+echo '<input type="hidden" name="DataI" value="' . htmlspecialchars($dataInicial, ENT_QUOTES, 'UTF-8') . '">';
+echo '<input type="hidden" name="DataF" value="' . htmlspecialchars($dataFinal, ENT_QUOTES, 'UTF-8') . '">';
+echo '<input type="hidden" name="SaldoAnterior" value="' . htmlspecialchars((string)$saldoAnterior, ENT_QUOTES, 'UTF-8') . '">';
 echo '<div><label for="Evento">Filtrar por evento</label><input id="Evento" name="Evento" type="text" maxlength="100" placeholder="Digite parte do nome do evento" value="' . htmlspecialchars($eventoFiltro, ENT_QUOTES, 'UTF-8') . '"></div>';
 echo '<button type="submit" class="filtro-acao">Aplicar filtro</button>';
 echo '<a class="filtro-acao" href="' . htmlspecialchars($limparEventoUrl, ENT_QUOTES, 'UTF-8') . '">Limpar filtro</a>';

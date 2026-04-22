@@ -3,27 +3,7 @@
 require_once __DIR__ . '/auth_session.php';
 eventosExigirLogin();
 
-include_once 'Conectar_BaseH.php';
-require_once __DIR__ . '/extrato_rotina.php';
-
 date_default_timezone_set('America/Sao_Paulo');
-
-$apelido = eventosApelidoSessao();
-$senha = eventosSenhaSessao();
-
-function resumoFalha($dbcon, $mensagem, $stmt = null)
-{
-    if ($stmt) {
-        mysqli_stmt_close($stmt);
-    }
-
-    if ($dbcon) {
-        mysqli_close($dbcon);
-    }
-
-    http_response_code(500);
-    exit($mensagem);
-}
 
 function resumoNormalizarData($valor)
 {
@@ -98,76 +78,10 @@ function resumoCsvCampo($valor)
     return '"' . $texto . '"';
 }
 
-function resumoNormalizarValorMonetario($valor)
-{
-    $texto = trim((string)$valor);
-    if ($texto === '') {
-        return 0.0;
-    }
-
-    $texto = preg_replace('/\s+/', '', $texto);
-    if ($texto === null || $texto === '') {
-        return 0.0;
-    }
-
-    $texto = preg_replace('/^R\$/i', '', $texto);
-    $texto = preg_replace('/[^0-9,\.\-]/', '', $texto);
-    if ($texto === null || $texto === '') {
-        return 0.0;
-    }
-
-    $negativo = false;
-    if (strpos($texto, '-') === 0) {
-        $negativo = true;
-        $texto = substr($texto, 1);
-    }
-
-    if ($texto === '') {
-        return 0.0;
-    }
-
-    $temVirgula = strpos($texto, ',') !== false;
-    $temPonto = strpos($texto, '.') !== false;
-
-    if ($temVirgula && $temPonto) {
-        if (strrpos($texto, ',') > strrpos($texto, '.')) {
-            $texto = str_replace('.', '', $texto);
-            $texto = str_replace(',', '.', $texto);
-        } else {
-            $texto = str_replace(',', '', $texto);
-        }
-    } elseif ($temVirgula) {
-        $partesVirgula = explode(',', $texto);
-        if (count($partesVirgula) > 2) {
-            $texto = implode('', $partesVirgula);
-        } elseif (isset($partesVirgula[1]) && strlen($partesVirgula[1]) === 3) {
-            $texto = $partesVirgula[0] . $partesVirgula[1];
-        } else {
-            $texto = $partesVirgula[0] . '.' . ($partesVirgula[1] ?? '');
-        }
-    } elseif ($temPonto) {
-        $partesPonto = explode('.', $texto);
-        if (count($partesPonto) > 2) {
-            $texto = implode('', $partesPonto);
-        } elseif (isset($partesPonto[1]) && strlen($partesPonto[1]) === 3) {
-            $texto = $partesPonto[0] . $partesPonto[1];
-        }
-    }
-
-    if ($negativo) {
-        $texto = '-' . $texto;
-    }
-
-    if (!preg_match('/^-?\d+(\.\d+)?$/', $texto)) {
-        return 0.0;
-    }
-
-    return (float)$texto;
-}
-
 $dataInicial = resumoNormalizarData($_GET['DataI'] ?? '');
 $dataFinal = resumoNormalizarData($_GET['DataF'] ?? '');
-$saldoAnterior = resumoNormalizarValorMonetario($_GET['SaldoAnterior'] ?? '');
+$eventoFiltro = trim((string)($_GET['Evento'] ?? ''));
+$eventoFiltro = substr($eventoFiltro, 0, 100);
 $exportarExcel = (($_GET['export'] ?? '') === 'excel');
 
 if (!$dataInicial || !$dataFinal) {
@@ -181,72 +95,104 @@ if ($dataInicial > $dataFinal) {
     $dataInicial = $dataFinal;
     $dataFinal = $tmp;
 }
+$cacheExtrato = isset($_SESSION['extrato_cache']) && is_array($_SESSION['extrato_cache'])
+    ? $_SESSION['extrato_cache']
+    : null;
 
-extratoPrepararMovtos($dbcon, $apelido, $senha, $dataInicial, $dataFinal);
+$movimentosCache = array();
+$mensagemCache = '';
+$cacheValido = false;
 
-$sql = "SELECT
-                        DATE_FORMAT(dataM, '%Y-%m') AS mesRef,
-                        IFNULL(grupo, '') AS grupo,
-                        SUM(CASE WHEN DC = 'D' THEN ValorE ELSE 0 END) AS debitoMes,
-                        SUM(CASE WHEN DC = 'D' THEN 0 ELSE ValorE END) AS creditoMes,
-                        SUM(CASE WHEN DC = 'D' THEN -ValorE ELSE ValorE END) AS saldoMes
-                FROM movtos
-                WHERE Apelido = ?
-                    AND senha = ?
-                    AND dataM BETWEEN ? AND ?
-                GROUP BY DATE_FORMAT(dataM, '%Y-%m'), IFNULL(grupo, '')
-                ORDER BY DATE_FORMAT(dataM, '%Y-%m') ASC, IFNULL(grupo, '') ASC";
+if ($cacheExtrato) {
+    $cacheApelido = (string)($cacheExtrato['apelido'] ?? '');
+    $cacheSenha = (string)($cacheExtrato['senha'] ?? '');
+    $cacheDataInicial = (string)($cacheExtrato['dataInicial'] ?? '');
+    $cacheDataFinal = (string)($cacheExtrato['dataFinal'] ?? '');
+    $cacheEventoFiltro = (string)($cacheExtrato['eventoFiltro'] ?? '');
 
-$stmt = mysqli_prepare($dbcon, $sql);
-if (!$stmt) {
-    resumoFalha($dbcon, 'Falha ao preparar resumo mensal: ' . mysqli_error($dbcon));
+    $cacheValido = $cacheApelido === eventosApelidoSessao()
+        && $cacheSenha === eventosSenhaSessao()
+        && $cacheDataInicial === $dataInicial
+        && $cacheDataFinal === $dataFinal
+        && $cacheEventoFiltro === $eventoFiltro;
+
+    if ($cacheValido) {
+        $movimentosCache = isset($cacheExtrato['movimentos']) && is_array($cacheExtrato['movimentos'])
+            ? $cacheExtrato['movimentos']
+            : array();
+    } else {
+        $mensagemCache = 'Para gerar o resumo sem SQL, abra o extrato novamente com o mesmo período e filtro.';
+    }
+} else {
+    $mensagemCache = 'Resumo depende dos dados em memória da tela de extrato. Gere o extrato primeiro.';
 }
 
-mysqli_stmt_bind_param($stmt, 'ssss', $apelido, $senha, $dataInicial, $dataFinal);
-if (!mysqli_stmt_execute($stmt)) {
-    $erro = mysqli_stmt_error($stmt);
-    resumoFalha($dbcon, 'Falha ao executar resumo mensal: ' . $erro, $stmt);
-}
-
-$resultado = mysqli_stmt_get_result($stmt);
 $grupos = array();
 $totalPeriodoDebito = 0.0;
 $totalPeriodoCredito = 0.0;
-$totalPeriodoSaldo = $saldoAnterior;
+$totalPeriodoSaldo = 0.0;
 
-while ($resultado && ($linha = mysqli_fetch_assoc($resultado))) {
-    $mes = (string)$linha['mesRef'];
-    $grupo = trim((string)$linha['grupo']);
-    $debito = (float)$linha['debitoMes'];
-    $credito = (float)$linha['creditoMes'];
-    $saldoMes = (float)$linha['saldoMes'];
+if ($cacheValido) {
+    foreach ($movimentosCache as $mov) {
+        $dataMovimento = (string)($mov['dataM'] ?? '');
+        $dt = DateTime::createFromFormat('Y-m-d', $dataMovimento);
+        if (!$dt) {
+            continue;
+        }
 
-    if (!isset($grupos[$mes])) {
-        $grupos[$mes] = array(
-            'itens' => array(),
-            'debito' => 0.0,
-            'credito' => 0.0,
-            'saldo' => 0.0,
-        );
+        $mes = $dt->format('Y-m');
+        $grupoNome = trim((string)($mov['grupo'] ?? ''));
+        $dc = (string)($mov['DC'] ?? 'C');
+        $valor = (float)($mov['ValorE'] ?? 0.0);
+
+        $debito = ($dc === 'D') ? $valor : 0.0;
+        $credito = ($dc === 'D') ? 0.0 : $valor;
+        $saldoMes = ($dc === 'D') ? ($valor * -1) : $valor;
+        $grupoChave = $grupoNome === '' ? 'Sem grupo' : $grupoNome;
+
+        if (!isset($grupos[$mes])) {
+            $grupos[$mes] = array(
+                'itens' => array(),
+                'debito' => 0.0,
+                'credito' => 0.0,
+                'saldo' => 0.0,
+            );
+        }
+
+        if (!isset($grupos[$mes]['itens'][$grupoChave])) {
+            $grupos[$mes]['itens'][$grupoChave] = array(
+                'grupo' => $grupoChave,
+                'debito' => 0.0,
+                'credito' => 0.0,
+                'saldo' => 0.0,
+            );
+        }
+
+        $grupos[$mes]['itens'][$grupoChave]['debito'] += $debito;
+        $grupos[$mes]['itens'][$grupoChave]['credito'] += $credito;
+        $grupos[$mes]['itens'][$grupoChave]['saldo'] += $saldoMes;
+
+        $grupos[$mes]['debito'] += $debito;
+        $grupos[$mes]['credito'] += $credito;
+        $grupos[$mes]['saldo'] += $saldoMes;
+
+        $totalPeriodoDebito += $debito;
+        $totalPeriodoCredito += $credito;
+        $totalPeriodoSaldo += $saldoMes;
     }
 
-    $grupos[$mes]['itens'][] = array(
-        'grupo' => $grupo === '' ? 'Sem grupo' : $grupo,
-        'debito' => $debito,
-        'credito' => $credito,
-        'saldo' => $saldoMes,
-    );
-    $grupos[$mes]['debito'] += $debito;
-    $grupos[$mes]['credito'] += $credito;
-    $grupos[$mes]['saldo'] += $saldoMes;
-
-    $totalPeriodoDebito += $debito;
-    $totalPeriodoCredito += $credito;
-    $totalPeriodoSaldo += $saldoMes;
+    foreach ($grupos as $mesChave => $grupoMes) {
+        ksort($grupos[$mesChave]['itens'], SORT_NATURAL | SORT_FLAG_CASE);
+        $grupos[$mesChave]['itens'] = array_values($grupos[$mesChave]['itens']);
+    }
 }
 
-mysqli_stmt_close($stmt);
-mysqli_close($dbcon);
+$extratoUrl = 'Extrato.php?DataI=' . urlencode($dataInicial) . '&DataF=' . urlencode($dataFinal) . '&usarCache=1';
+$resumoBaseUrl = 'ResumoMensal.php?DataI=' . urlencode($dataInicial) . '&DataF=' . urlencode($dataFinal);
+if ($eventoFiltro !== '') {
+    $extratoUrl .= '&Evento=' . urlencode($eventoFiltro);
+    $resumoBaseUrl .= '&Evento=' . urlencode($eventoFiltro);
+}
 
 if ($exportarExcel) {
     $nomeArquivo = 'resumo_mensal_' . str_replace('-', '', $dataInicial) . '_a_' . str_replace('-', '', $dataFinal) . '.csv';
@@ -260,7 +206,10 @@ if ($exportarExcel) {
     echo "Mes;Grupo;Debito total (R$);Credito total (R$);Saldo do grupo (R$)\r\n";
 
     if (count($grupos) === 0) {
-        echo resumoCsvCampo('Nenhum valor encontrado no periodo selecionado.') . ";;;;\r\n";
+        $mensagemCsv = $mensagemCache !== ''
+            ? $mensagemCache
+            : 'Nenhum valor encontrado no periodo selecionado.';
+        echo resumoCsvCampo($mensagemCsv) . ";;;;\r\n";
     } else {
         foreach ($grupos as $mes => $grupoMes) {
             foreach ($grupoMes['itens'] as $item) {
@@ -277,12 +226,6 @@ if ($exportarExcel) {
                 . resumoCsvCampo(resumoCsvValor($grupoMes['credito'])) . ';'
                 . resumoCsvCampo(resumoCsvValor($grupoMes['saldo'])) . "\r\n";
         }
-
-        echo resumoCsvCampo('Saldo anterior') . ';'
-            . resumoCsvCampo('-') . ';'
-            . resumoCsvCampo('-') . ';'
-            . resumoCsvCampo('-') . ';'
-            . resumoCsvCampo(resumoCsvValor($saldoAnterior)) . "\r\n";
 
         echo resumoCsvCampo('Total do periodo') . ';'
             . resumoCsvCampo('Geral') . ';'
@@ -303,10 +246,6 @@ body{font-family:Arial,sans-serif;background:#f2f4f7;margin:0;padding:20px;color
 .topo a{background:#1f4f82;color:#fff;padding:7px 12px;text-decoration:none;border-radius:4px}
 h2{margin:0 0 12px 0}
 .filtro{background:#fff;border:1px solid #dbe2ea;border-radius:6px;padding:10px 12px;margin-bottom:14px}
-.saldo-form{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
-.saldo-form label{font-size:13px;color:#344054;display:block;margin-bottom:4px}
-.saldo-form input{height:36px;padding:6px 10px;border:1px solid #cfd8e3;border-radius:6px;min-width:220px}
-.saldo-form button{height:36px;min-width:140px;padding:0 14px;border:none;border-radius:6px;background:#1f4f82;color:#fff;cursor:pointer}
 .bloco-mes{background:#fff;border:1px solid #dbe2ea;border-radius:8px;overflow:hidden;margin-bottom:16px}
 .bloco-mes h3{margin:0;padding:12px 14px;background:#1f4f82;color:#fff;font-size:18px}
 table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #dbe2ea;border-radius:8px;overflow:hidden}
@@ -324,17 +263,13 @@ echo '<div class="container">';
 echo '<h2>Resumo mensal dos valores diários</h2>';
 echo '<div class="topo">';
 echo '<a href="../menu.html">Menu</a>';
-echo '<a href="Extrato.php?DataI=' . urlencode(resumoDataBr($dataInicial)) . '&DataF=' . urlencode(resumoDataBr($dataFinal)) . '&SaldoAnterior=' . urlencode((string)$saldoAnterior) . '">Extrato</a>';
-echo '<a href="ResumoMensal.php?DataI=' . urlencode(resumoDataBr($dataInicial)) . '&DataF=' . urlencode(resumoDataBr($dataFinal)) . '&SaldoAnterior=' . urlencode((string)$saldoAnterior) . '&export=excel">Exportar Excel</a>';
+echo '<a href="' . htmlspecialchars($extratoUrl, ENT_QUOTES, 'UTF-8') . '">Extrato</a>';
+echo '<a href="' . htmlspecialchars($resumoBaseUrl . '&export=excel', ENT_QUOTES, 'UTF-8') . '">Exportar Excel</a>';
 echo '</div>';
 echo '<div class="filtro">Período: <strong>' . htmlspecialchars(resumoDataBr($dataInicial), ENT_QUOTES, 'UTF-8') . '</strong> até <strong>' . htmlspecialchars(resumoDataBr($dataFinal), ENT_QUOTES, 'UTF-8') . '</strong></div>';
-echo '<div class="filtro">Saldo anerior ao período (R$): <strong>' . resumoValor($saldoAnterior) . '</strong></div>';
-echo '<form class="filtro saldo-form" method="get" action="ResumoMensal.php">';
-echo '<input type="hidden" name="DataI" value="' . htmlspecialchars($dataInicial, ENT_QUOTES, 'UTF-8') . '">';
-echo '<input type="hidden" name="DataF" value="' . htmlspecialchars($dataFinal, ENT_QUOTES, 'UTF-8') . '">';
-echo '<div><label for="SaldoAnterior">Saldo anerior ao período (R$)</label><input id="SaldoAnterior" name="SaldoAnterior" type="text" inputmode="decimal" maxlength="20" placeholder="0,00" value="' . htmlspecialchars(resumoValor($saldoAnterior), ENT_QUOTES, 'UTF-8') . '"></div>';
-echo '<button type="submit">Aplicar saldo</button>';
-echo '</form>';
+if ($mensagemCache !== '') {
+    echo '<div class="filtro">' . htmlspecialchars($mensagemCache, ENT_QUOTES, 'UTF-8') . '</div>';
+}
 
 if (count($grupos) === 0) {
     echo '<table>';
@@ -369,7 +304,6 @@ if (count($grupos) === 0) {
     echo '<table>';
     echo '<thead><tr><th>Total do período</th><th>Débito total (R$)</th><th>Crédito total (R$)</th><th>Saldo total (R$)</th></tr></thead>';
     echo '<tbody>';
-    echo '<tr><td>Saldo anterior</td><td class="num">-</td><td class="num">-</td><td class="num ' . ($saldoAnterior >= 0 ? 'saldo-pos' : 'saldo-neg') . '">' . resumoValor($saldoAnterior) . '</td></tr>';
     echo '<tr><td>Geral</td><td class="num deb">' . resumoValor($totalPeriodoDebito) . '</td><td class="num cre">' . resumoValor($totalPeriodoCredito) . '</td><td class="num ' . ($totalPeriodoSaldo >= 0 ? 'saldo-pos' : 'saldo-neg') . '">' . resumoValor($totalPeriodoSaldo) . '</td></tr>';
     echo '</tbody>';
     echo '</table>';
