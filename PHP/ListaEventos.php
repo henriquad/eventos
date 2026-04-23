@@ -66,7 +66,17 @@ $camposObrigatorios = trim((string)($_GET['campos'] ?? ''));
 $erroConsulta = false;
 $fields = [];
 $linhas = [];
-$hiddenColumns = array('apelido', 'senha');
+$hiddenColumns = array('apelido', 'senha', 'diahora', 'aviso');
+
+// Corrige o cálculo do lastVisibleIndex para não ocultar a última coluna visível
+$visibleFields = array_filter($fields, function ($field) use ($hiddenColumns) {
+    return !in_array(strtolower($field->name), $hiddenColumns, true);
+});
+$lastVisibleIndex = count($fields) - 1;
+if (count($visibleFields) > 0) {
+    // Garante que todas as colunas não ocultas sejam exibidas
+    $lastVisibleIndex = count($fields) - 1;
+}
 
 if ($query) {
     $fields = $query->fetch_fields();
@@ -77,7 +87,7 @@ if ($query) {
     $erroConsulta = true;
 }
 
-$hiddenFromEnd = 4;
+$hiddenFromEnd = 0;
 $numberOfColumns = count($fields);
 $lastVisibleIndex = $numberOfColumns - $hiddenFromEnd - 1;
 
@@ -144,7 +154,7 @@ mysqli_close($conn);
     <style>
         .hero__content,
         .menu-page {
-            max-width: min(99vw, 2100px);
+            max-width: min(110vw, 2100px);
         }
 
         .hero__content {
@@ -154,7 +164,7 @@ mysqli_close($conn);
         .menu-shell__header h2,
         .menu-shell__header p,
         .resumo-lista {
-            text-align: center;
+            text-align: left;
         }
 
         .menu-shell__header {
@@ -172,15 +182,18 @@ mysqli_close($conn);
         }
 
         .tabela-scroll table {
-            min-width: 1800px;
             width: 100%;
             margin-top: 0;
+            table-layout: fixed;
         }
+
 
         .col-acoes {
             white-space: nowrap;
             width: 130px;
         }
+
+
 
         .acao-link {
             display: inline-flex;
@@ -205,6 +218,16 @@ mysqli_close($conn);
             font-variant-numeric: tabular-nums;
         }
 
+        .coluna-checkbox {
+            text-align: center;
+        }
+
+        .coluna-checkbox input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: default;
+        }
+
         .vazio-card {
             margin-top: 1rem;
             padding: 1rem;
@@ -222,9 +245,10 @@ mysqli_close($conn);
         .tabela-scroll th {
             text-align: center;
             position: relative;
-            overflow: visible;
+            overflow: hidden;
+            word-break: break-word;
             z-index: 1;
-            padding-top: 5.2rem;
+            padding-top: 5.5rem;
             vertical-align: bottom;
         }
 
@@ -232,6 +256,18 @@ mysqli_close($conn);
             min-width: 90px;
             white-space: normal;
             word-break: break-word;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .tabela-scroll td {
+            overflow: hidden;
+            word-break: break-word;
+        }
+
+        .coluna-ativo {
+            width: 60px;
+            min-width: 60px;
             text-align: center;
         }
 
@@ -290,8 +326,8 @@ mysqli_close($conn);
             font-size: 0.9em;
             font-weight: normal;
             white-space: normal;
-            width: 400px;
-            max-width: 400px;
+            width: 150px;
+            max-width: 150px;
             text-align: left !important;
             text-align-last: left !important;
             line-height: 1.15;
@@ -305,8 +341,8 @@ mysqli_close($conn);
         }
 
         .coluna-ordenavel .tooltip-text.tooltip-text--dc {
-            width: 400px;
-            max-width: 400px;
+            width: 150px;
+            max-width: 150px;
         }
 
         .coluna-ordenavel .tooltip-text::before {
@@ -334,7 +370,7 @@ mysqli_close($conn);
             }
 
             .tabela-scroll table {
-                min-width: 980px;
+                min-width: 0;
             }
         }
     </style>
@@ -354,7 +390,7 @@ mysqli_close($conn);
             <div class="menu-shell__header">
                 <div>
                     <h2>Eventos cadastrados</h2>
-                    <p>Use as açoes na primeira coluna para editar ou excluir um registro.</p>
+
                 </div>
                 <a class="menu-shell__logout" style="width: 170px;" href="../menu.html">Voltar ao menu</a>
             </div>
@@ -384,7 +420,7 @@ mysqli_close($conn);
                                     <?php if ($index > $lastVisibleIndex) {
                                         continue;
                                     } ?>
-                                    <?php if (in_array($field->name, $hiddenColumns, true)) {
+                                    <?php if (in_array(strtolower($field->name), $hiddenColumns, true) || strtolower($field->name) === 'id' || strtolower($field->name) === 'grupo') {
                                         continue;
                                     } ?>
                                     <?php
@@ -393,44 +429,31 @@ mysqli_close($conn);
 
                                     // Mapa de títulos e tooltips
                                     $descricoes = array(
-                                        'id' => array('título' => 'id', 'tooltip' => 'Identificador'),
-                                        'evento' => array('título' => 'evento', 'tooltip' => 'Nome do evento'),
-                                        'valorE' => array('título' => 'ValorE', 'tooltip' => 'Valor financeiro'),
+                                        'evento' => array('título' => 'Evento', 'tooltip' => 'Nome do evento'),
                                         'grupo' => array('título' => 'Grupo', 'tooltip' => 'Grupo do evento'),
+                                        'valorE' => array('título' => 'Valor R$', 'tooltip' => 'Valor financeiro'),
                                         'DC' => array('título' => 'DC', 'tooltip' => 'Débito ou crédito'),
-                                        'diario' => array('título' => 'diario', 'tooltip' => 'ocorre todos os dias?'),
-                                        'diaM' => array('título' => 'DiaM', 'tooltip' => 'Dia do mês'),
+                                        'diario' => array('título' => 'Diario?', 'tooltip' => 'ocorre todos os dias?'),
+                                        'diaM' => array('título' => 'diaM', 'tooltip' => 'Dia do mês'),
                                         'diaS' => array('título' => 'diaS', 'tooltip' => 'Dia da semana'),
                                         'diaU' => array('título' => 'diaU', 'tooltip' => 'Dia útil'),
                                         'dataF' => array('título' => 'dataF', 'tooltip' => 'Data fixa'),
-                                        'prorroga' => array('título' => 'prorroga', 'tooltip' => 'ocorre após dia não útil'),
+                                        'prorroga' => array('título' => 'prorroga?', 'tooltip' => 'ocorre após dia não útil'),
                                         'UPA' => array('título' => 'UPA', 'tooltip' => 'último, penúltimo ou antepenúltimo dia do mês'),
+
                                         'semN' => array('título' => 'semN', 'tooltip' => 'ordem da semana no mês '),
                                         'semD' => array('título' => 'semD', 'tooltip' => 'dia da semana '),
-                                        'semN' => array('título' => 'semM', 'tooltip' => 'ordem da semana no mês '),
-                                        'semD' => array('título' => 'semM', 'tooltip' => 'dia da semana '),
                                         'semM' => array('título' => 'semM', 'tooltip' => 'número do mês '),
+
                                         'diaR' => array('título' => 'diaR', 'tooltip' => 'dia que repete '),
                                         'mesR' => array('título' => 'mesR', 'tooltip' => 'mês que repete '),
-                                        'ativo' => array('título' => 'ativo', 'tooltip' => 'ativo ou inativo '),
+                                        'ativo' => array('título' => 'ativo?', 'tooltip' => 'ou inativo?'),
 
                                     );
 
                                     if (isset($descricoes[$field->name])) {
                                         $titulo = $descricoes[$field->name]['título'];
                                         $tooltip = $descricoes[$field->name]['tooltip'];
-                                    } elseif ($index === 0) {
-                                        $titulo = 'id';
-                                        $tooltip = 'Identificador';
-                                    } elseif ($index === 1) {
-                                        $titulo = 'Evento';
-                                        $tooltip = 'Nome do evento';
-                                    } elseif ($field->name === 'Grupo') {
-                                        $titulo = 'Grupo';
-                                        $tooltip = 'Grupo do evento';
-                                    } elseif ($field->name === 'valorE') {
-                                        $titulo = 'Valor';
-                                        $tooltip = 'Valor financeiro';
                                     }
 
                                     // Determinar a próxima direção de ordenação
@@ -441,12 +464,37 @@ mysqli_close($conn);
                                         $classe_ativa = ($direcao_ordem === 'ASC') ? 'ativo-asc' : 'ativo-desc';
                                     }
 
-                                    $classe_coluna = $field->name === 'DC' ? 'coluna-dc' : '';
+                                    $classe_coluna = $field->name === 'DC' ? 'coluna-dc' : ($field->name === 'ativo' ? 'coluna-ativo' : '');
                                     $classe_tooltip = $field->name === 'DC' ? 'tooltip-text tooltip-text--dc' : 'tooltip-text';
 
                                     $url_ordenacao = '?ordem=' . urlencode($field->name) . '&direcao=' . urlencode($proxima_direcao);
                                     ?>
-                                    <th class="<?php echo $classe_coluna; ?>">
+                                    <?php
+                                    // Não define largura mínima, deixa o navegador ajustar automaticamente
+                                    $largura_min = null;
+                                    ?>
+                                    <?php
+                                    // Força largura de 50px para colunas específicas
+                                    // Remover larguras fixas para todas as colunas
+                                    if (strtolower($field->name) === 'ativo') {
+                                        $style = 'style="width:100px;min-width:100px;max-width:100px;text-align:center;"';
+                                    } elseif (strtolower($field->name) === 'diaR') {
+                                        $style = 'style="width:80px;min-width:80px;max-width:80px;text-align:center;"';
+                                    } elseif (strtolower($field->name) === 'diario') {
+                                        $style = 'style="width:100px;min-width:100px;max-width:100px;text-align:center;"';
+                                    } elseif (strtolower($field->name) === 'prorroga') {
+                                        $style = 'style="width:110px;min-width:110px;max-width:110px;text-align:center;"';
+                                    } elseif (strtolower($field->name) === 'mesR') {
+                                        $style = 'style="width:60px;min-width:60px;max-width:60px;text-align:center;"';
+                                    } elseif (strtolower($field->name) === 'diaS') {
+                                        $style = 'style="width:80px;min-width:80px;max-width:80px;text-align:center;"';
+                                    } elseif (strtolower($field->name) === 'semM') {
+                                        $style = 'style="width:80px;min-width:80px;max-width:80px;text-align:center;"';
+                                    } else {
+                                        $style = '';
+                                    }
+                                    ?>
+                                    <th class="<?php echo $classe_coluna; ?>" <?php echo $style; ?>>
                                         <a href="<?php echo htmlspecialchars($url_ordenacao, ENT_QUOTES, 'UTF-8'); ?>" class="coluna-ordenavel <?php echo $classe_ativa; ?>">
                                             <span><?php echo htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'); ?></span>
                                             <span class="seta"></span>
@@ -464,21 +512,22 @@ mysqli_close($conn);
                                             <img src="../images/edit_icon-36.png" alt="Editar" />
                                         </a>
                                         <a class="acao-link" href="deletar.php?id=<?php echo urlencode((string)$row[0]); ?>" title="Excluir evento" onclick="return confirm('Confirma excluir este evento?')">
-                                            <img src="../images/excluir.gif" alt="Excluir" />
+                                            <img src="../images/Excluir.GIF" alt="Excluir" />
                                         </a>
                                     </td>
 
                                     <?php for ($j = 0; $j <= $lastVisibleIndex; $j++): ?>
-                                        <?php if (in_array($fields[$j]->name, $hiddenColumns, true)) {
+                                        <?php if (in_array(strtolower($fields[$j]->name), $hiddenColumns, true) || strtolower($fields[$j]->name) === 'id' || strtolower($fields[$j]->name) === 'grupo') {
                                             continue;
                                         } ?>
-                                        <?php $classeColunaDado = $fields[$j]->name === 'DC' ? 'coluna-dc' : ''; ?>
+                                        <?php $classeColunaDado = $fields[$j]->name === 'DC' ? 'coluna-dc' : ($fields[$j]->name === 'ativo' ? 'coluna-ativo' : ''); ?>
                                         <?php if ($fields[$j]->name === 'valorE'): ?>
                                             <td class="valor-coluna <?php echo $classeColunaDado; ?>"><?php echo number_format((float)$row[$j], 2, ',', '.'); ?></td>
                                         <?php else: ?>
                                             <td class="<?php echo $classeColunaDado; ?>"><?php echo htmlspecialchars((string)$row[$j], ENT_QUOTES, 'UTF-8'); ?></td>
                                         <?php endif; ?>
                                     <?php endfor; ?>
+
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
