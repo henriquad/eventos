@@ -381,7 +381,7 @@ mysqli_close($conn);
         <div class="hero__content">
             <p class="hero__eyebrow">Agenda financeira</p>
             <h1>Lista de eventos</h1>
-            <p class="hero__text">Consulte, edite ou exclua eventos cadastrados para manter o planejamento atualizado.</p>
+            <p class="hero__text" style="text-align: center;">Consulte, edite ou exclua eventos cadastrados para manter o planejamento atualizado.</p>
         </div>
     </header>
 
@@ -389,10 +389,17 @@ mysqli_close($conn);
         <section class="menu-shell">
             <div class="menu-shell__header">
                 <div>
-                    <h2>Eventos cadastrados</h2>
+                    <h2 style="text-align: center;">Eventos cadastrados</h2>
 
                 </div>
                 <a class="menu-shell__logout" style="width: 170px;" href="../menu.html">Voltar ao menu</a>
+            </div>
+
+            <div class="button_linha" style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+                <a href="../Incluir.html" class="icon-button" title="Incluir novo evento" style="display: inline-block;">
+                    <img src="../images/salvar.png" alt="Incluir novo evento" style="vertical-align: middle; width: 32px; height: 32px;">
+                </a>
+                <span style="font-size: 1.1em; color: #2d5016;">Incluir novo evento</span>
             </div>
 
             <?php if ($mensagemSucesso !== ''): ?>

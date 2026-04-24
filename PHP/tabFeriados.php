@@ -27,6 +27,16 @@ mysqli_close($conn);
 	<title>Feriados</title>
 	<link rel="stylesheet" href="../css/menu.css" />
 	<style>
+		.tabela-scroll th,
+		.tabela-scroll td {
+			max-width: 200px;
+			min-width: 200px;
+			width: 120px;
+			text-align: center;
+			white-space: nowrap;
+			overflow-x: auto;
+		}
+
 		.tabela-scroll {
 			overflow-x: auto;
 		}

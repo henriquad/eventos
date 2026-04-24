@@ -6,6 +6,103 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Ferramenta para criacao de planilhas Excel para Fluxo de Caixa" />
   <link rel="stylesheet" href="css/index.css" />
+  <style>
+    .ajuda-panel details.shrinked {
+      max-height: 2.2em;
+      overflow: hidden;
+      padding: 0;
+      opacity: 0.7;
+      transition: max-height 0.3s, opacity 0.3s;
+    }
+
+    .ajuda-panel details.shrinked {
+      max-height: 2.2em;
+      overflow: hidden;
+      padding: 0;
+      opacity: 0.7;
+      transition: max-height 0.3s, opacity 0.3s;
+    }
+
+    .ajuda-panel details.shrinked summary {
+      opacity: 0.7;
+      filter: grayscale(0.5);
+    }
+
+    .ajuda-panel details.shrinked summary {
+      opacity: 0.8;
+      filter: grayscale(0.5);
+      font-style: italic;
+      transition: opacity 0.2s, filter 0.2s, font-style 0.2s;
+    }
+
+    .ajuda-panel details.shrinked summary:hover {
+      opacity: 1;
+      filter: none;
+      font-style: normal;
+      background: #333;
+      cursor: pointer;
+    }
+
+
+    .ajuda-panel details.invisivel {
+      opacity: 0;
+      visibility: hidden;
+      height: 0;
+      margin: 0;
+      padding: 0;
+      pointer-events: none;
+    }
+
+    .ajuda-panel details summary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3em;
+      vertical-align: middle;
+      opacity: 0.6;
+      transform: scale(0.98);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .ajuda-panel details summary .ajuda-seta {
+      font-size: 1.1em;
+      line-height: 1;
+      margin-right: 0.2em;
+      position: relative;
+      top: 1px;
+      display: inline-block;
+    }
+
+    .ajuda-panel details[open] summary {
+      opacity: 1;
+      transform: scale(1.03);
+      font-weight: bold;
+      text-shadow: 0 2px 8px #000a;
+    }
+
+    .ajuda-panel,
+    .ajuda-panel * {
+      color: #fff !important;
+
+    }
+
+    .ajuda-panel table th,
+    .ajuda-panel table td {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff !important;
+    }
+
+    .ajuda-panel details summary h3 {
+      color: #fff !important;
+    }
+
+    .ajuda-panel details[open] summary {
+      color: #fff !important;
+    }
+
+    .ajuda-panel details summary {
+      cursor: pointer;
+    }
+  </style>
   <meta name="description" content="Ferramenta para criação automática de planilhas Excel para Fluxo de Caixa" />
   <title>Eventos - Login</title>
 </head>
@@ -16,20 +113,39 @@
       <aside class="login-promo" aria-label="Apresentacao da agenda">
         <p class="login-promo__tag">Agenda financeira</p>
         <h1 id="login-title">Central de eventos para seu fluxo de caixa</h1>
-        <p class="login-promo__text">Organize vencimentos, recebimentos e compromissos com uma visao clara do que entra,
-          do que sai e do que precisa de atencao.</p>
+        <p class="login-promo__text">Organize vencimentos, recebimentos e compromissos com uma visão clara do que entra,
+          do que sai e do que precisa de atenção.</p>
+        <br>
 
-        <ul class="login-promo__list">
-          <li>Planejamento por periodo</li>
-          <li>Consulta de feriados e datas</li>
-          <li>Controle de eventos recorrentes</li>
-        </ul>
+
+        <br>Precisa de ajuda?
+
+
+
+
+        <a class="ajuda-branca"
+          href="https://scribehow.com/viewer/Fluxo_de_caixa_em_Excel_de_forma_automatica__5aaEc9G1RC-5tHpFqO80aQ"
+          target="_blank">clique aqui...</a>
+        </p>
+
+
+        <br><br>
+        <p class="login-card__copyright">
+          &copy; Copyright
+          <abbr title="Instituto Nacional da Propriedade Intelectual">INPI</abbr>
+          512.018.052.242-4
+        </p>
+        <br>
+        <p class="login-card__support">Apoio: henriquad@gmail.com</p>
+
+
       </aside>
 
       <div class="login-card">
         <header class="login-card__header">
+          <br><br>
           <h2>Entrar</h2>
-          <p>Acesso rapido para continuar seu planejamento.</p>
+          <p>O apelido e senha serão usados, apenas, para garantir a privacidade dos dados informados!</p>
         </header>
 
         <form id="loginForm" class="login-form" action="PHP/login.php" method="post">
@@ -44,29 +160,215 @@
           <label for="rememberLogin">
             <input type="checkbox" id="rememberLogin" name="rememberLogin" /> Lembrar de mim
           </label>
+          <br><br><br>
 
-          <button type="submit" class="bt">Entrar na central</button>
+          <button type="submit" class="bt">Entrar</button>
           <button type="button" id="forgetLogin" class="bt bt--secondary">Excluir apelido, senha e eventos</button>
           <p id="loginStorageStatus" class="login-form__status" aria-live="polite"></p>
         </form>
 
-        <footer class="login-card__footer">
-          <p>
-            Precisa de ajuda?
-            <a href="https://scribehow.com/viewer/Fluxo_de_caixa_em_Excel_de_forma_automatica__5aaEc9G1RC-5tHpFqO80aQ"
-              target="_blank" rel="noopener noreferrer">Ver exemplo de uso</a>
-          </p>
-          <p class="login-card__copyright">
-            &copy; Copyright
-            <abbr title="Instituto Nacional da Propriedade Intelectual">INPI</abbr>
-            512.018.052.242-4
-          </p>
-          <p class="login-card__support">Apoio: henriquad@gmail.com</p>
-        </footer>
+
       </div>
+    </section>
+
+    <section class="ajuda-panel">
+
+      <h2>Exemplos de eventos e como incluir...</h2>
+      <br>
+      <details>
+        <summary><span class="ajuda-seta">&#9654;</span>
+          <h3> Receitas, rendimentos ou créditos...</h3>
+        </summary>
+        <ul>
+          <li>Salários, pró-labore, comissões, ajuda de custo.</li>
+          <li>Devoluções, reembolsos, vendas, prêmios e entradas extraordinárias.</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary><span class="ajuda-seta">&#9654;</span>
+          <h3> Despesas, pagamentos ou débitos..</h3>
+        </summary>
+        <ul>
+          <li>Contas de luz, água, condomínio, gás.</li>
+          <li>Transporte, alimentação, deslocamentos.</li>
+          <li>Assinaturas, lazer, despesas recorrentes do mês.</li>
+        </ul>
+      </details>
+      <br>
+      <details>
+        <summary><span class="ajuda-seta">&#9654;</span>
+          <h3>Eventos anuais</h3>
+        </summary>
+        <table>
+          <thead>
+            <tr>
+              <th class="TituloAjuda">Evento</th>
+              <th class="TituloAjuda">Quando ocorre</th>
+              <th class="TituloAjuda">Como cadastrar...</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Aniversário</td>
+              <td>27 de outubro</td>
+              <td>Dia do mês = 27, mês = outubro</td>
+            </tr>
+            <tr>
+              <td>Natal</td>
+              <td>25 de dezembro</td>
+              <td>Dia do mês = 25, mês = dezembro</td>
+            </tr>
+            <tr>
+              <td>IPTU/IPVA</td>
+              <td>10 de janeiro</td>
+              <td>Dia da data = 10, mês da data = janeiro</td>
+            </tr>
+            <tr>
+              <td>IRPF</td>
+              <td>Até 30 de abril</td>
+              <td>Dia da data = 30, mês da data = abril</td>
+            </tr>
+            <tr>
+              <td>Dia das Mães</td>
+              <td>1º domingo de maio</td>
+              <td>Semana no mês = 1ª, dia da semana = domingo, mês = maio</td>
+            </tr>
+          </tbody>
+        </table>
+      </details>
+
+      <details>
+        <summary><span class="ajuda-seta">&#9654;</span>
+          <h3> Eventos mensais</h3>
+        </summary>
+        <table>
+          <thead>
+            <tr>
+              <th class="TituloAjuda">Evento</th>
+              <th class="TituloAjuda">Quando ocorre</th>
+              <th class="TituloAjuda">Como cadastrar...</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Salário próprio</td>
+              <td>Dia 1 do mês</td>
+              <td>Dia do mês = 1</td>
+            </tr>
+            <tr>
+              <td>Salário próprio</td>
+              <td>1º dia útil</td>
+              <td>Dia útil = 1</td>
+            </tr>
+            <tr>
+              <td>Mensalidade</td>
+              <td>Dia 15 do mês</td>
+              <td>Dia do mês = 15</td>
+            </tr>
+            <tr>
+              <td>FGTS</td>
+              <td>7º dia útil</td>
+              <td>Dia útil = 7</td>
+            </tr>
+            <tr>
+              <td>Salário empregado</td>
+              <td>5º dia útil</td>
+              <td>Dia útil = 5</td>
+            </tr>
+          </tbody>
+        </table>
+      </details>
+
+      <details>
+        <summary><span class="ajuda-seta">&#9654;</span>
+          <h3> Eventos semanais</h3>
+        </summary>
+        <table>
+          <thead>
+            <tr>
+              <th class="TituloAjuda">Evento</th>
+              <th class="TituloAjuda">Quando ocorre</th>
+              <th class="TituloAjuda">Como cadastrar...</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Lanche após aula</td>
+              <td>Toda segunda-feira</td>
+              <td>Dia da semana = segunda-feira</td>
+            </tr>
+            <tr>
+              <td>Lanche após aula</td>
+              <td>Toda quarta-feira</td>
+              <td>Dia da semana = quarta-feira</td>
+            </tr>
+            <tr>
+              <td>Happy-hour</td>
+              <td>Toda sexta-feira</td>
+              <td>Dia da semana = sexta-feira</td>
+            </tr>
+          </tbody>
+        </table>
+      </details>
+
+      <details>
+        <summary><span class="ajuda-seta">&#9654;</span>
+          <h3> Eventos diários</h3>
+        </summary>
+        <table>
+          <thead>
+            <tr>
+              <th class="TituloAjuda">Evento</th>
+              <th class="TituloAjuda">Quando ocorre</th>
+              <th class="TituloAjuda">Como cadastrar... </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Almoço, jantar, ônibus, metrô, trem</td>
+              <td>Todo dia útil</td>
+              <td>Diário = Sim</td>
+            </tr>
+          </tbody>
+        </table>
+      </details>
+
     </section>
   </main>
   <script src="js/login.js"></script>
+  </script>
+  <script>
+    // Torna outros details invisíveis quando um é aberto e atualiza a seta
+    document.addEventListener('DOMContentLoaded', function () {
+      const ajudaPanel = document.querySelector('.ajuda-panel');
+      if (!ajudaPanel) return;
+      const detailsList = Array.from(ajudaPanel.querySelectorAll('details'));
+      detailsList.forEach(details => {
+        details.addEventListener('toggle', function () {
+          // Seta: gira e troca símbolo
+          const seta = details.querySelector('.ajuda-seta');
+          if (seta) {
+            if (details.open) {
+              seta.innerHTML = '&#9660;'; // ▼
+            } else {
+              seta.innerHTML = '&#9654;'; // ►
+            }
+          }
+          // Fecha os outros details
+          if (details.open) {
+            detailsList.forEach(d => {
+              if (d !== details && d.open) {
+                d.open = false;
+                const s = d.querySelector('.ajuda-seta');
+                if (s) s.innerHTML = '&#9654;';
+              }
+            });
+          }
+        });
+      });
+    });
+  </script>
 </body>
 
 </html>

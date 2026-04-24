@@ -140,6 +140,86 @@ mysqli_close($conn);
 	<title>Datas</title>
 	<link rel="stylesheet" href="../css/menu.css" />
 	<style>
+		.tabela-scroll table th,
+		.tabela-scroll table td {
+			text-align: center;
+			vertical-align: middle;
+		}
+
+		/* Linhas alternadas para todas as tabelas */
+		table tbody tr:nth-child(even):not(.no-alt),
+		.tabela-scroll tbody tr:nth-child(even) {
+			background: #f8f0e4 !important;
+		}
+
+		table tbody tr:nth-child(odd):not(.no-alt),
+		.tabela-scroll tbody tr:nth-child(odd) {
+			background: #fffdf9 !important;
+		}
+
+		/* Melhoria visual para tabela de datas */
+		.tabela-scroll {
+			overflow-x: auto;
+			max-width: 100vw;
+		}
+
+		.tabela-scroll table {
+			min-width: 1200px;
+			width: 100%;
+			border-collapse: collapse;
+			background: #fffdf9;
+		}
+
+		.tabela-scroll th {
+			background: #f4e9d9;
+			color: #2f2419;
+			position: sticky;
+			top: 0;
+			z-index: 2;
+			box-shadow: 0 2px 4px rgba(44, 34, 19, 0.04);
+			padding-top: 0.25rem;
+			padding-bottom: 0.25rem;
+			min-height: 0;
+			height: 32px;
+		}
+
+
+		.tabela-scroll tbody tr:nth-child(even) {
+			background: #f8f0e4;
+		}
+
+		.tabela-scroll tbody tr:nth-child(odd) {
+			background: #fffdf9;
+		}
+
+		.tabela-scroll tbody tr:hover {
+			background: #e9e0d1;
+			transition: background 0.2s;
+		}
+
+		.tabela-scroll td {
+			font-size: 1.01em;
+		}
+
+		@media (max-width: 900px) {
+			.tabela-scroll table {
+				min-width: 700px;
+			}
+
+			.tabela-scroll th,
+			.tabela-scroll td {
+				padding: 0.45rem 0.5rem;
+				font-size: 0.98em;
+			}
+		}
+
+		table,
+		th,
+		td {
+			border: 1.5px solid #bcae98 !important;
+			border-collapse: collapse !important;
+		}
+
 		.tabela-scroll {
 			overflow-x: auto;
 		}
@@ -314,7 +394,11 @@ mysqli_close($conn);
 						<thead>
 							<tr>
 								<?php foreach ($campos as $campo): ?>
-									<th><?php echo htmlspecialchars((string)$campo, ENT_QUOTES, 'UTF-8'); ?></th>
+									<?php if ($campo === 'DataMes'): ?>
+										<th style="max-width: 80px; min-width: 70px; width: 80px;">DataMes</th>
+									<?php else: ?>
+										<th><?php echo htmlspecialchars((string)$campo, ENT_QUOTES, 'UTF-8'); ?></th>
+									<?php endif; ?>
 								<?php endforeach; ?>
 							</tr>
 						</thead>
@@ -322,7 +406,13 @@ mysqli_close($conn);
 							<?php foreach ($linhasPaginadas as $linha): ?>
 								<tr>
 									<?php foreach ($campos as $campo): ?>
-										<td><?php echo htmlspecialchars((string)($linha[$campo] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
+										<?php if ($campo === 'DataMes'): ?>
+											<td style="max-width: 80px; min-width: 70px; width: 80px; overflow-x: auto; white-space: nowrap;">
+												<?php echo htmlspecialchars((string)($linha[$campo] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+											</td>
+										<?php else: ?>
+											<td><?php echo htmlspecialchars((string)($linha[$campo] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
+										<?php endif; ?>
 									<?php endforeach; ?>
 								</tr>
 							<?php endforeach; ?>
