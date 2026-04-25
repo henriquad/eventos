@@ -476,7 +476,7 @@ if ($saldoAnteriorAtivo && $eventoFiltro !== '') {
 
             <div class="filtros-bloco filtros-bloco--direita">
                 <div class="campo-grupo">
-                    <label for="SaldoAnterior">AAAAAAAAAASaldo anterior do período (R$)</label>
+                    <label for="SaldoAnterior">Saldo anterior do período (R$)</label>
                     <input type="text" id="SaldoAnterior" name="SaldoAnterior" placeholder="0,00" inputmode="decimal" autocomplete="off" value="<?= htmlspecialchars($saldoAnteriorTexto === '' ? '' : fmtVal($saldoAnterior), ENT_QUOTES, 'UTF-8') ?>" />
                 </div>
                 <button type="submit" name="acao" value="recalcular">Recalcular</button>

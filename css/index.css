@@ -294,11 +294,13 @@ ol {
 }
 
 .login-card__copyright {
-  margin-top: 0.6rem;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 0.85rem;
 }
 
 .login-card__support {
-  margin-top: 0.15rem;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 0.85rem;
 }
 
 @media (max-width: 920px) {
