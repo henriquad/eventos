@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Ferramenta para criacao de planilhas Excel para Fluxo de Caixa" />
+  <meta name="description" content="Ferramenta para criação automática de planilhas Excel para Fluxo de Caixa" />
+  <title>Eventos - Login</title>
   <link rel="stylesheet" href="css/index.css" />
   <style>
     .ajuda-panel details.shrinked {
@@ -103,49 +104,191 @@
       cursor: pointer;
     }
   </style>
-  <meta name="description" content="Ferramenta para criação automática de planilhas Excel para Fluxo de Caixa" />
-  <title>Eventos - Login</title>
+
 </head>
 
 <body>
   <main class="login-page">
     <section class="login-shell" aria-labelledby="login-title">
       <aside class="login-promo" aria-label="Apresentacao da agenda">
-        <p class="login-promo__tag">Agenda financeira</p>
-        <h1 id="login-title">Central de eventos para seu fluxo de caixa</h1>
-        <p class="login-promo__text">Organize vencimentos, recebimentos e compromissos com uma visão clara do que entra,
-          do que sai e do que precisa de atenção.</p>
-        <br>
 
 
-        <br>Precisa de ajuda?
+        <section class="ajuda-panel">
 
+          <h2 style="width: 600px;">Exemplos de eventos e como incluir...</h2>
+          <br>
+          <details>
+            <summary><span class="ajuda-seta">&#9654;</span>
+              <h3> Receitas, rendimentos ou créditos...</h3>
+            </summary>
+            <br>
+            <ul>
+              <li>Salários, pró-labore, comissões, ajuda de custo.</li>
+              <li>Devoluções, reembolsos, vendas, prêmios e entradas extraordinárias.</li>
+            </ul>
+          </details>
+          <br>
+          <details>
+            <br>
+            <summary><span class="ajuda-seta">&#9654;</span>
+              <br>
+              <h3> Despesas, pagamentos ou débitos..</h3>
+            </summary>
+            <ul>
+              <li>Contas de luz, água, condomínio, gás.</li>
+              <li>Transporte, alimentação, deslocamentos.</li>
+              <li>Assinaturas, lazer, despesas recorrentes do mês.</li>
+            </ul>
+          </details>
+          <br>
+          <details>
+            <summary><span class="ajuda-seta">&#9654;</span>
+              <h3>Eventos anuais</h3>
+            </summary>
+            <table>
+              <thead>
+                <tr>
+                  <th class="TituloAjuda">Evento</th>
+                  <th class="TituloAjuda">Quando ocorre</th>
+                  <th class="TituloAjuda">Como incluir...</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Aniversário</td>
+                  <td>27 de outubro</td>
+                  <td>Dia do mês = 27, mês = outubro</td>
+                </tr>
+                <tr>
+                  <td>Natal</td>
+                  <td>25 de dezembro</td>
+                  <td>Dia do mês = 25, mês = dezembro</td>
+                </tr>
+                <tr>
+                  <td>IPTU/IPVA</td>
+                  <td>10 de janeiro</td>
+                  <td>Dia da data = 10, mês da data = janeiro</td>
+                </tr>
+                <tr>
+                  <td>IRPF</td>
+                  <td>Até 30 de abril</td>
+                  <td>Dia da data = 30, mês da data = abril</td>
+                </tr>
+                <tr>
+                  <td>Dia das Mães</td>
+                  <td>1º domingo de maio</td>
+                  <td>Semana no mês = 1ª, dia da semana = domingo, mês = maio</td>
+                </tr>
+              </tbody>
+            </table>
+          </details>
 
+          <details>
+            <summary><span class="ajuda-seta">&#9654;</span>
+              <h3> Eventos mensais</h3>
+            </summary>
+            <table>
+              <thead>
+                <tr>
+                  <th class="TituloAjuda">Evento</th>
+                  <th class="TituloAjuda">Quando ocorre</th>
+                  <th class="TituloAjuda">Como incluir...</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Salário próprio</td>
+                  <td>Dia 1 do mês</td>
+                  <td>Dia do mês = 1</td>
+                </tr>
+                <tr>
+                  <td>Salário próprio</td>
+                  <td>1º dia útil</td>
+                  <td>Dia útil = 1</td>
+                </tr>
+                <tr>
+                  <td>Mensalidade</td>
+                  <td>Dia 15 do mês</td>
+                  <td>Dia do mês = 15</td>
+                </tr>
+                <tr>
+                  <td>FGTS</td>
+                  <td>7º dia útil</td>
+                  <td>Dia útil = 7</td>
+                </tr>
+                <tr>
+                  <td>Salário empregado</td>
+                  <td>5º dia útil</td>
+                  <td>Dia útil = 5</td>
+                </tr>
+              </tbody>
+            </table>
+          </details>
 
+          <details>
+            <summary><span class="ajuda-seta">&#9654;</span>
+              <h3> Eventos semanais</h3>
+            </summary>
+            <table>
+              <thead>
+                <tr>
+                  <th class="TituloAjuda">Evento</th>
+                  <th class="TituloAjuda">Quando ocorre</th>
+                  <th class="TituloAjuda">Como incluir...</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Lanche após aula</td>
+                  <td>Toda segunda-feira</td>
+                  <td>Dia da semana = segunda-feira</td>
+                </tr>
+                <tr>
+                  <td>Lanche após aula</td>
+                  <td>Toda quarta-feira</td>
+                  <td>Dia da semana = quarta-feira</td>
+                </tr>
+                <tr>
+                  <td>Happy-hour</td>
+                  <td>Toda sexta-feira</td>
+                  <td>Dia da semana = sexta-feira</td>
+                </tr>
+              </tbody>
+            </table>
+          </details>
 
-        <a class="ajuda-branca"
-          href="https://scribehow.com/viewer/Fluxo_de_caixa_em_Excel_de_forma_automatica__5aaEc9G1RC-5tHpFqO80aQ"
-          target="_blank">clique aqui...</a>
-        </p>
+          <details>
+            <summary><span class="ajuda-seta">&#9654;</span>
+              <h3> Eventos diários</h3>
+            </summary>
+            <table>
+              <thead>
+                <tr>
+                  <th class="TituloAjuda">Evento</th>
+                  <th class="TituloAjuda">Quando ocorre</th>
+                  <th class="TituloAjuda">Como incluir... </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Almoço, jantar, ônibus, metrô, trem</td>
+                  <td>Todo dia útil</td>
+                  <td>Diário = Sim</td>
+                </tr>
+              </tbody>
+            </table>
+          </details>
 
-
-        <br><br>
-        <p class="login-card__copyright">
-          &copy; Copyright
-          <abbr title="Instituto Nacional da Propriedade Intelectual">INPI</abbr>
-          512.018.052.242-4
-        </p>
-        <br>
-        <p class="login-card__support">Apoio: henriquad@gmail.com</p>
-
+        </section>
 
       </aside>
 
       <div class="login-card">
         <header class="login-card__header">
           <br><br>
-          <h2>Entrar</h2>
-          <p>O apelido e senha serão usados, apenas, para garantir a privacidade dos dados informados!</p>
+          <h1 id="login-title">Criador de fluxo de caixa com base em eventos</h1>
+
+
         </header>
 
         <form id="loginForm" class="login-form" action="PHP/login.php" method="post">
@@ -157,184 +300,37 @@
           <input type="password" id="password" name="password" placeholder="Digite sua senha"
             autocomplete="current-password" required />
 
+          <p>O apelido e senha serão usados, apenas, para garantir a privacidade dos dados informados!</p>
+
+          <br><br>
           <label for="rememberLogin">
             <input type="checkbox" id="rememberLogin" name="rememberLogin" /> Lembrar de mim
           </label>
-          <br><br><br>
+          <br>
 
           <button type="submit" class="bt">Entrar</button>
           <button type="button" id="forgetLogin" class="bt bt--secondary">Excluir apelido, senha e eventos</button>
           <p id="loginStorageStatus" class="login-form__status" aria-live="polite"></p>
         </form>
+        <section class="ajuda-panel" aria-label="Painel de ajuda para inclusão de eventos no fluxo de caixa">
+          Precisa de ajuda?
+          <a class="ajuda-branca"
+            href="https://scribehow.com/viewer/Fluxo_de_caixa_em_Excel_de_forma_automatica__5aaEc9G1RC-5tHpFqO80aQ"
+            target="_blank">clique aqui...</a>
+          </p>
 
+          <p class="login-card__copyright">
+            &copy; Copyright
+            <abbr title="Instituto Nacional da Propriedade Intelectual">INPI</abbr>
+            512.018.052.242-4
+          </p>
 
+          <p class="login-card__support">Apoio: henriquad@gmail.com</p>
+        </section>
       </div>
     </section>
 
-    <section class="ajuda-panel">
 
-      <h2>Exemplos de eventos e como incluir...</h2>
-      <br>
-      <details>
-        <summary><span class="ajuda-seta">&#9654;</span>
-          <h3> Receitas, rendimentos ou créditos...</h3>
-        </summary>
-        <ul>
-          <li>Salários, pró-labore, comissões, ajuda de custo.</li>
-          <li>Devoluções, reembolsos, vendas, prêmios e entradas extraordinárias.</li>
-        </ul>
-      </details>
-
-      <details>
-        <summary><span class="ajuda-seta">&#9654;</span>
-          <h3> Despesas, pagamentos ou débitos..</h3>
-        </summary>
-        <ul>
-          <li>Contas de luz, água, condomínio, gás.</li>
-          <li>Transporte, alimentação, deslocamentos.</li>
-          <li>Assinaturas, lazer, despesas recorrentes do mês.</li>
-        </ul>
-      </details>
-      <br>
-      <details>
-        <summary><span class="ajuda-seta">&#9654;</span>
-          <h3>Eventos anuais</h3>
-        </summary>
-        <table>
-          <thead>
-            <tr>
-              <th class="TituloAjuda">Evento</th>
-              <th class="TituloAjuda">Quando ocorre</th>
-              <th class="TituloAjuda">Como incluir...</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Aniversário</td>
-              <td>27 de outubro</td>
-              <td>Dia do mês = 27, mês = outubro</td>
-            </tr>
-            <tr>
-              <td>Natal</td>
-              <td>25 de dezembro</td>
-              <td>Dia do mês = 25, mês = dezembro</td>
-            </tr>
-            <tr>
-              <td>IPTU/IPVA</td>
-              <td>10 de janeiro</td>
-              <td>Dia da data = 10, mês da data = janeiro</td>
-            </tr>
-            <tr>
-              <td>IRPF</td>
-              <td>Até 30 de abril</td>
-              <td>Dia da data = 30, mês da data = abril</td>
-            </tr>
-            <tr>
-              <td>Dia das Mães</td>
-              <td>1º domingo de maio</td>
-              <td>Semana no mês = 1ª, dia da semana = domingo, mês = maio</td>
-            </tr>
-          </tbody>
-        </table>
-      </details>
-
-      <details>
-        <summary><span class="ajuda-seta">&#9654;</span>
-          <h3> Eventos mensais</h3>
-        </summary>
-        <table>
-          <thead>
-            <tr>
-              <th class="TituloAjuda">Evento</th>
-              <th class="TituloAjuda">Quando ocorre</th>
-              <th class="TituloAjuda">Como incluir...</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Salário próprio</td>
-              <td>Dia 1 do mês</td>
-              <td>Dia do mês = 1</td>
-            </tr>
-            <tr>
-              <td>Salário próprio</td>
-              <td>1º dia útil</td>
-              <td>Dia útil = 1</td>
-            </tr>
-            <tr>
-              <td>Mensalidade</td>
-              <td>Dia 15 do mês</td>
-              <td>Dia do mês = 15</td>
-            </tr>
-            <tr>
-              <td>FGTS</td>
-              <td>7º dia útil</td>
-              <td>Dia útil = 7</td>
-            </tr>
-            <tr>
-              <td>Salário empregado</td>
-              <td>5º dia útil</td>
-              <td>Dia útil = 5</td>
-            </tr>
-          </tbody>
-        </table>
-      </details>
-
-      <details>
-        <summary><span class="ajuda-seta">&#9654;</span>
-          <h3> Eventos semanais</h3>
-        </summary>
-        <table>
-          <thead>
-            <tr>
-              <th class="TituloAjuda">Evento</th>
-              <th class="TituloAjuda">Quando ocorre</th>
-              <th class="TituloAjuda">Como incluir...</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Lanche após aula</td>
-              <td>Toda segunda-feira</td>
-              <td>Dia da semana = segunda-feira</td>
-            </tr>
-            <tr>
-              <td>Lanche após aula</td>
-              <td>Toda quarta-feira</td>
-              <td>Dia da semana = quarta-feira</td>
-            </tr>
-            <tr>
-              <td>Happy-hour</td>
-              <td>Toda sexta-feira</td>
-              <td>Dia da semana = sexta-feira</td>
-            </tr>
-          </tbody>
-        </table>
-      </details>
-
-      <details>
-        <summary><span class="ajuda-seta">&#9654;</span>
-          <h3> Eventos diários</h3>
-        </summary>
-        <table>
-          <thead>
-            <tr>
-              <th class="TituloAjuda">Evento</th>
-              <th class="TituloAjuda">Quando ocorre</th>
-              <th class="TituloAjuda">Como incluir... </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Almoço, jantar, ônibus, metrô, trem</td>
-              <td>Todo dia útil</td>
-              <td>Diário = Sim</td>
-            </tr>
-          </tbody>
-        </table>
-      </details>
-
-    </section>
   </main>
   <script src="js/login.js"></script>
   </script>
