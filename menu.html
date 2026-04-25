@@ -39,7 +39,7 @@
 <body>
     <header class="hero">
         <div class="hero__content">
-            <p class="hero__eyebrow">Agenda financeira</p>
+            
             <h1>Fluxo de Caixa</h1>
             <p class="hero__text">Cadastre, revise e acompanhe compromissos financeiros com mais clareza, menos surpresa
                 e uma visão prática do período.</p>
@@ -56,7 +56,7 @@
                 <ul>
                     <li><a href="Incluir.html">(*) Incluir evento</a></li>
                     <li><a href="PHP/ListaEventos.php">Lista de eventos</a></li>
-                    <li><a href="PHP/Extrato.php">Gerar extrato</a></li>
+                    <li><a href="PHP/Extrato.php">Extrato no período</a></li>
                     <li><a href="PHP/tabFeriados.php">Consulta Feriados</a></li>
                     <li><a href="PHP/tabDatas.php">Consulta Datas</a></li>
                     <li><a href="PHP/logout.php" style="color:dimgray;"
@@ -68,31 +68,29 @@
             <br><br>
 
             <section class="periodo-card">
-                <div class="periodo-card__intro">
-                    <h2>Período de referência</h2>
-                    <p>Defina um intervalo para visualizar o extrato dos eventos diários.</p>
+                <div class="periodo-card__linha-flex">
                     <div class="periodo-card__actions">
-                        <button type="button" class="periodo-btn" data-periodo="mes-atual">Mês atual</button>
-                        <button type="button" class="periodo-btn" data-periodo="ano-atual">Ano atual</button>
+                        <button type="button" class="periodo-btn" data-periodo="mes-atual">Mês atual</button>                        
                         <button type="button" class="periodo-btn" data-periodo="proximos-30">Próximos 30 dias</button>
-                        <button type="button" class="periodo-btn periodo-btn--ghost"
-                            data-periodo="limpar">Limpar</button>
+                        <button type="button" class="periodo-btn" data-periodo="ano-atual">Ano atual</button>
+                       
+                    </div>
+                    <div class="periodo-card__fields-inline">
+                        <div class="field-group">
+                            <label for="DataI">Data inicial</label>
+                            <input type="text" id="DataI" name="DataI" placeholder="dd/mm/aaaa" inputmode="numeric"
+                                autocomplete="off" />
+                        </div>
+                        <div class="field-group">
+                            <label for="DataF">Data final</label>
+                            <input type="text" id="DataF" name="DataF" placeholder="dd/mm/aaaa" inputmode="numeric"
+                                autocomplete="off" />
+                        </div>
+                         <button type="button" class="periodo-btn periodo-btn--ghost"
+                            data-periodo="limpar">Limpar datas</button>
                     </div>
                 </div>
-                
-                <div class="periodo-card__fields">
-                    <div class="field-group">
-                        <label for="DataI">Data inicial</label>
-                        <input type="text" id="DataI" name="DataI" placeholder="dd/mm/aaaa" inputmode="numeric"
-                            autocomplete="off" />
-                    </div>
-                    <div class="field-group">
-                        <label for="DataF">Data final</label>
-                        <input type="text" id="DataF" name="DataF" placeholder="dd/mm/aaaa" inputmode="numeric"
-                            autocomplete="off" />
-                    </div>
-                    <p id="periodoStatus" class="periodo-status periodo-card__status" aria-live="polite"></p>
-                </div>
+                <p id="periodoStatus" class="periodo-status periodo-card__status" aria-live="polite"></p>
             </section>
         </section>
 
