@@ -164,7 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                             <label for="ativo">Ativo</label>
                         </div>
                         <div class="radio-option">
-                            <input type="radio" id="inativo" name="ativo" value="Não" />
+                            <input type="radio" id="inativo" name="ativo" value="não" />
                             <label for="inativo">Não ativo, aguardando outras considerações</label>
                         </div>
 
@@ -192,11 +192,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                                 <label for="prorrogaS">Sim, prorroga, pois paga ou recebe depois do feriado ou fim de semana</label>
                             </div>
                             <div class="radio-option">
-                                <input type="radio" id="prorrogaN" value="Não" name="prorroga" <?php echo checkedAttr(($evento['prorroga'] ?? '') === 'Não'); ?> />
+                                <input type="radio" id="prorrogaN" value="não" name="prorroga" <?php echo checkedAttr(($evento['prorroga'] ?? '') === 'não'); ?> />
                                 <label for="prorrogaN">Não, não prorroga, pois tem que pagar ou receber antes do feriado ou fim de semana</label>
                             </div>
                             <div class="radio-option">
-                                <input id="prorrogaNulo" type="radio" value="Nulo" name="prorroga" <?php echo checkedAttr(($evento['prorroga'] ?? '') === 'Nulo'); ?> />
+                                <input id="prorrogaNulo" type="radio" value="nul" name="prorroga" <?php echo checkedAttr(($evento['prorroga'] ?? '') === 'nul'); ?> />
                                 <label for="prorrogaNulo">Nulo, pois evento não ocorre se for feriado ou fim de semana</label>
                             </div>
                         </fieldset>
@@ -210,12 +210,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                     <br>
                     <fieldset>
                         <legend>escolha apenas uma das 6 opções...</legend>
+                        <h3>É diário?</h3>
                         <div class="radio-option">
-                            <input type="radio" id="diarioS" value="Sim" name="diario" />
+                            <input type="radio" id="diarioS" value="Sim" name="diario" <?php echo checkedAttr(($evento['diario'] ?? '') === 'Sim'); ?> />
                             <label for="diarioS">Sim, ocorre todos os dias...</label>
                         </div>
                         <div class="radio-option">
-                            <input type="radio" id="diarioN" checked="True" value="Não" name="diario" />
+                            <input type="radio" id="diarioN" value="não" name="diario" <?php echo checkedAttr(($evento['diario'] ?? '') === 'não'); ?> />
                             <label for="diarioN">Não, não é diario...</label>
                         </div>
 
@@ -437,15 +438,15 @@ if (!in_array($diaS, $diaSPermitidos, true)) {
 
 $ativo = getPostValue('ativo');
 
-if ($diario !== 'Sim' && $diario !== 'Não') {
+if ($diario !== 'Sim' && $diario !== 'não') {
     $diario = null;
 }
 
-if ($ativo !== 'Sim' && $ativo !== 'Não') {
+if ($ativo !== 'Sim' && $ativo !== 'não') {
     $ativo = null;
 }
 
-if ($prorroga !== 'Sim' && $prorroga !== 'Não' && $prorroga !== 'Nulo') {
+if ($prorroga !== 'Sim' && $prorroga !== 'não' && $prorroga !== 'nul') {
     $prorroga = null;
 }
 

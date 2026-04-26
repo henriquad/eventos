@@ -87,15 +87,15 @@ if ($DC !== 'D' && $DC !== 'C') {
     $DC = null;
 }
 
-if ($diario !== 'Sim' && $diario !== 'Não') {
+if ($diario !== 'Sim' && $diario !== 'não') {
     $diario = null;
 }
 
-if ($ativo !== 'Sim' && $ativo !== 'Não') {
+if ($ativo !== 'Sim' && $ativo !== 'não') {
     $ativo = null;
 }
 
-if ($prorroga !== 'Sim' && $prorroga !== 'Não' && $prorroga !== 'Nulo') {
+if ($prorroga !== 'Sim' && $prorroga !== 'não' && $prorroga !== 'nul') {
     $prorroga = null;
 }
 

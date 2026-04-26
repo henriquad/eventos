@@ -169,7 +169,7 @@ function extratoPrepararMovtos($dbcon, $apelido, $senha, $dataInicial, $dataFina
             WHEN IFNULL(diaU, 0) > 0 THEN diaCorreto
             WHEN IFNULL(Util, 0) = 1 THEN diaCorreto
             WHEN Prorroga = 'Sim' THEN diaCorreto + 1
-            WHEN Prorroga = 'Não' THEN diaCorreto
+            WHEN Prorroga = 'não' THEN diaCorreto
             WHEN Prorroga = 'Nulo' THEN 0
             ELSE diaCorreto
         END
