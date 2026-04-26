@@ -336,7 +336,7 @@ mysqli_close($conn);
 <body>
 	<header class="hero">
 		<div class="hero__content">
-			<p class="hero__eyebrow">Agenda financeira</p>
+			
 			<h1>Calendario para eventos</h1>
 			<p class="hero__text">Visualize a base de datas de apoio para recorrencias, prazos e organizacao do planejamento.</p>
 		</div>

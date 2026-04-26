@@ -59,7 +59,7 @@ mysqli_close($conn);
 <body>
 	<header class="hero">
 		<div class="hero__content">
-			<p class="hero__eyebrow">Agenda financeira</p>
+			
 			<h1>Tabela de feriados</h1>
 			<p class="hero__text">Consulte os feriados cadastrados para planejar prorrogacoes e antecipacoes de eventos.</p>
 		</div>

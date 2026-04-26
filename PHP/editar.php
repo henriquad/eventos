@@ -137,8 +137,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             <h1>Fluxo de caixa - Edição de eventos</h1>
             <div class="button_linha">
 
-                <button type="submit" form="formEditar" style="background: none; border: none; cursor: pointer; padding: 0;">
-                    <img src="../images/salvar.png" alt="Salvar"></button>
+                <button type="submit" form="formEditar" class="icon-button" title="Salvar evento">
+                    <img src="../images/salvar.png" alt="Salvar">
+                </button>
 
                 <a class="menu-shell__logout" href="../php/ListaEventos.php">Voltar ao menu</a>
             </div>
