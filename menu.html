@@ -14,7 +14,7 @@
             function resolverBaseEventos() {
                 var caminho = String(window.location.pathname || "");
                 var caminhoLower = caminho.toLowerCase();
-                var marcador = "/eventos/";
+                var marcador = "/eventoshtml/";
                 var indice = caminhoLower.indexOf(marcador);
                 if (indice === -1) {
                     return null;
@@ -39,7 +39,7 @@
 <body>
     <header class="hero">
         <div class="hero__content">
-            
+
             <h1>Fluxo de Caixa</h1>
             <p class="hero__text">Cadastre, revise e acompanhe compromissos financeiros com mais clareza, menos surpresa
                 e uma visão prática do período.</p>
@@ -118,7 +118,7 @@
 
             var caminho = String(window.location.pathname || "");
             var caminhoLower = caminho.toLowerCase();
-            var marcador = "/eventos/";
+            var marcador = "/eventoshtml/";
             var indice = caminhoLower.indexOf(marcador);
             if (indice === -1) {
                 return;
