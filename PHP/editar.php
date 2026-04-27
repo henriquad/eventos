@@ -137,11 +137,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             <h1>Fluxo de caixa - Edição de eventos</h1>
             <div class="button_linha">
 
-                <button type="submit" form="formEditar" class="icon-button" title="Salvar evento">
-                    <img src="../images/salvar.png" alt="Salvar">
-                </button>
+                <button type="submit" form="formEditar" style="background: none; border: none; cursor: pointer; padding: 0;">
+                    <img src="../images/salvar.png" alt="Salvar"></button>
 
-                <a class="menu-shell__logout" href="../php/ListaEventos.php">Voltar ao menu</a>
+                <a class="menu-shell__logout" href="../php/ListaEventos.php">Voltar para a lista de eventos</a>
             </div>
         </header>
 
@@ -161,7 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                             <input type="text" name="valorE" id="valorE" value="<?php echo h($evento['valorE']); ?>" style="margin: 12px;" placeholder="apenas digitos..." />
                         </div>
                         <div class="radio-option">
-                            <input type="radio" id="ativo" name="ativo" checked="True" value="Sim" />
+                            <input type="radio" id="ativo" name="ativo" checked="True" value="sim" />
                             <label for="ativo">Ativo</label>
                         </div>
                         <div class="radio-option">
@@ -189,7 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                             <legend>(*) Prorroga?</legend>
                             <br>
                             <div class="radio-option">
-                                <input type="radio" id="prorrogaS" value="Sim" name="prorroga" <?php echo checkedAttr(($evento['prorroga'] ?? '') === 'Sim'); ?> />
+                                <input type="radio" id="prorrogaS" value="sim" name="prorroga" <?php echo checkedAttr(($evento['prorroga'] ?? '') === 'sim'); ?> />
                                 <label for="prorrogaS">Sim, prorroga, pois paga ou recebe depois do feriado ou fim de semana</label>
                             </div>
                             <div class="radio-option">
@@ -197,7 +196,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                                 <label for="prorrogaN">Não, não prorroga, pois tem que pagar ou receber antes do feriado ou fim de semana</label>
                             </div>
                             <div class="radio-option">
-                                <input id="prorrogaNulo" type="radio" value="nul" name="prorroga" <?php echo checkedAttr(($evento['prorroga'] ?? '') === 'nul'); ?> />
+                                <input id="prorrogaNulo" type="radio" value="Nulo" name="prorroga" <?php echo checkedAttr(($evento['prorroga'] ?? '') === 'Nulo'); ?> />
                                 <label for="prorrogaNulo">Nulo, pois evento não ocorre se for feriado ou fim de semana</label>
                             </div>
                         </fieldset>
@@ -211,9 +210,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                     <br>
                     <fieldset>
                         <legend>escolha apenas uma das 6 opções...</legend>
-                        <h3>É diário?</h3>
+
                         <div class="radio-option">
-                            <input type="radio" id="diarioS" value="Sim" name="diario" <?php echo checkedAttr(($evento['diario'] ?? '') === 'Sim'); ?> />
+                            <input type="radio" id="diarioS" value="sim" name="diario" <?php echo checkedAttr(($evento['diario'] ?? '') === 'sim'); ?> />
                             <label for="diarioS">Sim, ocorre todos os dias...</label>
                         </div>
                         <div class="radio-option">
@@ -439,15 +438,15 @@ if (!in_array($diaS, $diaSPermitidos, true)) {
 
 $ativo = getPostValue('ativo');
 
-if ($diario !== 'Sim' && $diario !== 'não') {
+if ($diario !== 'sim' && $diario !== 'não') {
     $diario = null;
 }
 
-if ($ativo !== 'Sim' && $ativo !== 'não') {
+if ($ativo !== 'sim' && $ativo !== 'não') {
     $ativo = null;
 }
 
-if ($prorroga !== 'Sim' && $prorroga !== 'não' && $prorroga !== 'nul') {
+if ($prorroga !== 'sim' && $prorroga !== 'não' && $prorroga !== 'nulo') {
     $prorroga = null;
 }
 

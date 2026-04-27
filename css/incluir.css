@@ -80,17 +80,6 @@ a {
   background: transparent;
   cursor: pointer;
   padding: 0;
-  width: 60px !important;
-  height: 60px !important;
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
-  border-radius: 14px;
-}
-
-.icon-button img {
-  width: 44px !important;
-  height: 44px !important;
 }
 
 main {

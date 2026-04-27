@@ -87,15 +87,15 @@ if ($DC !== 'D' && $DC !== 'C') {
     $DC = null;
 }
 
-if ($diario !== 'Sim' && $diario !== 'não') {
+if ($diario !== 'Sim' && $diario !== 'Não') {
     $diario = null;
 }
 
-if ($ativo !== 'Sim' && $ativo !== 'não') {
+if ($ativo !== 'Sim' && $ativo !== 'Não') {
     $ativo = null;
 }
 
-if ($prorroga !== 'Sim' && $prorroga !== 'não' && $prorroga !== 'nul') {
+if ($prorroga !== 'Sim' && $prorroga !== 'Não' && $prorroga !== 'Nulo') {
     $prorroga = null;
 }
 
@@ -188,7 +188,7 @@ mysqli_stmt_close($stmt);
 mysqli_close($dbcon);
 
 // Redireciona para a lista apos incluir
-$destino = '/eventos/PHP/ListaEventos.php?incluido=1&id=' . $lastId;
+$destino = '/eventosHTML/PHP/ListaEventos.php?incluido=1&id=' . $lastId;
 
 if (!headers_sent()) {
     header('Location: ' . $destino, true, 303);

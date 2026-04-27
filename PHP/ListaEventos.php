@@ -208,20 +208,6 @@ mysqli_close($conn);
             margin-right: 0.45rem;
         }
 
-        .icon-button {
-            width: 60px !important;
-            height: 60px !important;
-            display: inline-flex !important;
-            align-items: center;
-            justify-content: center;
-            border-radius: 14px;
-        }
-
-        .icon-button img {
-            width: 44px !important;
-            height: 44px !important;
-        }
-
         .acao-link img {
             max-width: 20px;
             max-height: 20px;
@@ -262,10 +248,8 @@ mysqli_close($conn);
             overflow: hidden;
             word-break: break-word;
             z-index: 1;
-            height: 160px;
-            padding-top: 0;
-            padding-bottom: 0;
-            vertical-align: middle;
+            padding-top: 5.5rem;
+            vertical-align: bottom;
         }
 
         .coluna-dc {
@@ -274,7 +258,6 @@ mysqli_close($conn);
             word-break: break-word;
             text-align: center;
             overflow: hidden;
-            height: 60px;
         }
 
         .tabela-scroll td {
@@ -329,7 +312,7 @@ mysqli_close($conn);
 
         .coluna-ordenavel .tooltip-text {
             position: absolute;
-            top: calc(100% + 0.4rem);
+            bottom: calc(100% + 0.4rem);
             left: 50%;
             transform: translateX(-50%);
             background: #2d5016;
@@ -365,11 +348,11 @@ mysqli_close($conn);
         .coluna-ordenavel .tooltip-text::before {
             content: '';
             position: absolute;
-            bottom: 100%;
+            top: 100%;
             left: 50%;
             transform: translateX(-50%);
             border: 6px solid transparent;
-            border-bottom-color: #2d5016;
+            border-top-color: #2d5016;
             pointer-events: none;
         }
 
@@ -394,28 +377,22 @@ mysqli_close($conn);
 </head>
 
 <body>
+
     <header class="hero">
         <div class="hero__content">
-
             <h1>Lista de eventos</h1>
             <p class="hero__text" style="text-align: center;">Consulte, edite ou exclua eventos cadastrados para manter o planejamento atualizado.</p>
-
-            <div class="menu-shell__header">
-                <div class="button_linha" style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem;">
-                    <a href="../Incluir.html" class="icon-button" title="Incluir novo evento" style="display: inline-block;">
-                        <img src="../images/adicionar_96.png" alt="Incluir novo evento" style="vertical-align: middle; width: 32px; height: 32px;">
-                    </a>
-                    <span style="font-size: 1.5em; color: white;">Incluir novo evento</span>
-                </div>
-                <a class="menu-shell__logout" style="width: 170px;" href="../menu.html">Voltar ao menu</a>
+            <div class="button_linha">
+                <button type="button" onclick="window.location.href='../Incluir.html'" class="icon-button" title="Incluir novo evento">
+                    <img src="../images/new.png" alt="Incluir novo evento" style="vertical-align: middle; width: 64px; height: 64px;">
+                </button>
+                <a class="menu-shell__logout" href="../menu.html">Voltar ao menu</a>
             </div>
         </div>
     </header>
 
     <main class="menu-page">
         <section class="menu-shell">
-
-
 
 
             <?php if ($mensagemSucesso !== ''): ?>
@@ -532,10 +509,10 @@ mysqli_close($conn);
                                 <tr>
                                     <td class="col-acoes">
                                         <a class="acao-link" href="editar.php?id=<?php echo urlencode((string)$row[0]); ?>" title="Editar evento">
-                                            <img src="../images/edit_icon-36.png" alt="Editar" />
+                                            <img src="../images/editar.png" alt="Editar" />
                                         </a>
                                         <a class="acao-link" href="deletar.php?id=<?php echo urlencode((string)$row[0]); ?>" title="Excluir evento" onclick="return confirm('Confirma excluir este evento?')">
-                                            <img src="../images/Excluir.GIF" alt="Excluir" />
+                                            <img src="../images/delete.png" alt="Excluir" />
                                         </a>
                                     </td>
 

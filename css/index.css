@@ -294,13 +294,11 @@ ol {
 }
 
 .login-card__copyright {
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
-  font-size: 0.85rem;
+  margin-top: 0.6rem;
 }
 
 .login-card__support {
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
-  font-size: 0.85rem;
+  margin-top: 0.15rem;
 }
 
 @media (max-width: 920px) {
@@ -310,7 +308,6 @@ ol {
 
   .login-promo {
     padding: 1.6rem 1.2rem;
-    font-size: 18px;
   }
 
   .login-card {
