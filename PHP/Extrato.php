@@ -1,83 +1,116 @@
 <?php
 
-require_once __DIR__ . '/auth_session.php';
-eventosExigirLogin();
+session_start();
 
-include_once "Conectar_BaseH.php";
-require_once __DIR__ . '/extrato_rotina.php';
+// --- GARANTIR MOVTOS PARA 1 ANO À FRENTE ---
 
-date_default_timezone_set("America/Sao_Paulo");
 
-$apelido = eventosApelidoSessao();
-$senha = eventosSenhaSessao();
-
-function extratoFormatoBr($iso)
-{
-    $dt = DateTime::createFromFormat('Y-m-d', (string)$iso);
-    return $dt ? $dt->format('d/m/Y') : (string)$iso;
+// --- GARANTIR MOVTOS PARA O PERÍODO SELECIONADO ---
+$apelidoMov = $_SESSION['apelido'] ?? '';
+$senhaMov = $_SESSION['senha'] ?? '';
+$periodoI = isset($_GET['DataI']) ? extratoNormalizarData($_GET['DataI']) : date('Y-m-d');
+$periodoF = isset($_GET['DataF']) ? extratoNormalizarData($_GET['DataF']) : date('Y-m-d', strtotime('+1 year'));
+if ($apelidoMov && $senhaMov) {
+    $dbconMov = new mysqli('MYSQL8002.site4now.net', 'a90b7e_baseh', 'Amanti_#9', 'db_a90b7e_baseh');
+    if ($dbconMov && !$dbconMov->connect_error) {
+        // Só executa se não houver nenhum movto para o período selecionado
+        $sqlExiste = "SELECT COUNT(*) as total FROM movtos WHERE Apelido = ? AND senha = ? AND diaCorreto > 0 AND EXISTS (SELECT 1 FROM datas d WHERE d.DataMes BETWEEN ? AND ? AND d.DiaUtil = movtos.diaCorreto AND d.M = movtos.M AND d.A = movtos.A)";
+        $stmtExiste = $dbconMov->prepare($sqlExiste);
+        $stmtExiste->bind_param('ssss', $apelidoMov, $senhaMov, $periodoI, $periodoF);
+        $stmtExiste->execute();
+        $resExiste = $stmtExiste->get_result();
+        $totalMovtos = $resExiste->fetch_assoc()['total'] ?? 0;
+        $stmtExiste->close();
+        if ($totalMovtos == 0) {
+            // Busca datas já existentes para o usuário nesse período
+            $sqlDatas = "SELECT d.DataMes, d.DiaUtil, d.M, d.A FROM datas d WHERE d.DataMes BETWEEN ? AND ? AND d.Util = 1 ORDER BY d.DataMes ASC";
+            $stmtDatas = $dbconMov->prepare($sqlDatas);
+            $stmtDatas->bind_param('ss', $periodoI, $periodoF);
+            $stmtDatas->execute();
+            $resultDatas = $stmtDatas->get_result();
+            while ($row = $resultDatas->fetch_assoc()) {
+                // Verifica se já existe movto para essa data
+                $sqlCheck = "SELECT COUNT(*) as total FROM movtos WHERE Apelido = ? AND senha = ? AND diaCorreto = ? AND M = ? AND A = ?";
+                $stmtCheck = $dbconMov->prepare($sqlCheck);
+                $stmtCheck->bind_param('ssiii', $apelidoMov, $senhaMov, $row['DiaUtil'], $row['M'], $row['A']);
+                $stmtCheck->execute();
+                $resCheck = $stmtCheck->get_result();
+                $existe = $resCheck->fetch_assoc()['total'] ?? 0;
+                $stmtCheck->close();
+                if ($existe == 0) {
+                    // Insere movto "placeholder" para a data
+                    $sqlIns = "INSERT INTO movtos (Apelido, senha, diaCorreto, M, A, evento, grupo, DC, ValorE) VALUES (?, ?, ?, ?, ?, 'PREVISTO', 'Automático', 'C', 0.00)";
+                    $stmtIns = $dbconMov->prepare($sqlIns);
+                    $stmtIns->bind_param('ssiii', $apelidoMov, $senhaMov, $row['DiaUtil'], $row['M'], $row['A']);
+                    $stmtIns->execute();
+                    $stmtIns->close();
+                }
+            }
+            $stmtDatas->close();
+        }
+        $dbconMov->close();
+    }
 }
 
+
+// Funções utilitárias
+function extratoNormalizarData($data)
+{
+    $data = trim((string)$data);
+    if ($data === '') return '';
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $data)) return $data;
+    if (preg_match('/^(\d{2})\/(\d{2})\/(\d{4})$/', $data, $m)) return $m[3] . '-' . $m[2] . '-' . $m[1];
+    $dt = DateTime::createFromFormat('d/m/Y', $data);
+    if ($dt) return $dt->format('Y-m-d');
+    $dt = DateTime::createFromFormat('Y-m-d', $data);
+    if ($dt) return $dt->format('Y-m-d');
+    return $data;
+}
+function extratoFormatoBr($data)
+{
+    $data = trim((string)$data);
+    if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $data, $m)) return $m[3] . '/' . $m[2] . '/' . $m[1];
+    return $data;
+}
 function extratoFormatoDataComSemana($iso)
 {
     $dt = DateTime::createFromFormat('Y-m-d', (string)$iso);
-    if (!$dt) {
-        return (string)$iso;
-    }
-
+    if (!$dt) return (string)$iso;
     $semana = array('Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab');
     $indice = (int)$dt->format('w');
-
     return $dt->format('d/m/Y') . ' - ' . $semana[$indice];
 }
-
 function extratoValorFormatado($valor)
 {
     return number_format((float)$valor, 2, ',', '.');
 }
-
 function extratoCsvValor($valor)
 {
     return number_format((float)$valor, 2, ',', '');
 }
-
 function extratoCsvCampo($valor)
 {
     $texto = (string)$valor;
     $texto = str_replace('"', '""', $texto);
     return '"' . $texto . '"';
 }
-
 function extratoNormalizarValorMonetario($valor)
 {
     $texto = trim((string)$valor);
-    if ($texto === '') {
-        return 0.0;
-    }
-
+    if ($texto === '') return 0.0;
     $texto = preg_replace('/\s+/', '', $texto);
-    if ($texto === null || $texto === '') {
-        return 0.0;
-    }
-
+    if ($texto === null || $texto === '') return 0.0;
     $texto = preg_replace('/^R\$/i', '', $texto);
     $texto = preg_replace('/[^0-9,\.\-]/', '', $texto);
-    if ($texto === null || $texto === '') {
-        return 0.0;
-    }
-
+    if ($texto === null || $texto === '') return 0.0;
     $negativo = false;
     if (strpos($texto, '-') === 0) {
         $negativo = true;
         $texto = substr($texto, 1);
     }
-
-    if ($texto === '') {
-        return 0.0;
-    }
-
+    if ($texto === '') return 0.0;
     $temVirgula = strpos($texto, ',') !== false;
     $temPonto = strpos($texto, '.') !== false;
-
     if ($temVirgula && $temPonto) {
         if (strrpos($texto, ',') > strrpos($texto, '.')) {
             $texto = str_replace('.', '', $texto);
@@ -102,20 +135,32 @@ function extratoNormalizarValorMonetario($valor)
             $texto = $partesPonto[0] . $partesPonto[1];
         }
     }
-
-    if ($negativo) {
-        $texto = '-' . $texto;
-    }
-
-    if (!preg_match('/^-?\d+(\.\d+)?$/', $texto)) {
-        return 0.0;
-    }
-
+    if ($negativo) $texto = '-' . $texto;
+    if (!preg_match('/^-?\d+(\.\d+)?$/', $texto)) return 0.0;
     return (float)$texto;
 }
 
-$dataInicial = extratoNormalizarData($_GET['DataI'] ?? '');
-$dataFinal = extratoNormalizarData($_GET['DataF'] ?? '');
+// Variáveis de sessão e conexão
+$apelido = $_SESSION['apelido'] ?? '';
+$senha = $_SESSION['senha'] ?? '';
+$dbcon = new mysqli('MYSQL8002.site4now.net', 'a90b7e_baseh', 'Amanti_#9', 'db_a90b7e_baseh');
+if (!$dbcon) {
+    die('Erro ao conectar ao banco de dados: ' . mysqli_connect_error());
+}
+
+
+
+
+
+
+// Define datas padrão de 1 ano à frente se não vierem por GET
+if (isset($_GET['DataI']) && isset($_GET['DataF'])) {
+    $dataInicial = extratoNormalizarData($_GET['DataI']);
+    $dataFinal = extratoNormalizarData($_GET['DataF']);
+} else {
+    $dataInicial = date('Y-m-d');
+    $dataFinal = date('Y-m-d', strtotime('+1 year'));
+}
 $saldoAnteriorInformado = array_key_exists('SaldoAnterior', $_GET);
 $saldoAnterior = extratoNormalizarValorMonetario($_GET['SaldoAnterior'] ?? '');
 $eventoFiltro = trim((string)($_GET['Evento'] ?? ''));
@@ -123,18 +168,22 @@ $eventoFiltro = substr($eventoFiltro, 0, 100);
 $exportarExcel = (($_GET['export'] ?? '') === 'excel');
 $usarCache = (($_GET['usarCache'] ?? '') === '1');
 
+
 if (!$dataInicial || !$dataFinal) {
-    $hoje = new DateTime('today');
-    $primeiroDia = new DateTime($hoje->format('Y-m-01'));
-    $ultimoDia = new DateTime($hoje->format('Y-m-t'));
-    $dataInicial = $primeiroDia->format('Y-m-d');
-    $dataFinal = $ultimoDia->format('Y-m-d');
+    die('<div style="color:red;font-weight:bold;margin:20px 0;">Por favor, informe a Data Inicial e a Data Final para calcular o extrato.</div>');
 }
 
 if ($dataInicial > $dataFinal) {
     $tmp = $dataInicial;
     $dataInicial = $dataFinal;
     $dataFinal = $tmp;
+}
+
+
+// Monta a tabela movtos para o período de 1 ano à frente antes de carregar a página
+if ($apelido && $senha) {
+    require_once __DIR__ . '/extrato_rotina.php';
+    extratoPrepararMovtos($dbcon, $apelido, $senha, $dataInicial, $dataFinal);
 }
 
 $movimentos = array();
@@ -160,20 +209,20 @@ if ($usarCache && $cacheExtrato) {
     }
 }
 
+
 if (!$cacheValido) {
-    extratoPrepararMovtos($dbcon, $apelido, $senha, $dataInicial, $dataFinal);
+    // extratoPrepararMovtos($dbcon, $apelido, $senha, $dataInicial, $dataFinal);
 
     $sqlLista = "SELECT m.id, d.DataMes AS dataM, CAST(IFNULL(d.DiaUtil, 0) AS UNSIGNED) AS diaUtil, m.evento, m.grupo, m.DC, m.ValorE
-                             FROM movtos m
-                             INNER JOIN datas d
-                                 ON CAST(IFNULL(d.DiaUtil, 0) AS UNSIGNED) = CAST(IFNULL(m.diaCorreto, 0) AS UNSIGNED)
-                                AND CAST(d.M AS UNSIGNED) = CAST(m.M AS UNSIGNED)
-                                AND CAST(d.A AS UNSIGNED) = CAST(m.A AS UNSIGNED)
-                             WHERE m.Apelido = ?
-                                 AND m.senha = ?
-                                 AND d.DataMes BETWEEN ? AND ?
-                                 AND IFNULL(m.diaCorreto, 0) > 0
-                                 AND CAST(IFNULL(d.Util, 0) AS UNSIGNED) = 1";
+        FROM movtos m
+        INNER JOIN datas d ON CAST(IFNULL(d.DiaUtil, 0) AS UNSIGNED) = CAST(IFNULL(m.diaCorreto, 0) AS UNSIGNED)
+        AND CAST(d.M AS UNSIGNED) = CAST(m.M AS UNSIGNED)
+        AND CAST(d.A AS UNSIGNED) = CAST(m.A AS UNSIGNED)
+        WHERE m.Apelido = ?
+        AND m.senha = ?
+        AND d.DataMes BETWEEN ? AND ?
+        AND IFNULL(m.diaCorreto, 0) > 0
+        AND CAST(IFNULL(d.Util, 0) AS UNSIGNED) = 1";
 
     $eventoFiltroLike = '';
     if ($eventoFiltro !== '') {
@@ -218,7 +267,9 @@ if (!$cacheValido) {
 if ($exportarExcel) {
     $nomeArquivo = 'extrato_' . str_replace('-', '', $dataInicial) . '_a_' . str_replace('-', '', $dataFinal) . '.csv';
 
-    mysqli_close($dbcon);
+    if ($dbcon instanceof mysqli) {
+        $dbcon->close();
+    }
 
     header('Content-Type: text/csv; charset=UTF-8');
     header('Content-Disposition: attachment; filename="' . $nomeArquivo . '"');
@@ -293,36 +344,216 @@ $limparEventoUrl = 'Extrato.php?DataI=' . urlencode($dataInicial) . '&DataF=' . 
 
 mysqli_close($dbcon);
 
-echo '<!doctype html><html lang="pt-br"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">';
+echo '
+<!doctype html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">';
 echo '<title>Extrato</title>';
 echo '<style>
-body{font-family:Arial,sans-serif;background:#f2f4f7;margin:0;padding:20px;color:#222}
-.container{max-width:1100px;margin:0 auto}
-h2{margin:0 0 12px 0}
-.topo{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
-.topo a{background:#1f4f82;color:#fff;padding:7px 12px;text-decoration:none;border-radius:4px}
-.filtro{background:#fff;border:1px solid #dbe2ea;border-radius:6px;padding:10px 12px;margin-bottom:12px}
-.filtro-form{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
-.filtro-form label{font-size:13px;color:#344054;display:block;margin-bottom:4px}
-.filtro-form input{height:36px;padding:6px 10px;border:1px solid #cfd8e3;border-radius:6px;min-width:260px}
-.filtro-form .filtro-acao{height:36px;min-width:140px;padding:0 14px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box}
-.filtro-form button{border:none;background:#1f4f82;color:#fff;cursor:pointer}
-.filtro-form a{background:#eef2f7;color:#1f4f82;text-decoration:none}
-.acoes-grafico{margin:0 0 12px 0}
-.btn-grafico{background:#067647;color:#fff;border:none;border-radius:6px;padding:9px 14px;font-size:14px;cursor:pointer}
-.btn-grafico:hover{background:#055d38}
-.grafico{background:#fff;border:1px solid #dbe2ea;border-radius:6px;padding:12px;margin-bottom:12px}
-.grafico.is-hidden{display:none}
-.grafico h3{margin:0 0 10px 0;font-size:16px}
-.grafico-wrap{position:relative;height:280px}
-table{width:100%;border-collapse:collapse;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-th,td{border:1px solid #e5e9ef;padding:8px 10px;font-size:14px}
-th{background:#1f4f82;color:#fff;text-align:center}
-td.num{text-align:right;font-family:monospace}
-td.deb{color:#b42318}
-td.cre{color:#067647}
-tr:nth-child(even){background:#f8fafc}
-</style></head><body>';
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f4f7;
+            margin: 0;
+            padding: 20px;
+            color: #222
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto
+        }
+
+        h2 {
+            margin: 0 0 12px 0
+        }
+
+        .topo {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 12px
+        }
+
+        .topo a {
+            background: #1f4f82;
+            color: #fff;
+            padding: 7px 12px;
+            text-decoration: none;
+            border-radius: 4px
+        }
+
+        .filtro {
+            background: #fff;
+            border: 1px solid #dbe2ea;
+            border-radius: 6px;
+            padding: 10px 12px;
+            margin-bottom: 12px
+        }
+
+        .filtro-form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: end
+        }
+
+        .filtro-form label {
+            font-size: 13px;
+            color: #344054;
+            display: block;
+            margin-bottom: 4px
+        }
+
+        .filtro-form input {
+            height: 36px;
+            padding: 6px 10px;
+            border: 1px solid #cfd8e3;
+            border-radius: 6px;
+            min-width: 260px
+        }
+
+        .filtro-form .filtro-acao {
+            height: 36px;
+            min-width: 140px;
+            padding: 0 14px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box
+        }
+
+        .filtro-form button {
+            border: none;
+            background: #1f4f82;
+            color: #fff;
+            cursor: pointer
+        }
+
+        .filtro-form a {
+            background: #eef2f7;
+            color: #1f4f82;
+            text-decoration: none
+        }
+
+        .acoes-grafico {
+            margin: 0 0 12px 0
+        }
+
+        .btn-grafico {
+            background: #067647;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 9px 14px;
+            font-size: 14px;
+            cursor: pointer
+        }
+
+        .btn-grafico:hover {
+            background: #055d38
+        }
+
+        .grafico {
+            background: #fff;
+            border: 1px solid #dbe2ea;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px
+        }
+
+        .grafico.is-hidden {
+            display: none
+        }
+
+        .grafico h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px
+        }
+
+        .grafico-wrap {
+            position: relative;
+            width: 100vw;
+            left: 50%;
+            right: 50%;
+            margin-left: -50vw;
+            margin-right: -50vw;
+            height: 480px;
+            min-height: 320px;
+            max-height: 600px;
+            max-width: 100vw;
+            background: #fff;
+            border-radius: 8px;
+            padding: 12px 0 8px 0;
+            box-shadow: 0 1px 4px rgba(0,0,0,.08);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .08)
+        }
+
+        th,
+        td {
+            border: 1px solid #e5e9ef;
+            padding: 8px 10px;
+            font-size: 14px
+        }
+
+        th {
+            background: #1f4f82;
+            color: #fff;
+            text-align: center
+        }
+
+        td.num {
+            text-align: right;
+            font-family: monospace
+        }
+
+        td.deb {
+            color: #b42318
+        }
+
+        td.cre {
+            color: #067647
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc
+        }
+    </style>
+    <style>
+        .periodo-rapido-btn {
+            background: linear-gradient(90deg, #1f4f82 60%, #3a7bd5 100%);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0 18px;
+            height: 36px;
+            min-width: 140px;
+            margin-left: 5px;
+            font-size: 15px;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(31, 79, 130, 0.08);
+            transition: background 0.2s, transform 0.1s;
+            cursor: pointer;
+        }
+
+        .periodo-rapido-btn:hover {
+            background: linear-gradient(90deg, #3a7bd5 60%, #1f4f82 100%);
+            transform: translateY(-2px) scale(1.04);
+        }
+    </style>
+</head>
+
+<body>';
 echo '<div class="container">';
 echo '<h2>Extrato - Lista de Movimentos</h2>';
 echo '<div class="topo">';
@@ -330,8 +561,70 @@ echo '<a href="../menu.html">Menu</a>';
 echo '<a href="ListaEventos.php">Lista de eventos</a>';
 echo '<a href="' . htmlspecialchars($resumoMensalUrl, ENT_QUOTES, 'UTF-8') . '">Resumo mensal</a>';
 echo '<a href="' . htmlspecialchars($exportUrl, ENT_QUOTES, 'UTF-8') . '">Exportar Excel</a>';
+// Botões de período rápido
+$hoje = date('Y-m-d');
+$mesAtualInicio = date('Y-m-01');
+$mesAtualFim = date('Y-m-t');
+$anoAtualInicio = date('Y-01-01');
+$anoAtualFim = date('Y-12-31');
+$proximos30Fim = date('Y-m-d', strtotime('+30 days'));
+
+
+
+// Campos de data manual + botões de período rápido
+
+// Corrige datas padrão para 1 ano à frente ao abrir o formulário
+if (isset($_GET['DataI']) && isset($_GET['DataF'])) {
+    $dataInicialPadrao = extratoNormalizarData($_GET['DataI']);
+    $dataFinalPadrao = extratoNormalizarData($_GET['DataF']);
+} else {
+    $dataInicialPadrao = date('Y-m-d');
+    $dataFinalPadrao = date('Y-m-d', strtotime('+1 year'));
+}
+echo '<form class="filtro filtro-form" method="get" action="Extrato.php" style="margin-bottom:12px;" onsubmit="return prepararDatasFiltro(this)">';
+echo '<div style="display:flex;gap:16px;align-items:end;">';
+echo '<div><label for="DataI">Data inicial</label><input type="text" id="DataI" name="DataI" placeholder="dd/mm/aaaa" inputmode="numeric" autocomplete="off" value="' . htmlspecialchars(extratoFormatoBr($dataInicialPadrao), ENT_QUOTES, 'UTF-8') . '" style="min-width:120px;"></div>';
+echo '<div><label for="DataFim">Data final</label><input type="text" id="DataFim" name="DataF" placeholder="dd/mm/aaaa" inputmode="numeric" autocomplete="off" value="' . htmlspecialchars(extratoFormatoBr($dataFinalPadrao), ENT_QUOTES, 'UTF-8') . '" style="min-width:120px;"></div>';
+
+// Botões de período rápido ao lado da data final
+echo '<div style="display:flex;gap:5px;align-items:end;margin-left:10px;">';
+echo '<button type="submit" class="periodo-rapido-btn" style="min-width:100px;">Gerar movimentos</button>';
+// Mês atual
+$mesAtualInicioJs = htmlspecialchars($mesAtualInicio, ENT_QUOTES, 'UTF-8');
+$mesAtualFimJs = htmlspecialchars($mesAtualFim, ENT_QUOTES, 'UTF-8');
+$anoAtualInicioJs = htmlspecialchars($anoAtualInicio, ENT_QUOTES, 'UTF-8');
+$anoAtualFimJs = htmlspecialchars($anoAtualFim, ENT_QUOTES, 'UTF-8');
+$hojeJs = htmlspecialchars($hoje, ENT_QUOTES, 'UTF-8');
+$proximos30FimJs = htmlspecialchars($proximos30Fim, ENT_QUOTES, 'UTF-8');
+echo '<button type="button" class="periodo-rapido-btn" onclick="setPeriodoRapido(\'' . $mesAtualInicioJs . '\', \' ' . $mesAtualFimJs . '\')">Mês atual</button>';
+echo '<button type="button" class="periodo-rapido-btn" onclick="setPeriodoRapido(\'' . $anoAtualInicioJs . '\', \' ' . $anoAtualFimJs . '\')">Ano atual</button>';
+echo '<button type="button" class="periodo-rapido-btn" onclick="setPeriodoRapido(\'' . $hojeJs . '\', \' ' . $proximos30FimJs . '\')">Próximos 30 dias</button>';
 echo '</div>';
-echo '<div class="filtro">Período: <strong>' . htmlspecialchars(extratoFormatoBr($dataInicial), ENT_QUOTES, 'UTF-8') . '</strong> até <strong>' . htmlspecialchars(extratoFormatoBr($dataFinal), ENT_QUOTES, 'UTF-8') . '</strong></div>';
+
+echo '</div>';
+echo '</form>';
+
+// Script para preencher datas rapidamente e preparar datas para envio
+echo "<script>
+                function setPeriodoRapido(di, df) {
+                    document.getElementById('DataI').value = di.split('-').reverse().join('/');
+                    document.getElementById('DataFim').value = df.split('-').reverse().join('/');
+                }
+
+                function prepararDatasFiltro(form) {
+                    // Converte datas para formato yyyy-mm-dd antes de enviar
+                    var di = form.DataI;
+                    var df = form.DataF;
+                    if (di && df) {
+                        var vdi = di.value.split('/');
+                        var vdf = df.value.split('/');
+                        if (vdi.length === 3) di.value = vdi[2] + '-' + vdi[1].padStart(2, '0') + '-' + vdi[0].padStart(2, '0');
+                        if (vdf.length === 3) df.value = vdf[2] + '-' + vdf[1].padStart(2, '0') + '-' + vdf[0].padStart(2, '0');
+                    }
+                    return true;
+                }
+            </script>";
+
 
 echo '<form class="filtro filtro-form" method="get" action="Extrato.php">';
 echo '<input type="hidden" name="DataI" value="' . htmlspecialchars($dataInicial, ENT_QUOTES, 'UTF-8') . '">';
@@ -352,22 +645,36 @@ echo '</form>';
 if ($eventoFiltro !== '') {
     echo '<div class="filtro">Evento filtrado: <strong>' . htmlspecialchars($eventoFiltro, ENT_QUOTES, 'UTF-8') . '</strong></div>';
 }
-echo '<div class="acoes-grafico"><button type="button" id="toggleGraficoBtn" class="btn-grafico">Ocultar gráfico</button></div>';
 
-echo '<div class="grafico" id="grafico">';
+
+echo '<div class="acoes-grafico"><button type="button" id="toggleGraficoBtn" class="btn-grafico">Mostrar gráfico</button></div>';
+
+echo '<div class="grafico is-hidden" id="grafico">';
 echo '<h3>Saldo Final Acumulado por Dia</h3>';
 if (count($movimentos) === 0) {
     echo '<p>Sem dados para gerar gráfico no período selecionado.</p>';
 } else {
-    echo '<div class="grafico-wrap"><canvas id="graficoExtrato"></canvas></div>';
+    echo '<div class="grafico-wrap"><canvas id="graficoExtrato" style="width:100vw!important;min-width:320px;max-width:100vw;height:100%!important;min-height:320px;max-height:600px;display:block;margin:0 auto;"></canvas></div>';
 }
 echo '</div>';
 
 echo '<table>';
-echo '<thead><tr><th>Data</th><th>DiaUtil</th><th>Evento</th><th>Grupo</th><th>Débito (R$)</th><th>Crédito (R$)</th><th>Saldo Acumulado (R$)</th></tr></thead><tbody>';
+echo '<thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>DiaUtil</th>
+                        <th>Evento</th>
+                        <th>Grupo</th>
+                        <th>Débito (R$)</th>
+                        <th>Saldo Acumulado (R$)</th>
+                    </tr>
+                </thead>
+                <tbody>';
 
 if (count($movimentos) === 0) {
-    echo '<tr><td colspan="7">Nenhum movimento encontrado para o período selecionado.</td></tr>';
+    echo '<tr>
+                        <td colspan="7">Nenhum movimento encontrado para o período selecionado.</td>
+                    </tr>';
 } else {
     $saldoAcumulado = $saldoAnterior;
     foreach ($movimentos as $mov) {
@@ -376,61 +683,72 @@ if (count($movimentos) === 0) {
         $valor = (float)$mov['ValorE'];
         $valorComSinal = ($dc === 'D') ? ($valor * -1) : $valor;
         $saldoAcumulado += $valorComSinal;
-
         echo '<tr>';
         echo '<td>' . htmlspecialchars(extratoFormatoDataComSemana((string)$mov['dataM']), ENT_QUOTES, 'UTF-8') . '</td>';
-        echo '<td>' . (int)$mov['diaUtil'] . '</td>';
+        echo '<td>' . htmlspecialchars((int)$mov['diaUtil'], ENT_QUOTES, 'UTF-8') . '</td>';
         echo '<td>' . htmlspecialchars((string)$mov['evento'], ENT_QUOTES, 'UTF-8') . '</td>';
         echo '<td>' . htmlspecialchars((string)$mov['grupo'], ENT_QUOTES, 'UTF-8') . '</td>';
-
-        if ($dc === 'D') {
-            echo '<td class="num deb">' . extratoValorFormatado($valor) . '</td>';
-            echo '<td class="num">-</td>';
-        } else {
-            echo '<td class="num">-</td>';
-            echo '<td class="num cre">' . extratoValorFormatado($valor) . '</td>';
-        }
-
+        echo '<td class="num deb">' . ($dc === 'D' ? extratoValorFormatado($valor) : '-') . '</td>';
         echo '<td class="num">' . extratoValorFormatado($saldoAcumulado) . '</td>';
         echo '</tr>';
     }
-}
 
-echo '</tbody></table>';
-echo '<script>';
-echo '(function(){';
-echo 'var btn=document.getElementById("toggleGraficoBtn");';
-echo 'var grafico=document.getElementById("grafico");';
-echo 'if(!btn||!grafico){return;}';
-echo 'btn.addEventListener("click",function(){';
-echo 'var oculto=grafico.classList.toggle("is-hidden");';
-echo 'btn.textContent=oculto?"Mostrar gráfico":"Ocultar gráfico";';
-echo '});';
-echo '})();';
-echo '</script>';
-if (count($movimentos) > 0) {
-    echo '<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>';
-    echo '<script>';
-    echo 'const labels = ' . $graficoLabelsJson . ';';
-    echo 'const dadosSaldo = ' . $graficoSaldosJson . ';';
-    echo 'const ctx = document.getElementById("graficoExtrato");';
-    echo 'if (ctx) {';
-    echo 'new Chart(ctx, {';
-    echo 'type: "bar",';
-    echo 'data: {';
-    echo 'labels: labels,';
-    echo 'datasets: [';
-    echo '{ label: "Saldo acumulado", data: dadosSaldo, backgroundColor: "rgba(31,79,130,0.75)", borderColor: "rgba(31,79,130,1)", borderWidth: 1 }';
-    echo ']';
-    echo '},';
-    echo 'options: {';
-    echo 'responsive: true,';
-    echo 'maintainAspectRatio: false,';
-    echo 'plugins: { legend: { position: "top" } },';
-    echo 'scales: { y: { beginAtZero: true } }';
-    echo '}';
-    echo '});';
-    echo '}';
-    echo '</script>';
+    echo '</tbody>
+            </table>';
+    echo '<script>
+                (function() {
+                    var btn = document.getElementById("toggleGraficoBtn");
+                    var grafico = document.getElementById("grafico");
+                    if (!btn || !grafico) {
+                        return;
+                    }
+                    btn.addEventListener("click", function() {
+                        var oculto = grafico.classList.toggle("is-hidden");
+                        btn.textContent = oculto ? "Mostrar gráfico" : "Ocultar gráfico";
+                    });
+                })();
+            </script>';
+    if (count($movimentos) > 0) {
+        echo '<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>';
+        echo '<script>
+                const labels = ' . $graficoLabelsJson . ';
+                const dadosSaldo = ' . $graficoSaldosJson . ';
+                const ctx = document.getElementById("graficoExtrato");
+                if (ctx) {
+                    new Chart(ctx, {
+                        type: "bar",
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: "Saldo acumulado",
+                                data: dadosSaldo,
+                                backgroundColor: "rgba(31,79,130,0.75)",
+                                borderColor: "rgba(31,79,130,1)",
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: "top"
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                }
+            </script>';
+    }
+
+    echo '</div>';
+    echo '</body>';
+    echo '
+
+</html>';
 }
-echo '</div></body></html>';

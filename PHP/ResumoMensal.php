@@ -79,15 +79,16 @@ function resumoCsvCampo($valor)
 }
 
 $dataInicial = resumoNormalizarData($_GET['DataI'] ?? '');
-$dataFinal = resumoNormalizarData($_GET['DataF'] ?? '');
+$dataFinal = resumoNormalizarData($_GET['DataFim'] ?? '');
 $eventoFiltro = trim((string)($_GET['Evento'] ?? ''));
 $eventoFiltro = substr($eventoFiltro, 0, 100);
 $exportarExcel = (($_GET['export'] ?? '') === 'excel');
 
+
 if (!$dataInicial || !$dataFinal) {
     $hoje = new DateTime('today');
-    $dataInicial = (new DateTime($hoje->format('Y-m-01')))->format('Y-m-d');
-    $dataFinal = (new DateTime($hoje->format('Y-m-t')))->format('Y-m-d');
+    $dataFinal = $hoje->format('Y-m-d');
+    $dataInicial = (clone $hoje)->modify('-6 months')->format('Y-m-d');
 }
 
 if ($dataInicial > $dataFinal) {
@@ -187,8 +188,8 @@ if ($cacheValido) {
     }
 }
 
-$extratoUrl = 'Extrato.php?DataI=' . urlencode($dataInicial) . '&DataF=' . urlencode($dataFinal) . '&usarCache=1';
-$resumoBaseUrl = 'ResumoMensal.php?DataI=' . urlencode($dataInicial) . '&DataF=' . urlencode($dataFinal);
+$extratoUrl = 'Extrato.php?DataI=' . urlencode($dataInicial) . '&DataFim=' . urlencode($dataFinal) . '&usarCache=1';
+$resumoBaseUrl = 'ResumoMensal.php?DataI=' . urlencode($dataInicial) . '&DataFim=' . urlencode($dataFinal);
 if ($eventoFiltro !== '') {
     $extratoUrl .= '&Evento=' . urlencode($eventoFiltro);
     $resumoBaseUrl .= '&Evento=' . urlencode($eventoFiltro);
@@ -258,8 +259,73 @@ td.saldo-pos{color:#067647;font-weight:bold}
 td.saldo-neg{color:#b42318;font-weight:bold}
 tr:nth-child(even){background:#f8fafc}
 tfoot td{font-weight:bold;background:#eef4fa}
-</style></head><body>';
+.grafico-resumo-wrap{
+    width:100vw;
+    left:50%;
+    right:50%;
+    margin-left:-50vw;
+    margin-right:-50vw;
+    margin-bottom:24px;
+    background:#fff;
+    border-radius:8px;
+    padding:12px 0 8px 0;
+    box-shadow:0 1px 4px rgba(0,0,0,.08)
+}
+#graficoResumo{
+    width:100vw!important;
+    min-width:320px;
+    max-width:100vw;
+    height:340px!important;
+    display:block;
+    margin:0 auto;
+}
+</style>';
+echo '<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>';
+// Preparar dados do gráfico
+$graficoLabels = array();
+$graficoSaldos = array();
+foreach ($grupos as $mes => $grupoMes) {
+    $graficoLabels[] = resumoMesRotulo($mes);
+    $graficoSaldos[] = round($grupoMes['saldo'], 2);
+}
+$graficoLabelsJson = json_encode($graficoLabels, JSON_UNESCAPED_UNICODE);
+$graficoSaldosJson = json_encode($graficoSaldos);
 echo '<div class="container">';
+// Gráfico de barras do saldo mensal
+if (count($graficoLabels) > 0) {
+    echo '<div class="grafico-resumo-wrap">';
+    echo '<canvas id="graficoResumo"></canvas>';
+    echo '</div>';
+    echo '<script>
+    const ctxResumo = document.getElementById("graficoResumo").getContext("2d");
+    new Chart(ctxResumo, {
+        type: "bar",
+        data: {
+            labels: ' . $graficoLabelsJson . ',
+            datasets: [{
+                label: "Saldo do mês (R$)",
+                data: ' . $graficoSaldosJson . ',
+                backgroundColor: "#1f4f82",
+                borderRadius: 6,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                title: { display: true, text: "Saldo total por mês" }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { callback: v => v.toLocaleString("pt-BR", {minimumFractionDigits:2}) }
+                }
+            }
+        }
+    });
+    </script>';
+}
 echo '<h2>Resumo mensal dos valores diários</h2>';
 echo '<div class="topo">';
 echo '<a href="../menu.html">Menu</a>';

@@ -152,6 +152,10 @@ mysqli_close($conn);
     <title>Lista de eventos</title>
     <link rel="stylesheet" href="../css/menu.css" />
     <style>
+        .coluna-centralizada {
+            text-align: center !important;
+        }
+
         .hero__content,
         .menu-page {
             max-width: min(110vw, 2100px);
@@ -437,7 +441,7 @@ mysqli_close($conn);
                                         'diaM' => array('título' => 'diaM', 'tooltip' => 'Dia do mês'),
                                         'diaS' => array('título' => 'diaS', 'tooltip' => 'Dia da semana'),
                                         'diaU' => array('título' => 'diaU', 'tooltip' => 'Dia útil'),
-                                        'dataF' => array('título' => 'dataF', 'tooltip' => 'Data fixa'),
+                                        'dataFixa' => array('título' => 'dataFixa', 'tooltip' => 'Data fixa'),
                                         'prorroga' => array('título' => 'prorroga?', 'tooltip' => 'ocorre após dia não útil'),
                                         'UPA' => array('título' => 'UPA', 'tooltip' => 'último, penúltimo ou antepenúltimo dia do mês'),
 
@@ -464,7 +468,8 @@ mysqli_close($conn);
                                         $classe_ativa = ($direcao_ordem === 'ASC') ? 'ativo-asc' : 'ativo-desc';
                                     }
 
-                                    $classe_coluna = $field->name === 'DC' ? 'coluna-dc' : ($field->name === 'ativo' ? 'coluna-ativo' : '');
+                                    $classe_coluna =
+                                        $field->name === 'DC' ? 'coluna-dc' : ($field->name === 'ativo' ? 'coluna-ativo' : (in_array($field->name, ['diario', 'diaM', 'diaS', 'diaU', 'dataF', 'dataFixa', 'prorroga', 'UPA', 'semN', 'semD', 'semM', 'diaR', 'mesR']) ? 'coluna-centralizada' : ''));
                                     $classe_tooltip = $field->name === 'DC' ? 'tooltip-text tooltip-text--dc' : 'tooltip-text';
 
                                     $url_ordenacao = '?ordem=' . urlencode($field->name) . '&direcao=' . urlencode($proxima_direcao);
@@ -520,9 +525,26 @@ mysqli_close($conn);
                                         <?php if (in_array(strtolower($fields[$j]->name), $hiddenColumns, true) || strtolower($fields[$j]->name) === 'id' || strtolower($fields[$j]->name) === 'grupo') {
                                             continue;
                                         } ?>
-                                        <?php $classeColunaDado = $fields[$j]->name === 'DC' ? 'coluna-dc' : ($fields[$j]->name === 'ativo' ? 'coluna-ativo' : ''); ?>
+                                        <?php
+                                        $classeColunaDado =
+                                            $fields[$j]->name === 'DC' ? 'coluna-dc' : ($fields[$j]->name === 'ativo' ? 'coluna-ativo' : (in_array($fields[$j]->name, ['diario', 'diaM', 'diaS', 'diaU', 'dataF', 'dataFixa', 'prorroga', 'UPA', 'semN', 'semD', 'semM', 'diaR', 'mesR']) ? 'coluna-centralizada' : ''));
+                                        ?>
                                         <?php if ($fields[$j]->name === 'valorE'): ?>
                                             <td class="valor-coluna <?php echo $classeColunaDado; ?>"><?php echo number_format((float)$row[$j], 2, ',', '.'); ?></td>
+                                        <?php elseif ($fields[$j]->name === 'dataFixa'): ?>
+                                            <td class="<?php echo $classeColunaDado; ?>">
+                                                <?php
+                                                $data = $row[$j];
+                                                if (!empty($data)) {
+                                                    $dt = DateTime::createFromFormat('Y-m-d', $data);
+                                                    if ($dt) {
+                                                        echo $dt->format('d/m/Y');
+                                                    } else {
+                                                        echo htmlspecialchars((string)$data, ENT_QUOTES, 'UTF-8');
+                                                    }
+                                                }
+                                                ?>
+                                            </td>
                                         <?php else: ?>
                                             <td class="<?php echo $classeColunaDado; ?>"><?php echo htmlspecialchars((string)$row[$j], ENT_QUOTES, 'UTF-8'); ?></td>
                                         <?php endif; ?>

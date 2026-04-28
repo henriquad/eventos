@@ -60,19 +60,17 @@ mysqli_close($conn);
 	<header class="hero">
 		<div class="hero__content">
 			
-			<h1>Tabela de feriados</h1>
+			<h1>Tabela de feriados</h1>			
 			<p class="hero__text">Consulte os feriados cadastrados para planejar prorrogacoes e antecipacoes de eventos.</p>
+			<a class="menu-shell__logout" href="../menu.html">Voltar ao menu</a>
 		</div>
 	</header>
 
 	<main class="menu-page">
 		<section class="menu-shell">
 			<div class="menu-shell__header">
-				<div>
-					<h2>Feriados cadastrados</h2>
-					<p>Referencia para calculo de eventos em dias uteis e excecoes do calendario.</p>
-				</div>
-				<a class="menu-shell__logout" href="../menu.html">Voltar ao menu</a>
+			
+				
 			</div>
 
 			<?php if ($erroConsulta): ?>

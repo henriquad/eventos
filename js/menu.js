@@ -320,11 +320,48 @@ function conectarMascara(input, dataIEl, dataFEl, statusEl, saldoAnteriorEl) {
 }
 
 function inicializarPeriodo() {
-  var dataIEl = document.getElementById("DataI");
-  var dataFEl = document.getElementById("DataF");
+  var dataIEl = document.getElementById("dataI");
+  var dataFEl = document.getElementById("dataFim");
   var saldoAnteriorEl = document.getElementById("SaldoAnterior");
   var statusEl = document.getElementById("periodoStatus");
   var botoes = document.querySelectorAll(".periodo-btn");
+  var dataFixaEl = document.getElementById("dataFixa");
+
+  // Limpa dataFixa ao digitar em dataI ou dataFim
+  if (dataIEl && dataFixaEl) {
+    dataIEl.addEventListener("input", function () {
+      if (dataIEl.value) {
+        dataFixaEl.value = "";
+      }
+    });
+  }
+  if (dataFEl && dataFixaEl) {
+    dataFEl.addEventListener("input", function () {
+      if (dataFEl.value) {
+        dataFixaEl.value = "";
+      }
+    });
+  }
+
+  // Limpa todos os outros campos ao escolher dataFixa
+  if (dataFixaEl) {
+    dataFixaEl.addEventListener("input", function () {
+      if (dataFixaEl.value) {
+        if (dataIEl) dataIEl.value = "";
+        if (dataFEl) dataFEl.value = "";
+        var saldoAnterior = document.getElementById("SaldoAnterior");
+        if (saldoAnterior) saldoAnterior.value = "";
+        var eventoEl = document.getElementById("EventoExtrato");
+        if (eventoEl) eventoEl.value = "";
+        validarPeriodo(
+          dataIEl || { value: "" },
+          dataFEl || { value: "" },
+          statusEl,
+          saldoAnterior || { value: "" },
+        );
+      }
+    });
+  }
 
   if (!dataIEl || !dataFEl) {
     return;
@@ -360,6 +397,25 @@ function inicializarPeriodo() {
   }
 
   validarPeriodo(dataIEl, dataFEl, statusEl, saldoAnteriorEl);
+
+  // Limpa todos os campos ao escolher dataFixa
+  if (dataFixaEl) {
+    dataFixaEl.addEventListener("input", function () {
+      if (dataFixaEl.value) {
+        if (dataIEl) dataIEl.value = "";
+        if (dataFEl) dataFEl.value = "";
+        if (saldoAnteriorEl) saldoAnteriorEl.value = "";
+        var eventoEl = document.getElementById("EventoExtrato");
+        if (eventoEl) eventoEl.value = "";
+        validarPeriodo(
+          dataIEl || { value: "" },
+          dataFEl || { value: "" },
+          statusEl,
+          saldoAnteriorEl || { value: "" },
+        );
+      }
+    });
+  }
 
   if (saldoAnteriorEl) {
     saldoAnteriorEl.addEventListener("input", function () {
@@ -429,8 +485,8 @@ function inicializarPeriodo() {
 
 function inicializarLinkComPeriodo(selector, base) {
   var link = document.querySelector(selector);
-  var dataIEl = document.getElementById("DataI");
-  var dataFEl = document.getElementById("DataF");
+  var dataIEl = document.getElementById("dataI");
+  var dataFEl = document.getElementById("dataFim");
   var saldoAnteriorEl = document.getElementById("SaldoAnterior");
   var eventoEl = document.getElementById("EventoExtrato");
   var incluirSaldoAnterior =
@@ -565,8 +621,8 @@ function inicializarMenuEventos() {
   var botaoLimparDadosLocais = document.getElementById("clearLocalData");
   if (botaoLimparDadosLocais) {
     botaoLimparDadosLocais.addEventListener("click", function () {
-      var dataIEl = document.getElementById("DataI");
-      var dataFEl = document.getElementById("DataF");
+      var dataIEl = document.getElementById("dataI");
+      var dataFEl = document.getElementById("dataFim");
       var saldoAnteriorEl = document.getElementById("SaldoAnterior");
       var eventoEl = document.getElementById("EventoExtrato");
       var statusEl = document.getElementById("periodoStatus");

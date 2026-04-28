@@ -339,18 +339,13 @@ mysqli_close($conn);
 			
 			<h1>Calendario para eventos</h1>
 			<p class="hero__text">Visualize a base de datas de apoio para recorrencias, prazos e organizacao do planejamento.</p>
+			<a class="menu-shell__logout" href="../menu.html">Voltar ao menu</a>
 		</div>
 	</header>
 
 	<main class="menu-page">
 		<section class="menu-shell">
-			<div class="menu-shell__header">
-				<div>
-					<h2>Tabela de datas</h2>
-					<p>Use filtros e paginacao para navegar melhor pelos registros do calendario.</p>
-				</div>
-				<a class="menu-shell__logout" href="../menu.html">Voltar ao menu</a>
-			</div>
+			
 
 			<form method="get" action="tabDatas.php">
 				<div class="filtros-grid">

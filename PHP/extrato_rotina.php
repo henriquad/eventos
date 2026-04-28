@@ -36,29 +36,31 @@ function extratoExecutar($dbcon, $sql, $types = '', ...$params)
     return $afetados;
 }
 
-function extratoNormalizarData($valor)
-{
-    $valor = trim((string)$valor);
-    if ($valor === '') {
+if (!function_exists('extratoNormalizarData')) {
+    function extratoNormalizarData($valor)
+    {
+        $valor = trim((string)$valor);
+        if ($valor === '') {
+            return null;
+        }
+
+        $dtBrCurto = DateTime::createFromFormat('j/n/Y', $valor);
+        if ($dtBrCurto && $dtBrCurto->format('j/n/Y') === $valor) {
+            return $dtBrCurto->format('Y-m-d');
+        }
+
+        $dtBr = DateTime::createFromFormat('d/m/Y', $valor);
+        if ($dtBr && $dtBr->format('d/m/Y') === $valor) {
+            return $dtBr->format('Y-m-d');
+        }
+
+        $dtIso = DateTime::createFromFormat('Y-m-d', $valor);
+        if ($dtIso && $dtIso->format('Y-m-d') === $valor) {
+            return $valor;
+        }
+
         return null;
     }
-
-    $dtBrCurto = DateTime::createFromFormat('j/n/Y', $valor);
-    if ($dtBrCurto && $dtBrCurto->format('j/n/Y') === $valor) {
-        return $dtBrCurto->format('Y-m-d');
-    }
-
-    $dtBr = DateTime::createFromFormat('d/m/Y', $valor);
-    if ($dtBr && $dtBr->format('d/m/Y') === $valor) {
-        return $dtBr->format('Y-m-d');
-    }
-
-    $dtIso = DateTime::createFromFormat('Y-m-d', $valor);
-    if ($dtIso && $dtIso->format('Y-m-d') === $valor) {
-        return $valor;
-    }
-
-    return null;
 }
 
 function extratoPrepararMovtos($dbcon, $apelido, $senha, $dataInicial, $dataFinal)
@@ -85,7 +87,7 @@ function extratoPrepararMovtos($dbcon, $apelido, $senha, $dataInicial, $dataFina
 
         extratoExecutar(
             $dbcon,
-            $insertBase . $selectBase . "INNER JOIN datas ON eventos.dataF = datas.DataMes" . $filtroAtivos . $filtroPeriodoDatas,
+            $insertBase . $selectBase . "INNER JOIN datas ON eventos.dataFixa = datas.DataMes" . $filtroAtivos . $filtroPeriodoDatas,
             'ssss',
             $apelido,
             $senha,
@@ -135,7 +137,7 @@ function extratoPrepararMovtos($dbcon, $apelido, $senha, $dataInicial, $dataFina
 
         extratoExecutar(
             $dbcon,
-            $insertBase . $selectBase . "JOIN datas ON CAST(datas.Util AS UNSIGNED) = 1 WHERE eventos.diario = 'Sim' AND eventos.apelido = ? AND eventos.senha = ? AND LOWER(eventos.ativo) = 'sim' AND datas.DataMes BETWEEN ? AND ?",
+            $insertBase . $selectBase . "JOIN datas ON CAST(datas.Util AS UNSIGNED) = 1 WHERE eventos.diario = 'sim' AND eventos.apelido = ? AND eventos.senha = ? AND LOWER(eventos.ativo) = 'sim' AND datas.DataMes BETWEEN ? AND ?",
             'ssss',
             $apelido,
             $senha,
@@ -229,3 +231,6 @@ function extratoGarantirColunaProrrogaMovtos($dbcon)
         }
     }
 }
+
+// Removido: geração automática de movtos com datas provisórias.
+// Agora a geração deve ser feita apenas via chamada explícita, usando as datas passadas por Extrato.php.

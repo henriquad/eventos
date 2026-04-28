@@ -70,7 +70,7 @@ $diario = getPostValue('diario');
 $diaM = nullIfDefault(getPostValue('diaM'));
 $diaS = nullIfDefault(getPostValue('diaS'));
 $diaU = nullIfDefault(getPostValue('diaU'));
-$dataF = nullIfDefault(getPostValue('dataF'));
+$dataFixa = nullIfDefault(getPostValue('dataFixa'));
 $prorroga = getPostValue('prorroga');
 $UPA = nullIfDefault(getPostValue('UPA'));
 $semN = nullIfDefault(getPostValue('semN'));
@@ -95,7 +95,7 @@ if ($ativo !== 'Sim' && $ativo !== 'Não') {
     $ativo = null;
 }
 
-if ($prorroga !== 'Sim' && $prorroga !== 'Não' && $prorroga !== 'Nulo') {
+if ($prorroga !== 'sim' && $prorroga !== 'não' && $prorroga !== 'nul') {
     $prorroga = null;
 }
 
@@ -130,11 +130,18 @@ if (isBlankValue($grupo)) {
     exit();
 }
 
-// Converte data no formato dd/mm/aaaa para yyyy-mm-dd
-if (!empty($dataF) && preg_match('/^(\d{2})\/(\d{2})\/(\d{4})$/', $dataF, $matches)) {
-    $DataF = "{$matches[3]}-{$matches[2]}-{$matches[1]}";
+
+// Aceita tanto yyyy-mm-dd (padrão do input type=date) quanto dd/mm/aaaa
+if (!empty($dataFixa)) {
+    if (preg_match('/^(\d{2})\/(\d{2})\/(\d{4})$/', $dataFixa, $matches)) {
+        $dataFixa = "{$matches[3]}-{$matches[2]}-{$matches[1]}";
+    } elseif (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $dataFixa, $matches)) {
+        $dataFixa = $dataFixa;
+    } else {
+        $dataFixa = null;
+    }
 } else {
-    $DataF = null;
+    $dataFixa = null;
 }
 
 
@@ -144,7 +151,7 @@ eventosGarantirSchema($dbcon);
 // Insere os dados com prepared statement (proteção contra SQL Injection)
 $sql = "INSERT INTO eventos(
    evento, valorE, grupo, apelido, senha, DC, prorroga, diario, 
-    diaM, diaS, diaU, UPA, dataF, semN, semM, semD, diaR, mesR, ativo,  diaHora
+    diaM, diaS, diaU, UPA, dataFixa, semN, semM, semD, diaR, mesR, ativo,  diaHora
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 $stmt = mysqli_prepare($dbcon, $sql);
@@ -168,7 +175,7 @@ mysqli_stmt_bind_param(
     $diaS,
     $diaU,
     $UPA,
-    $DataF,
+    $dataFixa,
     $semN,
     $semM,
     $semD,

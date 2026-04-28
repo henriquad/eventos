@@ -1,4 +1,62 @@
-﻿// Script de validação e feedback para o formulário de inclusão de eventos
+﻿// Limpa todos os campos de recorrência ao escolher dataFixa
+document.addEventListener("DOMContentLoaded", function () {
+  var dataFixa = document.getElementById("dataFixa");
+  if (dataFixa) {
+    dataFixa.addEventListener("input", function () {
+      if (dataFixa.value) {
+        // Só limpa o campo diário se ele for 'sim'
+        var radioDiarioSim = document.querySelector(
+          'input[name="diario"][value="sim"]',
+        );
+        if (radioDiarioSim && radioDiarioSim.checked) {
+          radioDiarioSim.checked = false;
+        }
+
+        // Limpa todos os selects de recorrência
+        var todosSelects = [
+          document.getElementById("diaM"),
+          document.getElementById("diaS"),
+          document.getElementById("diaU"),
+          document.getElementById("UPA"),
+          document.getElementById("diaR"),
+          document.getElementById("mesR"),
+          document.getElementById("semN"),
+          document.getElementById("semD"),
+          document.getElementById("semM"),
+        ];
+        todosSelects.forEach(function (select) {
+          if (select) {
+            select.selectedIndex = 0;
+            var evt = document.createEvent("HTMLEvents");
+            evt.initEvent("change", true, false);
+            select.dispatchEvent(evt);
+
+            // Força atualização do visual customizado se existir wrapper
+            var wrapper = select.nextElementSibling;
+            if (
+              wrapper &&
+              wrapper.classList &&
+              wrapper.classList.contains("custom-select")
+            ) {
+              wrapper.classList.remove("has-selection");
+              var label = wrapper.querySelector(".custom-select-label");
+              if (label && select.options.length > 0) {
+                label.textContent =
+                  "\u00A0" + select.options[0].textContent.trim();
+              }
+              var optionsLi = wrapper.querySelectorAll(".custom-select-option");
+              optionsLi.forEach(function (li, idx) {
+                li.classList.remove("is-selected");
+                if (idx === 0) li.classList.add("is-selected");
+              });
+            }
+          }
+        });
+      }
+    });
+  }
+});
+// Script de validação e feedback para o formulário de inclusão de eventos
 
 function eachNode(nodeList, callback) {
   for (var i = 0; i < nodeList.length; i++) {
@@ -222,9 +280,18 @@ function inicializarExclusividadePrimeiroFieldset() {
     : [];
 
   function limparRadiosDiario() {
+    // Só limpa se o valor selecionado for 'sim'
+    var radioSim = null;
     eachNode(radiosDiario, function (radio) {
-      radio.checked = false;
+      if (radio.value === "sim" && radio.checked) {
+        radioSim = radio;
+      }
     });
+    if (radioSim) {
+      eachNode(radiosDiario, function (radio) {
+        radio.checked = false;
+      });
+    }
   }
 
   function limparSelects(selects, excecao) {
@@ -286,6 +353,27 @@ function inicializarExclusividadePrimeiroFieldset() {
       limparData(null);
       limparSelects(selectsSegundo, null);
       limparSelects(selectsTerceiro, null);
+
+      // Limpa o campo dataFixa sempre que qualquer select do primeiro grupo mudar
+      var dataFixa = document.getElementById("dataFixa");
+      if (dataFixa && dataFixa.value !== "") {
+        dataFixa.value = "";
+        dispatchChangeEvent(dataFixa);
+      }
+    });
+  });
+
+  // Limpa o campo dataFixa também ao selecionar qualquer radio do primeiro grupo
+  eachNode(radiosDiario, function (radio) {
+    radio.addEventListener("change", function () {
+      if (!radio.checked) {
+        return;
+      }
+      var dataFixa = document.getElementById("dataFixa");
+      if (dataFixa && dataFixa.value !== "") {
+        dataFixa.value = "";
+        dispatchChangeEvent(dataFixa);
+      }
     });
   });
 
@@ -295,10 +383,61 @@ function inicializarExclusividadePrimeiroFieldset() {
         return;
       }
 
-      limparRadiosDiario();
-      limparSelects(selectsPrimeiro, null);
-      limparSelects(selectsSegundo, null);
-      limparSelects(selectsTerceiro, null);
+      // Limpa todos os campos de recorrência ao escolher dataFixa
+      // Limpa todos os radios de diário
+      var radiosDiario = document.querySelectorAll('input[name="diario"]');
+      eachNode(radiosDiario, function (radio) {
+        radio.checked = false;
+      });
+
+      // Limpa todos os selects do primeiro grupo
+      var selectsPrimeiro = [
+        document.getElementById("diaM"),
+        document.getElementById("diaS"),
+        document.getElementById("diaU"),
+        document.getElementById("UPA"),
+      ];
+      var todosSelects = [
+        document.getElementById("diaM"),
+        document.getElementById("diaS"),
+        document.getElementById("diaU"),
+        document.getElementById("UPA"),
+        document.getElementById("diaR"),
+        document.getElementById("mesR"),
+        document.getElementById("semN"),
+        document.getElementById("semD"),
+        document.getElementById("semM"),
+      ];
+      todosSelects.forEach(function (select) {
+        if (select) {
+          select.selectedIndex = 0;
+          // Dispara o evento change para garantir atualização do visual customizado
+          var evt = document.createEvent("HTMLEvents");
+          evt.initEvent("change", true, false);
+          select.dispatchEvent(evt);
+
+          // Força atualização do visual customizado se existir wrapper
+          var wrapper = select.nextElementSibling;
+          if (
+            wrapper &&
+            wrapper.classList &&
+            wrapper.classList.contains("custom-select")
+          ) {
+            wrapper.classList.remove("has-selection");
+            var label = wrapper.querySelector(".custom-select-label");
+            if (label && select.options.length > 0) {
+              label.textContent = comRecuoVisual(select.options[0].textContent);
+            }
+            var optionsLi = wrapper.querySelectorAll(".custom-select-option");
+            eachNode(optionsLi, function (li) {
+              li.classList.remove("is-selected");
+            });
+            if (optionsLi.length > 0) {
+              optionsLi[0].classList.add("is-selected");
+            }
+          }
+        }
+      });
     });
   }
 
@@ -312,6 +451,13 @@ function inicializarExclusividadePrimeiroFieldset() {
       limparSelects(selectsPrimeiro, null);
       limparData(null);
       limparSelects(selectsTerceiro, null);
+
+      // Limpa o campo dataFixa ao selecionar qualquer campo do segundo grupo
+      var dataFixa = document.getElementById("dataFixa");
+      if (dataFixa && dataFixa.value !== "") {
+        dataFixa.value = "";
+        dispatchChangeEvent(dataFixa);
+      }
     });
   });
 
@@ -325,6 +471,13 @@ function inicializarExclusividadePrimeiroFieldset() {
       limparSelects(selectsPrimeiro, null);
       limparData(null);
       limparSelects(selectsSegundo, null);
+
+      // Limpa o campo dataFixa ao selecionar qualquer campo do terceiro grupo
+      var dataFixa = document.getElementById("dataFixa");
+      if (dataFixa && dataFixa.value !== "") {
+        dataFixa.value = "";
+        dispatchChangeEvent(dataFixa);
+      }
     });
   });
 }
@@ -412,7 +565,7 @@ function formatarDataInput(input) {
 // Aplica o formatador aos campos de data
 document.addEventListener("DOMContentLoaded", function () {
   var dataInputs = document.querySelectorAll(
-    'input[type="text"][name="DataM"], input[type="text"][name="DataF"]',
+    'input[type="text"][name="DataM"], input[type="text"][name="dataFixa"]',
   );
   eachNode(dataInputs, function (input) {
     input.addEventListener("input", function () {

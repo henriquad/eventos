@@ -118,6 +118,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     }
 
     $evento = mysqli_fetch_assoc($resultado);
+    // Torna o prorroga padrão "sim" se não estiver definido
+    if (!isset($evento['prorroga']) || $evento['prorroga'] === '' || $evento['prorroga'] === null) {
+        $evento['prorroga'] = 'sim';
+    }
+    // Torna o ativo padrão "sim" se não estiver definido
+    if (!isset($evento['ativo']) || $evento['ativo'] === '' || $evento['ativo'] === null) {
+        $evento['ativo'] = 'sim';
+    }
+    // Torna o diario padrão "não" se não estiver definido
+    if (!isset($evento['diario']) || $evento['diario'] === '' || $evento['diario'] === null) {
+        $evento['diario'] = 'não';
+    }
     mysqli_stmt_close($stmtSelect);
     mysqli_close($dbcon);
 
@@ -196,7 +208,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                                 <label for="prorrogaN">Não, não prorroga, pois tem que pagar ou receber antes do feriado ou fim de semana</label>
                             </div>
                             <div class="radio-option">
-                                <input id="prorrogaNulo" type="radio" value="Nulo" name="prorroga" <?php echo checkedAttr(($evento['prorroga'] ?? '') === 'Nulo'); ?> />
+                                <input id="prorrogaNulo" type="radio" value="nulo" name="prorroga" <?php echo checkedAttr(strtolower($evento['prorroga'] ?? '') === 'nulo'); ?> />
                                 <label for="prorrogaNulo">Nulo, pois evento não ocorre se for feriado ou fim de semana</label>
                             </div>
                         </fieldset>
@@ -224,37 +236,37 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
                         <select id="diaM" name="diaM">
                             <option value="0">escolha o dia do mês ou decêncio...</option>
-                            <option value="1">1 ou 1º decêncio</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="8">8</option>
-                            <option value="9">9</option>
-                            <option value="10">10</option>
-                            <option value="11">11 ou 2º decêncio</option>
-                            <option value="12">12</option>
-                            <option value="13">13</option>
-                            <option value="14">14</option>
-                            <option value="15">15</option>
-                            <option value="16">16</option>
-                            <option value="17">17</option>
-                            <option value="18">18</option>
-                            <option value="19">19</option>
-                            <option value="20">20</option>
-                            <option value="21">21 ou 3º decêncio</option>
-                            <option value="22">22</option>
-                            <option value="23">23</option>
-                            <option value="24">24</option>
-                            <option value="25">25</option>
-                            <option value="26">26</option>
-                            <option value="27">27</option>
-                            <option value="28">28</option>
-                            <option value="29">29</option>
-                            <option value="30">30</option>
-                            <option value="31">31</option>
+                            <option value="1" <?php echo selectedAttr($evento['diaM'] ?? '0', '1'); ?>>1 ou 1º decêncio</option>
+                            <option value="2" <?php echo selectedAttr($evento['diaM'] ?? '0', '2'); ?>>2</option>
+                            <option value="3" <?php echo selectedAttr($evento['diaM'] ?? '0', '3'); ?>>3</option>
+                            <option value="4" <?php echo selectedAttr($evento['diaM'] ?? '0', '4'); ?>>4</option>
+                            <option value="5" <?php echo selectedAttr($evento['diaM'] ?? '0', '5'); ?>>5</option>
+                            <option value="6" <?php echo selectedAttr($evento['diaM'] ?? '0', '6'); ?>>6</option>
+                            <option value="7" <?php echo selectedAttr($evento['diaM'] ?? '0', '7'); ?>>7</option>
+                            <option value="8" <?php echo selectedAttr($evento['diaM'] ?? '0', '8'); ?>>8</option>
+                            <option value="9" <?php echo selectedAttr($evento['diaM'] ?? '0', '9'); ?>>9</option>
+                            <option value="10" <?php echo selectedAttr($evento['diaM'] ?? '0', '10'); ?>>10</option>
+                            <option value="11" <?php echo selectedAttr($evento['diaM'] ?? '0', '11'); ?>>11 ou 2º decêncio</option>
+                            <option value="12" <?php echo selectedAttr($evento['diaM'] ?? '0', '12'); ?>>12</option>
+                            <option value="13" <?php echo selectedAttr($evento['diaM'] ?? '0', '13'); ?>>13</option>
+                            <option value="14" <?php echo selectedAttr($evento['diaM'] ?? '0', '14'); ?>>14</option>
+                            <option value="15" <?php echo selectedAttr($evento['diaM'] ?? '0', '15'); ?>>15</option>
+                            <option value="16" <?php echo selectedAttr($evento['diaM'] ?? '0', '16'); ?>>16</option>
+                            <option value="17" <?php echo selectedAttr($evento['diaM'] ?? '0', '17'); ?>>17</option>
+                            <option value="18" <?php echo selectedAttr($evento['diaM'] ?? '0', '18'); ?>>18</option>
+                            <option value="19" <?php echo selectedAttr($evento['diaM'] ?? '0', '19'); ?>>19</option>
+                            <option value="20" <?php echo selectedAttr($evento['diaM'] ?? '0', '20'); ?>>20</option>
+                            <option value="21" <?php echo selectedAttr($evento['diaM'] ?? '0', '21'); ?>>21 ou 3º decêncio</option>
+                            <option value="22" <?php echo selectedAttr($evento['diaM'] ?? '0', '22'); ?>>22</option>
+                            <option value="23" <?php echo selectedAttr($evento['diaM'] ?? '0', '23'); ?>>23</option>
+                            <option value="24" <?php echo selectedAttr($evento['diaM'] ?? '0', '24'); ?>>24</option>
+                            <option value="25" <?php echo selectedAttr($evento['diaM'] ?? '0', '25'); ?>>25</option>
+                            <option value="26" <?php echo selectedAttr($evento['diaM'] ?? '0', '26'); ?>>26</option>
+                            <option value="27" <?php echo selectedAttr($evento['diaM'] ?? '0', '27'); ?>>27</option>
+                            <option value="28" <?php echo selectedAttr($evento['diaM'] ?? '0', '28'); ?>>28</option>
+                            <option value="29" <?php echo selectedAttr($evento['diaM'] ?? '0', '29'); ?>>29</option>
+                            <option value="30" <?php echo selectedAttr($evento['diaM'] ?? '0', '30'); ?>>30</option>
+                            <option value="31" <?php echo selectedAttr($evento['diaM'] ?? '0', '31'); ?>>31</option>
                         </select>
                         <br>
 
@@ -291,8 +303,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
                         <br>
                         <br>
-                        <label for="dataF">ou escolha uma data em que o evento ocorre...</label>
-                        <input type="date" id="dataF" style="margin:12px;" name="dataF" value="<?php echo h($evento['dataF']); ?>" />
+                        <label for="dataFixa">ou escolha uma data em que o evento ocorre...</label>
+                        <input type="date" id="dataFixa" style="margin:12px;" name="dataFixa" value="<?php echo h($evento['dataFixa']); ?>" />
                     </fieldset>
 
                 </section>
@@ -388,6 +400,55 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         </footer>
 
         <script src="../js/incluir.js"></script>
+        <script>
+            // Garante que ao abrir a tela de edição, se dataFixa vier preenchida, limpa os outros campos de recorrência
+            document.addEventListener("DOMContentLoaded", function() {
+                var dataFixa = document.getElementById("dataFixa");
+                if (dataFixa && dataFixa.value) {
+                    // Limpa todos os radios de diário
+                    var radiosDiario = document.querySelectorAll('input[name="diario"]');
+                    radiosDiario.forEach(function(radio) {
+                        radio.checked = false;
+                    });
+
+                    // Limpa todos os selects de recorrência
+                    var todosSelects = [
+                        document.getElementById("diaM"),
+                        document.getElementById("diaS"),
+                        document.getElementById("diaU"),
+                        document.getElementById("UPA"),
+                        document.getElementById("diaR"),
+                        document.getElementById("mesR"),
+                        document.getElementById("semN"),
+                        document.getElementById("semD"),
+                        document.getElementById("semM")
+                    ];
+                    todosSelects.forEach(function(select) {
+                        if (select) {
+                            select.selectedIndex = 0;
+                            var evt = document.createEvent("HTMLEvents");
+                            evt.initEvent("change", true, false);
+                            select.dispatchEvent(evt);
+
+                            // Força atualização do visual customizado se existir wrapper
+                            var wrapper = select.nextElementSibling;
+                            if (wrapper && wrapper.classList && wrapper.classList.contains("custom-select")) {
+                                wrapper.classList.remove("has-selection");
+                                var label = wrapper.querySelector(".custom-select-label");
+                                if (label && select.options.length > 0) {
+                                    label.textContent = "\u00A0" + select.options[0].textContent.trim();
+                                }
+                                var optionsLi = wrapper.querySelectorAll(".custom-select-option");
+                                optionsLi.forEach(function(li, idx) {
+                                    li.classList.remove("is-selected");
+                                    if (idx === 0) li.classList.add("is-selected");
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+        </script>
     </body>
 
     </html>
@@ -411,7 +472,7 @@ $diario = getPostValue('diario');
 $diaM = nullIfDefault(getPostValue('diaM'));
 $diaS = nullIfDefault(getPostValue('diaS'));
 $diaU = nullIfDefault(getPostValue('diaU'));
-$dataF = nullIfDefault(getPostValue('dataF'));
+$dataFixa = nullIfDefault(getPostValue('dataFixa'));
 $prorroga = getPostValue('prorroga');
 $UPA = nullIfDefault(getPostValue('UPA'));
 $semN = nullIfDefault(getPostValue('semN'));
@@ -446,11 +507,36 @@ if ($ativo !== 'sim' && $ativo !== 'não') {
     $ativo = null;
 }
 
-if ($prorroga !== 'sim' && $prorroga !== 'não' && $prorroga !== 'nulo') {
+if ($prorroga !== 'sim' && $prorroga !== 'não' && strtolower($prorroga) !== 'nulo') {
     $prorroga = null;
 }
 
+
 $camposObrigatorios = array();
+
+// Validação: pelo menos um campo de recorrência deve ser preenchido
+$recorrenciaPreenchida = false;
+if (
+    ($diario === 'sim' || $diario === 'não') ||
+    (!empty($diaM) && $diaM !== '0') ||
+    (!empty($diaS)) ||
+    (!empty($diaU) && $diaU !== '0') ||
+    (!empty($UPA) && $UPA !== '0') ||
+    (!empty($dataFixa)) ||
+    (!empty($diaR) && $diaR !== '0') ||
+    (!empty($mesR) && $mesR !== '0') ||
+    (!empty($semN)) ||
+    (!empty($semD)) ||
+    (!empty($semM))
+) {
+    $recorrenciaPreenchida = true;
+}
+
+if (!$recorrenciaPreenchida) {
+    mysqli_close($dbcon);
+    header('Location: ListaEventos.php?erro=1&msg=recorrencia_obrigatoria&id=' . $id);
+    exit();
+}
 
 if (isBlankValue($evento)) {
     $camposObrigatorios[] = 'Evento';
@@ -464,12 +550,11 @@ if ($DC === null) {
     $camposObrigatorios[] = 'DC';
 }
 
-if ($prorroga === null) {
-    $camposObrigatorios[] = 'Prorroga';
-}
-
+// Remove qualquer menção a 'Prorroga' como campo obrigatório
 if (!empty($camposObrigatorios)) {
-    $campos = urlencode(implode(', ', $camposObrigatorios));
+    $campos = urlencode(implode(', ', array_filter($camposObrigatorios, function ($campo) {
+        return strtolower($campo) !== 'prorroga';
+    })));
     mysqli_close($dbcon);
     header('Location: ListaEventos.php?erro=1&msg=campos_obrigatorios&campos=' . $campos . '&id=' . $id);
     exit();
@@ -477,10 +562,10 @@ if (!empty($camposObrigatorios)) {
 
 $diaHora = date('Y-m-d H:i:s');
 
-if (!empty($dataF) && preg_match('/^(\d{2})\/(\d{2})\/(\d{4})$/', $dataF, $matches)) {
-    $dataF = "{$matches[3]}-{$matches[2]}-{$matches[1]}";
-} elseif (empty($dataF)) {
-    $dataF = null;
+if (!empty($dataFixa) && preg_match('/^(\d{2})\/(\d{2})\/(\d{4})$/', $dataFixa, $matches)) {
+    $dataFixa = "{$matches[3]}-{$matches[2]}-{$matches[1]}";
+} elseif (empty($dataFixa)) {
+    $dataFixa = null;
 }
 
 $sqlExiste = "SELECT id FROM eventos WHERE id = ? AND apelido = ? AND senha = ? LIMIT 1";
@@ -523,7 +608,7 @@ $sql = "UPDATE eventos SET
     diaS = ?,
     diaU = ?,
     UPA = ?,
-    dataF = ?,
+    dataFixa = ?,
     semN = ?,
     semM = ?,
     semD = ?,
@@ -554,7 +639,7 @@ mysqli_stmt_bind_param(
     $diaS,
     $diaU,
     $UPA,
-    $dataF,
+    $dataFixa,
     $semN,
     $semM,
     $semD,

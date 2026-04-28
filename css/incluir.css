@@ -39,11 +39,7 @@ a {
   margin: 2rem auto 1rem;
   padding: 2rem;
   border-radius: 26px;
-  background: linear-gradient(
-    135deg,
-    rgba(33, 76, 120, 0.96),
-    rgba(22, 50, 79, 0.92)
-  );
+  background: linear-gradient(120deg, #2563eb 60%, #60a5fa 100%);
   color: #fffdf9;
   box-shadow: var(--shadow);
 }
