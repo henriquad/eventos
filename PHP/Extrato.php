@@ -457,38 +457,38 @@ echo '<style>
         .btn-grafico:hover {
             background: #055d38
         }
-
-        .grafico {
+    
+        #grafico {
             background: #fff;
             border: 1px solid #dbe2ea;
             border-radius: 6px;
-            padding: 12px;
-            margin-bottom: 12px
-        }
+            margin-bottom: 12px;
+            }
 
         .grafico.is-hidden {
-            display: none
+            display: none;
         }
 
         .grafico h3 {
             margin: 0 0 10px 0;
-            font-size: 16px
+            font-size: 16px;
         }
 
         .grafico-wrap {
+        minBarLength: 2,
             position: relative;
-            width: 100vw;
-            left: 50%;
-            right: 50%;
-            margin-left: -50vw;
-            margin-right: -50vw;
+            width: 1100px;
+            left: 5px;
+            right: 5px;
+            margin-left: 5px;
+            margin-right: 5px;
             height: 480px;
             min-height: 320px;
             max-height: 600px;
-            max-width: 100vw;
-            background: #fff;
+            max-width: 1200vw;
+            background: #f2f4f7;
             border-radius: 8px;
-            padding: 12px 0 8px 0;
+            padding: 2px 0 8px 0;
             box-shadow: 0 1px 4px rgba(0,0,0,.08);
         }
 
@@ -654,7 +654,7 @@ echo '<h3>Saldo Final Acumulado por Dia</h3>';
 if (count($movimentos) === 0) {
     echo '<p>Sem dados para gerar gráfico no período selecionado.</p>';
 } else {
-    echo '<div class="grafico-wrap"><canvas id="graficoExtrato" style="width:100vw!important;min-width:320px;max-width:100vw;height:100%!important;min-height:320px;max-height:600px;display:block;margin:0 auto;"></canvas></div>';
+    echo '<div class="grafico-wrap"><canvas id="graficoExtrato" style="width:1100px;height:400px;"></canvas></div>';
 }
 echo '</div>';
 

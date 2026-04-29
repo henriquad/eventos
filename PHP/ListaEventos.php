@@ -424,7 +424,7 @@ mysqli_close($conn);
                                     <?php if ($index > $lastVisibleIndex) {
                                         continue;
                                     } ?>
-                                    <?php if (in_array(strtolower($field->name), $hiddenColumns, true) || strtolower($field->name) === 'id' || strtolower($field->name) === 'grupo') {
+                                    <?php if (in_array(strtolower($field->name), $hiddenColumns, true) || strtolower($field->name) === 'id') {
                                         continue;
                                     } ?>
                                     <?php
@@ -522,7 +522,7 @@ mysqli_close($conn);
                                     </td>
 
                                     <?php for ($j = 0; $j <= $lastVisibleIndex; $j++): ?>
-                                        <?php if (in_array(strtolower($fields[$j]->name), $hiddenColumns, true) || strtolower($fields[$j]->name) === 'id' || strtolower($fields[$j]->name) === 'grupo') {
+                                        <?php if (in_array(strtolower($fields[$j]->name), $hiddenColumns, true) || strtolower($fields[$j]->name) === 'id') {
                                             continue;
                                         } ?>
                                         <?php

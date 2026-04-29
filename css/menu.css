@@ -55,12 +55,24 @@ body {
   padding: 1.1rem 1.5rem 0.6rem;
 }
 
+.divfff {
+  display:flex;
+  justify-content: center;
+}
 .hero__content {
   max-width: 1180px;
   margin: 0 auto;
   padding: 2.5rem 2rem 2rem;
   border-radius: 32px;
-  background: linear-gradient(120deg, #2563eb 60%, #60a5fa 100%);
+  
+
+  background: linear-gradient(
+    145deg,
+    rgba(33, 76, 120, 0.96),
+    rgba(20, 53, 81, 0.94)
+  );
+
+  
   color: #fff;
   box-shadow: var(--shadow);
   position: relative;
