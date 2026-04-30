@@ -447,19 +447,20 @@ mysqli_close($conn);
                                         'valorE' => array('título' => 'Valor R$', 'tooltip' => 'Valor financeiro'),
                                         'DC' => array('título' => 'DC', 'tooltip' => 'Débito ou crédito'),
                                         'diario' => array('título' => 'Diario?', 'tooltip' => 'ocorre todos os dias?'),
-                                        'diaM' => array('título' => 'diaM', 'tooltip' => 'Dia do mês'),
-                                        'diaS' => array('título' => 'diaS', 'tooltip' => 'Dia da semana'),
-                                        'diaU' => array('título' => 'diaU', 'tooltip' => 'Dia útil'),
-                                        'dataFixa' => array('título' => 'dataFixa', 'tooltip' => 'Data fixa'),
+                                        'dataFixa' => array('título' => 'Data fixa', 'tooltip' => 'Data fixa'),
+                                        'diaM' => array('título' => 'Dia do mês', 'tooltip' => 'Dia do mês'),
+                                        'diaS' => array('título' => 'Dia da semana', 'tooltip' => 'Dia da semana'),
+                                        'diaU' => array('título' => 'Dia útil', 'tooltip' => 'Dia útil'),
+                                        
                                         'prorroga' => array('título' => 'prorroga?', 'tooltip' => 'ocorre após dia não útil'),
                                         'UPA' => array('título' => 'UPA', 'tooltip' => 'último, penúltimo ou antepenúltimo dia do mês'),
 
-                                        'semN' => array('título' => 'semN', 'tooltip' => 'ordem da semana no mês '),
-                                        'semD' => array('título' => 'semD', 'tooltip' => 'dia da semana '),
-                                        'semM' => array('título' => 'semM', 'tooltip' => 'número do mês '),
+                                        'semN' => array('título' => 'Ordem da semana no mês', 'tooltip' => 'ordem da semana no mês '),
+                                        'semD' => array('título' => 'Dia da semana', 'tooltip' => 'dia da semana '),
+                                        'semM' => array('título' => 'Número do mês', 'tooltip' => 'número do mês '),
 
-                                        'diaR' => array('título' => 'diaR', 'tooltip' => 'dia que repete '),
-                                        'mesR' => array('título' => 'mesR', 'tooltip' => 'mês que repete '),
+                                        'diaR' => array('título' => 'Dia que repete', 'tooltip' => 'dia que repete '),
+                                        'mesR' => array('título' => 'Mês que repete', 'tooltip' => 'mês que repete '),
                                         'ativo' => array('título' => 'ativo?', 'tooltip' => 'ou inativo?'),
 
                                     );
