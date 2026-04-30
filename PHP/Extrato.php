@@ -582,13 +582,10 @@ if (isset($_GET['DataI']) && isset($_GET['DataF'])) {
     $dataFinalPadrao = date('Y-m-d', strtotime('+1 year'));
 }
 echo '<form class="filtro filtro-form" method="get" action="Extrato.php" style="margin-bottom:12px;" onsubmit="return prepararDatasFiltro(this)">';
-echo '<div style="display:flex;gap:16px;align-items:end;">';
-echo '<div><label for="DataI">Data inicial</label><input type="text" id="DataI" name="DataI" placeholder="dd/mm/aaaa" inputmode="numeric" autocomplete="off" value="' . htmlspecialchars(extratoFormatoBr($dataInicialPadrao), ENT_QUOTES, 'UTF-8') . '" style="min-width:120px;"></div>';
-echo '<div><label for="DataFim">Data final</label><input type="text" id="DataFim" name="DataF" placeholder="dd/mm/aaaa" inputmode="numeric" autocomplete="off" value="' . htmlspecialchars(extratoFormatoBr($dataFinalPadrao), ENT_QUOTES, 'UTF-8') . '" style="min-width:120px;"></div>';
+echo '<div style="display:flex;gap:8px;align-items:end;">';
+echo '<div><label for="DataI">Data inicial</label><input type="text" id="DataI" name="DataI" placeholder="dd/mm/aaaa" inputmode="numeric" autocomplete="off" value="' . htmlspecialchars(extratoFormatoBr($dataInicialPadrao), ENT_QUOTES, 'UTF-8') . '" style="width:80px;min-width:80px;"></div>';
+echo '<div><label for="DataFim">Data final</label><input type="text" id="DataFim" name="DataF" placeholder="dd/mm/aaaa" inputmode="numeric" autocomplete="off" value="' . htmlspecialchars(extratoFormatoBr($dataFinalPadrao), ENT_QUOTES, 'UTF-8') . '" style="width:80px;min-width:80px;"></div>';
 
-// Botões de período rápido ao lado da data final
-echo '<div style="display:flex;gap:5px;align-items:end;margin-left:10px;">';
-echo '<button type="submit" class="periodo-rapido-btn" style="min-width:100px;">Gerar movimentos</button>';
 // Mês atual
 $mesAtualInicioJs = htmlspecialchars($mesAtualInicio, ENT_QUOTES, 'UTF-8');
 $mesAtualFimJs = htmlspecialchars($mesAtualFim, ENT_QUOTES, 'UTF-8');
@@ -596,9 +593,14 @@ $anoAtualInicioJs = htmlspecialchars($anoAtualInicio, ENT_QUOTES, 'UTF-8');
 $anoAtualFimJs = htmlspecialchars($anoAtualFim, ENT_QUOTES, 'UTF-8');
 $hojeJs = htmlspecialchars($hoje, ENT_QUOTES, 'UTF-8');
 $proximos30FimJs = htmlspecialchars($proximos30Fim, ENT_QUOTES, 'UTF-8');
-echo '<button type="button" class="periodo-rapido-btn" onclick="setPeriodoRapido(\'' . $mesAtualInicioJs . '\', \' ' . $mesAtualFimJs . '\')">Mês atual</button>';
-echo '<button type="button" class="periodo-rapido-btn" onclick="setPeriodoRapido(\'' . $anoAtualInicioJs . '\', \' ' . $anoAtualFimJs . '\')">Ano atual</button>';
-echo '<button type="button" class="periodo-rapido-btn" onclick="setPeriodoRapido(\'' . $hojeJs . '\', \' ' . $proximos30FimJs . '\')">Próximos 30 dias</button>';
+echo '<button type="button" class="periodo-rapido-btn" onclick="setPeriodoRapido(\'' . $mesAtualInicioJs . '\', \'' . $mesAtualFimJs . '\')">Gerar p/ mês atual</button>';
+echo '<button type="button" class="periodo-rapido-btn" onclick="setPeriodoRapido(\'' . $anoAtualInicioJs . '\', \'' . $anoAtualFimJs . '\')">Gerar p/ ano atual</button>';
+echo '<button type="button" class="periodo-rapido-btn" onclick="setPeriodoRapido(\'' . $hojeJs . '\', \'' . $proximos30FimJs . '\')">Gerar p/ os próximos 30 dias</button>';
+
+// Botões de período rápido ao lado da data final
+echo '<div style="display:flex;gap:5px;align-items:end;margin-left:10px;">';
+echo '<button type="submit" class="periodo-rapido-btn" style="font-style: italic; min-width:100px;">Gerar p/ período digitado</button>';
+
 echo '</div>';
 
 echo '</div>';
@@ -609,6 +611,10 @@ echo "<script>
                 function setPeriodoRapido(di, df) {
                     document.getElementById('DataI').value = di.split('-').reverse().join('/');
                     document.getElementById('DataFim').value = df.split('-').reverse().join('/');
+                    var form = document.getElementById('DataI').form;
+                    if (prepararDatasFiltro(form)) {
+                        form.submit();
+                    }
                 }
 
                 function prepararDatasFiltro(form) {

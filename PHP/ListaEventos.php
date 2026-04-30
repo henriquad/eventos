@@ -366,6 +366,15 @@ mysqli_close($conn);
             visibility: visible;
         }
 
+        /* Remover bordas entre as colunas de recorrência semanal (semN, semD, semM) */
+        .col-semN { border-right: none !important; }
+        .col-semD { border-left: none !important; border-right: none !important; }
+        .col-semM { border-left: none !important; }
+
+        /* Remover bordas entre diaR e mesR */
+        .col-diaR { border-right: none !important; }
+        .col-mesR { border-left: none !important; }
+
         @media (max-width: 900px) {
 
             .hero__content,
@@ -419,7 +428,7 @@ mysqli_close($conn);
                     <table>
                         <thead>
                             <tr>
-                                <th class="col-acoes">Açoes</th>
+                                <th class="col-acoes">Ações</th>
                                 <?php foreach ($fields as $index => $field): ?>
                                     <?php if ($index > $lastVisibleIndex) {
                                         continue;
@@ -469,7 +478,7 @@ mysqli_close($conn);
                                     }
 
                                     $classe_coluna =
-                                        $field->name === 'DC' ? 'coluna-dc' : ($field->name === 'ativo' ? 'coluna-ativo' : (in_array($field->name, ['diario', 'diaM', 'diaS', 'diaU', 'dataF', 'dataFixa', 'prorroga', 'UPA', 'semN', 'semD', 'semM', 'diaR', 'mesR']) ? 'coluna-centralizada' : ''));
+                                        ($field->name === 'DC' ? 'coluna-dc' : ($field->name === 'ativo' ? 'coluna-ativo' : (in_array($field->name, ['diario', 'diaM', 'diaS', 'diaU', 'dataF', 'dataFixa', 'prorroga', 'UPA', 'semN', 'semD', 'semM', 'diaR', 'mesR']) ? 'coluna-centralizada' : ''))) . ' col-' . $field->name;
                                     $classe_tooltip = $field->name === 'DC' ? 'tooltip-text tooltip-text--dc' : 'tooltip-text';
 
                                     $url_ordenacao = '?ordem=' . urlencode($field->name) . '&direcao=' . urlencode($proxima_direcao);
@@ -527,7 +536,7 @@ mysqli_close($conn);
                                         } ?>
                                         <?php
                                         $classeColunaDado =
-                                            $fields[$j]->name === 'DC' ? 'coluna-dc' : ($fields[$j]->name === 'ativo' ? 'coluna-ativo' : (in_array($fields[$j]->name, ['diario', 'diaM', 'diaS', 'diaU', 'dataF', 'dataFixa', 'prorroga', 'UPA', 'semN', 'semD', 'semM', 'diaR', 'mesR']) ? 'coluna-centralizada' : ''));
+                                            ($fields[$j]->name === 'DC' ? 'coluna-dc' : ($fields[$j]->name === 'ativo' ? 'coluna-ativo' : (in_array($fields[$j]->name, ['diario', 'diaM', 'diaS', 'diaU', 'dataF', 'dataFixa', 'prorroga', 'UPA', 'semN', 'semD', 'semM', 'diaR', 'mesR']) ? 'coluna-centralizada' : ''))) . ' col-' . $fields[$j]->name;
                                         ?>
                                         <?php if ($fields[$j]->name === 'valorE'): ?>
                                             <td class="valor-coluna <?php echo $classeColunaDado; ?>"><?php echo number_format((float)$row[$j], 2, ',', '.'); ?></td>
