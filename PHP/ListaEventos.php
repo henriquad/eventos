@@ -399,7 +399,7 @@ mysqli_close($conn);
                 <button type="button" onclick="window.location.href='../Incluir.html'" class="icon-button" title="Incluir novo evento">
                     <img src="../images/new.png" alt="Incluir novo evento" style="vertical-align: middle; width: 64px; height: 64px;">
                 </button>
-                <a class="menu-shell__logout" href="../menu.html">Voltar ao menu</a>
+                <a class="menu-shell__logout" href="../Php/Extrato.php">Ir p/ ao Extrato</a>
             </div>
         </div>
     </header>
