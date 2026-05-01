@@ -86,6 +86,8 @@ $totalPeriodoCredito = 0.0;
 $totalPeriodoSaldoNet = 0.0; // Net saldo for the entire period
 $saldoAcumuladoGeral = $saldoAnterior; // Overall accumulated balance
 $movimentosCache = $movimentosCache ?? null;
+$diasUteisPorMes = array();
+
 if (!$cacheValido || !$movimentosCache) {
     // Buscar do banco de dados
     $apelido = $_SESSION['apelido'] ?? '';
@@ -94,9 +96,41 @@ if (!$cacheValido || !$movimentosCache) {
     if ($apelido && $senha && $dataInicial && $dataFinal) {
         $dbcon = new mysqli('MYSQL8002.site4now.net', 'a90b7e_baseh', 'Amanti_#9', 'db_a90b7e_baseh');
         if (!$dbcon->connect_error) {
-            $sql = "SELECT d.DataMes AS dataM, m.grupo, m.DC, m.ValorE FROM movtos m INNER JOIN datas d ON CAST(IFNULL(d.DiaUtil, 0) AS UNSIGNED) = CAST(IFNULL(m.diaCorreto, 0) AS UNSIGNED) AND CAST(d.M AS UNSIGNED) = CAST(m.M AS UNSIGNED) AND CAST(d.A AS UNSIGNED) = CAST(m.A AS UNSIGNED) WHERE m.Apelido = ? AND m.senha = ? AND d.DataMes BETWEEN ? AND ? AND IFNULL(m.diaCorreto, 0) > 0 AND CAST(IFNULL(d.Util, 0) AS UNSIGNED) = 1 ORDER BY d.DataMes ASC, m.id ASC";
-            $stmt = $dbcon->prepare($sql);
-            $stmt->bind_param('ssss', $apelido, $senha, $dataInicial, $dataFinal);
+            // Consulta para contar dias úteis por mês no período
+            $sqlDias = "SELECT SUBSTRING(DataMes, 1, 7) as mes, COUNT(*) as qtd 
+                        FROM datas 
+                        WHERE DataMes BETWEEN ? AND ? AND CAST(Util AS UNSIGNED) = 1 
+                        GROUP BY SUBSTRING(DataMes, 1, 7)";
+            $stmtDias = $dbcon->prepare($sqlDias);
+            $stmtDias->bind_param('ss', $dataInicial, $dataFinal);
+            $stmtDias->execute();
+            $resDias = $stmtDias->get_result();
+            while ($rowD = $resDias->fetch_assoc()) {
+                $diasUteisPorMes[$rowD['mes']] = (int)$rowD['qtd'];
+            }
+            $stmtDias->close();
+
+            $sql = "SELECT d.DataMes AS dataM, m.grupo, m.DC, m.ValorE 
+                    FROM movtos m 
+                    INNER JOIN datas d ON CAST(IFNULL(d.DiaUtil, 0) AS UNSIGNED) = CAST(IFNULL(m.diaCorreto, 0) AS UNSIGNED) 
+                        AND CAST(d.M AS UNSIGNED) = CAST(m.M AS UNSIGNED) 
+                        AND CAST(d.A AS UNSIGNED) = CAST(m.A AS UNSIGNED) 
+                    WHERE m.Apelido = ? AND m.senha = ? AND d.DataMes BETWEEN ? AND ? 
+                        AND IFNULL(m.diaCorreto, 0) > 0 
+                        AND CAST(IFNULL(d.Util, 0) AS UNSIGNED) = 1";
+            
+            if ($eventoFiltro !== '') {
+                $sql .= " AND m.evento LIKE ?";
+                $sql .= " ORDER BY d.DataMes ASC, m.id ASC";
+                $stmt = $dbcon->prepare($sql);
+                $eventoFiltroLike = '%' . $eventoFiltro . '%';
+                $stmt->bind_param('sssss', $apelido, $senha, $dataInicial, $dataFinal, $eventoFiltroLike);
+            } else {
+                $sql .= " ORDER BY d.DataMes ASC, m.id ASC";
+                $stmt = $dbcon->prepare($sql);
+                $stmt->bind_param('ssss', $apelido, $senha, $dataInicial, $dataFinal);
+            }
+
             $stmt->execute();
             $res = $stmt->get_result();
             while ($row = $res->fetch_assoc()) {
@@ -124,6 +158,7 @@ foreach ($movimentosCache as $mov) {
             'credito' => 0.0,
             'saldo_net_mes' => 0.0, // Net saldo for the current month
             'saldo_acumulado_mes' => 0.0, // Accumulated saldo up to the end of this month
+            'qtd_dias_uteis' => $diasUteisPorMes[$dataMes] ?? 0,
             'itens' => array()
         );
         $mesesOrdenados[] = $dataMes; // Keep track of month order
@@ -174,6 +209,7 @@ if ($eventoFiltro !== '') {
     $extratoUrl .= '&Evento=' . urlencode($eventoFiltro);
     $resumoBaseUrl .= '&Evento=' . urlencode($eventoFiltro);
 }
+$limparEventoUrl = 'ResumoMensal.php?DataI=' . urlencode($dataInicial) . '&DataF=' . urlencode($dataFinal) . '&SaldoAnterior=' . urlencode((string)$saldoAnterior);
 
 if ($exportarExcel) {
     $nomeArquivo = 'resumo_mensal_' . str_replace('-', '', $dataInicial) . '_a_' . str_replace('-', '', $dataFinal) . '.csv';
@@ -239,6 +275,12 @@ td.saldo-pos{color:#067647;font-weight:bold}
 td.saldo-neg{color:#b42318;font-weight:bold}
 tr:nth-child(even){background:#f8fafc}
 tfoot td{font-weight:bold;background:#eef4fa}
+.filtro-form{background:#fff;border:1px solid #dbe2ea;border-radius:6px;padding:10px 12px;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.filtro-form label{font-size:13px;color:#344054;display:block;margin-bottom:4px}
+.filtro-form input{height:36px;padding:6px 10px;border:1px solid #cfd8e3;border-radius:6px;min-width:260px}
+.filtro-form button,.filtro-form .btn-limpar{height:36px;padding:0 14px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border:none;cursor:pointer}
+.filtro-form button{background:#1f4f82;color:#fff}
+.filtro-form .btn-limpar{background:#eef2f7;color:#1f4f82}
 </style>';
 echo '<div class="container">';
 echo '<h2>Resumo mensal dos valores diários</h2>';
@@ -248,6 +290,20 @@ echo '<a href="' . htmlspecialchars($extratoUrl, ENT_QUOTES, 'UTF-8') . '">Extra
 echo '<a href="' . htmlspecialchars($resumoBaseUrl . '&export=excel', ENT_QUOTES, 'UTF-8') . '">Exportar Excel</a>';
 echo '</div>';
 echo '<div class="filtro">Período: <strong>' . htmlspecialchars(resumoDataBr($dataInicial), ENT_QUOTES, 'UTF-8') . '</strong> até <strong>' . htmlspecialchars(resumoDataBr($dataFinal), ENT_QUOTES, 'UTF-8') . '</strong></div>';
+
+echo '<form class="filtro-form" method="get" action="ResumoMensal.php">';
+echo '<input type="hidden" name="DataI" value="' . htmlspecialchars($dataInicial, ENT_QUOTES, 'UTF-8') . '">';
+echo '<input type="hidden" name="DataF" value="' . htmlspecialchars($dataFinal, ENT_QUOTES, 'UTF-8') . '">';
+echo '<input type="hidden" name="SaldoAnterior" value="' . htmlspecialchars((string)$saldoAnterior, ENT_QUOTES, 'UTF-8') . '">';
+echo '<div><label for="Evento">Filtrar por evento</label><input id="Evento" name="Evento" type="text" maxlength="100" placeholder="Digite parte do nome do evento" value="' . htmlspecialchars($eventoFiltro, ENT_QUOTES, 'UTF-8') . '"></div>';
+echo '<button type="submit">Aplicar filtro</button>';
+echo '<a class="btn-limpar" href="' . htmlspecialchars($limparEventoUrl, ENT_QUOTES, 'UTF-8') . '">Limpar filtro</a>';
+echo '</form>';
+
+if ($eventoFiltro !== '') {
+    echo '<div class="filtro">Evento filtrado: <strong>' . htmlspecialchars($eventoFiltro, ENT_QUOTES, 'UTF-8') . '</strong></div>';
+}
+
 if ($mensagemCache !== '') {
     echo '<div class="filtro">' . htmlspecialchars($mensagemCache, ENT_QUOTES, 'UTF-8') . '</div>';
 }
@@ -260,7 +316,8 @@ if (count($grupos) === 0) {
 } else {
     foreach ($grupos as $mes => $grupoMes) {
         echo '<div class="bloco-mes">';
-        echo '<h3>' . htmlspecialchars(resumoMesRotulo($mes), ENT_QUOTES, 'UTF-8') . '</h3>';
+        $txtDias = ($grupoMes['qtd_dias_uteis'] ?? 0) > 0 ? ' (' . $grupoMes['qtd_dias_uteis'] . ' dias úteis)' : '';
+        echo '<h3>' . htmlspecialchars(resumoMesRotulo($mes), ENT_QUOTES, 'UTF-8') . $txtDias . '</h3>';
         echo '<table>';
         echo '<thead><tr><th>Grupo</th><th>Débito total (R$)</th><th>Crédito total (R$)</th><th>Saldo (R$)</th></tr></thead>';
         echo '<tbody>';
