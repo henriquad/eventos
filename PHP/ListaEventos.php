@@ -327,7 +327,7 @@ mysqli_close($conn);
             padding: 0.35rem 1.35rem;
             min-height: 50px;
             border-radius: 6px;
-            font-size: 0.9em;
+            font-size: 0.86em;
             font-weight: normal;
             white-space: normal;
             width: 150px;
@@ -520,8 +520,60 @@ mysqli_close($conn);
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($linhas as $row): ?>
-                                <tr>
+                            <?php
+                            // Lógica para colorir blocos de valores iguais na coluna ordenada e aplicar a cor para toda a linha
+                            $agrupadorIndex = null;
+                            $cores = [
+                                '#e3f2fd', // azul claro
+                                '#fff3e0', // laranja claro
+                                '#e8f5e9', // verde claro
+                                '#fce4ec', // rosa claro
+                                '#f3e5f5', // lilás claro
+                                '#f9fbe7', // amarelo claro
+                                '#ede7f6', // roxo claro
+                                '#fbe9e7', // salmão claro
+                                '#e0f2f1', // turquesa claro
+                                '#f1f8e9'  // verde amarelado
+                            ];
+                            // Descobre o índice da coluna atualmente ordenada
+                            foreach ($fields as $idx => $field) {
+                                if ($field->name === $coluna_ordem) {
+                                    $agrupadorIndex = $idx;
+                                    break;
+                                }
+                            }
+                            // fallback: se não encontrar, usa grupo
+                            if ($agrupadorIndex === null) {
+                                foreach ($fields as $idx => $field) {
+                                    if (strtolower($field->name) === 'grupo') {
+                                        $agrupadorIndex = $idx;
+                                        break;
+                                    }
+                                }
+                            }
+                            // Garante que as linhas estejam ordenadas pelo agrupador
+                            if ($agrupadorIndex !== null && $coluna_ordem !== $fields[$agrupadorIndex]->name) {
+                                usort($linhas, function($a, $b) use ($agrupadorIndex) {
+                                    $valA = is_string($a[$agrupadorIndex]) ? strtolower(trim($a[$agrupadorIndex])) : $a[$agrupadorIndex];
+                                    $valB = is_string($b[$agrupadorIndex]) ? strtolower(trim($b[$agrupadorIndex])) : $b[$agrupadorIndex];
+                                    return $valA <=> $valB;
+                                });
+                            }
+                            $valorAnteriorNorm = null;
+                            $corAtual = 0;
+                            $corFundoAtual = $cores[0];
+                            foreach ($linhas as $i => $row):
+                                $valorAgrupador = $agrupadorIndex !== null ? $row[$agrupadorIndex] : '';
+                                // Normaliza para comparação: remove espaços e ignora maiúsculas/minúsculas
+                                $valorAgrupadorNorm = is_string($valorAgrupador) ? strtolower(trim($valorAgrupador)) : $valorAgrupador;
+                                if ($i === 0 || $valorAgrupadorNorm !== $valorAnteriorNorm) {
+                                    $corFundoAtual = $cores[$corAtual % count($cores)];
+                                    $corAtual++;
+                                }
+                                $valorAnteriorNorm = $valorAgrupadorNorm;
+                                $corFundo = $corFundoAtual;
+                            ?>
+                                <tr style="background: <?php echo $corFundo; ?> !important;">
                                     <td class="col-acoes">
                                         <a class="acao-link" href="editar.php?id=<?php echo urlencode((string)$row[0]); ?>" title="Editar evento">
                                             <img src="../images/editar.png" alt="Editar" />
@@ -538,11 +590,16 @@ mysqli_close($conn);
                                         <?php
                                         $classeColunaDado =
                                             ($fields[$j]->name === 'DC' ? 'coluna-dc' : ($fields[$j]->name === 'ativo' ? 'coluna-ativo' : (in_array($fields[$j]->name, ['diario', 'diaM', 'diaS', 'diaU', 'dataF', 'dataFixa', 'prorroga', 'UPA', 'semN', 'semD', 'semM', 'diaR', 'mesR']) ? 'coluna-centralizada' : ''))) . ' col-' . $fields[$j]->name;
+                                        // Aplica a cor de fundo também na célula da coluna agrupadora
+                                        $styleTd = '';
+                                        if ($agrupadorIndex !== null && $j === $agrupadorIndex) {
+                                            $styleTd = ' style="background: ' . $corFundo . ';"';
+                                        }
                                         ?>
                                         <?php if ($fields[$j]->name === 'valorE'): ?>
-                                            <td class="valor-coluna <?php echo $classeColunaDado; ?>"><?php echo number_format((float)$row[$j], 2, ',', '.'); ?></td>
+                                            <td class="valor-coluna <?php echo $classeColunaDado; ?>"<?php echo $styleTd; ?>><?php echo number_format((float)$row[$j], 2, ',', '.'); ?></td>
                                         <?php elseif ($fields[$j]->name === 'dataFixa'): ?>
-                                            <td class="<?php echo $classeColunaDado; ?>">
+                                            <td class="<?php echo $classeColunaDado; ?>"<?php echo $styleTd; ?>>
                                                 <?php
                                                 $data = $row[$j];
                                                 if (!empty($data)) {
@@ -556,7 +613,7 @@ mysqli_close($conn);
                                                 ?>
                                             </td>
                                         <?php else: ?>
-                                            <td class="<?php echo $classeColunaDado; ?>"><?php echo htmlspecialchars((string)$row[$j], ENT_QUOTES, 'UTF-8'); ?></td>
+                                            <td class="<?php echo $classeColunaDado; ?>"<?php echo $styleTd; ?>><?php echo htmlspecialchars((string)$row[$j], ENT_QUOTES, 'UTF-8'); ?></td>
                                         <?php endif; ?>
                                     <?php endfor; ?>
 

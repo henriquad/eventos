@@ -56,7 +56,7 @@ body {
 }
 
 .divfff {
-  display:flex;
+  display: flex;
   justify-content: center;
 }
 .hero__content {
@@ -64,7 +64,6 @@ body {
   margin: 0 auto;
   padding: 2.5rem 2rem 2rem;
   border-radius: 32px;
-  
 
   background: linear-gradient(
     145deg,
@@ -72,7 +71,6 @@ body {
     rgba(20, 53, 81, 0.94)
   );
 
-  
   color: #fff;
   box-shadow: var(--shadow);
   position: relative;
@@ -212,7 +210,7 @@ h3 {
 #menu-h ul {
   list-style: none;
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 0.5rem;
   padding: 0;
   justify-content: center;
@@ -494,16 +492,35 @@ label {
   }
 
   #menu-h ul {
-    grid-template-columns: 1fr 1fr;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
   }
 }
 
 @media (max-width: 640px) {
   #menu-h ul {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
   }
 
   .hero h1 {
     font-size: 2.1rem;
+  }
+
+  .hero__content {
+    padding: 1rem 0.5rem;
+  }
+
+  .menu-page {
+    padding: 0 0.5rem 1rem;
+  }
+
+  #menu-h ul li a {
+    min-height: 54px;
+    font-size: 1rem;
+    padding: 0.4rem 0.7rem 0.4rem 1rem;
+    max-width: 100%;
   }
 }

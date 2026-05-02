@@ -140,11 +140,16 @@ mysqli_close($conn);
 	<title>Datas</title>
 	<link rel="stylesheet" href="../css/menu.css" />
 	<style>
-		.tabela-scroll table th,
-		.tabela-scroll table td {
-			text-align: center;
-			vertical-align: middle;
-		}
+		   .tabela-scroll table th,
+		   .tabela-scroll table td {
+			   text-align: center;
+			   vertical-align: middle;
+			   max-width: 40px;
+			   min-width: 40px;
+			   width: 40px;
+			   overflow-x: auto;
+			   white-space: nowrap;
+		   }
 
 		/* Linhas alternadas para todas as tabelas */
 		table tbody tr:nth-child(even):not(.no-alt),
@@ -160,11 +165,11 @@ mysqli_close($conn);
 		/* Melhoria visual para tabela de datas */
 		.tabela-scroll {
 			overflow-x: auto;
-			max-width: 100vw;
+			max-width: 80vw;
 		}
 
 		.tabela-scroll table {
-			min-width: 900px;
+			min-width: 460px;
 			width: 100%;
 			border-collapse: collapse;
 			background: #fffdf9;
@@ -201,9 +206,9 @@ mysqli_close($conn);
 			font-size: 1.01em;
 		}
 
-		@media (max-width: 900px) {
+		@media (max-width: 500px) {
 			.tabela-scroll table {
-				min-width: 700px;
+				min-width: 500px;
 			}
 
 			.tabela-scroll th,
@@ -225,7 +230,7 @@ mysqli_close($conn);
 		}
 
 		.tabela-scroll table {
-			min-width: 900px;
+			min-width: 440px;
 		}
 
 		.tabela-scroll td,
@@ -330,9 +335,7 @@ mysqli_close($conn);
 			color: #fff;
 			border-color: #214c78;
 		}
-	</style>
-	</style>
-	<style>
+	
 		.coluna-com-tooltip {
 			position: relative;
 			display: inline-block;
@@ -341,7 +344,7 @@ mysqli_close($conn);
 		.coluna-com-tooltip .tooltip-text {
 			visibility: hidden;
 			width: max-content;
-			max-width: 260px;
+			max-width: 200px;
 			background: #333;
 			color: #fff;
 			text-align: left;
@@ -441,12 +444,13 @@ mysqli_close($conn);
 							<tr>
 								<?php
 								$descricoesDatas = [
-									'DataMes' => ['título' => 'Data',   'tooltip' => "aaaa-mm-dd"],
+									'DataMes' => ['título' => 'Data',   'tooltip' => "dd-mm-aaaa"],
 									'N'       => ['título' => 'Dia',    'tooltip' => "dia\n(1-31)"],
 									'Sem'     => ['título' => 'Sem',    'tooltip' => "dia da\nsemana"],
 									'M'       => ['título' => 'Mês',    'tooltip' => "mês\n(1-12)"],
 									'A'       => ['título' => 'Ano',    'tooltip' => "ano com\n4 dígitos"],
 									'Util'    => ['título' => 'Útil',   'tooltip' => "1=útil\n0=não útil"],
+									'Feriado'    => ['título' => 'Feriado',   'tooltip' => "Feriados\nnacionais"],
 									'DiaUtil' => ['título' => 'Dia útil', 'tooltip' => "dia útil\nno mês"],
 									'SemN'    => ['título' => 'semN',  'tooltip' => "ordem da\nsemana"],
 									'UPAm'    => ['título' => 'UPA',   'tooltip' => "último, penúltimo\nou antepenúltimo"],
@@ -461,32 +465,7 @@ mysqli_close($conn);
 										$titulo = $descricoesDatas[$campo]['título'];
 										$tooltip = $descricoesDatas[$campo]['tooltip'];
 									}
-									if ($campo === 'diaM') {
-										$style = 'style="max-width: 60px; min-width: 60px; width: 60px;"';
-									} elseif ($campo === 'DiaUtil') {
-										$style = 'style="max-width: 80px; min-width: 60px; width: 80px;"';
-									} elseif ($campo === 'Sem') {
-										$style = 'style="max-width: 60px; min-width: 60px; width: 60px;"';									
-									} elseif ($campo === 'A') {
-										$style = 'style="max-width: 60px; min-width: 60px; width: 60px;"';
-									} elseif ($campo === 'UPAm') {
-										$style = 'style="max-width: 80px; min-width: 90px; width: 70px;"';
-									} elseif (strcasecmp($campo, 'Feriado') === 0) {
-										$style = 'style="max-width: 75px; min-width: 55px; width: 75px;"';
-									}  elseif ($campo === 'SemN') {
-										$style = 'style="max-width: 60px; min-width: 60px; width: 60px;"';
-									} elseif ($campo === 'Util') {
-										$style = 'style="max-width: 60px; min-width: 60px; width: 60px;"';
-									} elseif ($campo === 'U') {
-										$style = 'style="max-width: 80px; min-width: 90px; width: 70px;"';
-									} elseif ($campo === 'M') {
-										$style = 'style="max-width: 60px; min-width: 60px; width: 60px;"';
-									} elseif ($campo === 'N') {
-										$style = 'style="max-width: 60px; min-width: 60px; width: 60px;"';
-									} 
-									else {
-										$style = '';
-									}
+									   $style = 'style="max-width: 40px; min-width: 40px; width: 40px;"';
 									?>
 									<th <?php echo $style; ?>>
 										<?php if ($tooltip !== ''): ?>
@@ -502,25 +481,62 @@ mysqli_close($conn);
 							</tr>
 						</thead>
 						<tbody>
-							<?php foreach ($linhasPaginadas as $linha): ?>
+							<?php
+							$anoAnterior = null;
+							foreach ($linhasPaginadas as $linha):
+								// Descobre o ano da linha
+								$anoLinha = '';
+								$valorData = $linha['DataMes'] ?? '';
+								if (!empty($valorData)) {
+									$dt = DateTime::createFromFormat('Y-m-d', $valorData);
+									if ($dt instanceof DateTime) {
+										$anoLinha = $dt->format('Y');
+									} else {
+										$dt2 = DateTime::createFromFormat('d/m/Y', $valorData);
+										if ($dt2 instanceof DateTime) {
+											$anoLinha = $dt2->format('Y');
+										}
+									}
+								}
+								if ($anoLinha !== $anoAnterior) {
+									echo '<tr style="background:#e0e7ef;"><td colspan="' . count($campos) . '" style="font-weight:bold;text-align:left;padding-left:18px;">Ano ' . htmlspecialchars($anoLinha, ENT_QUOTES, 'UTF-8') . '</td></tr>';
+									$anoAnterior = $anoLinha;
+								}
+							?>
 								<tr>
 									<?php foreach ($campos as $campo): ?>
 										<?php if ($campo === 'DataMes'): ?>
-											<td style="max-width: 80px; min-width: 70px; width: 80px; overflow-x: auto; white-space: nowrap;">
-												<?php echo htmlspecialchars((string)($linha[$campo] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
-											</td>
+											   <td style="max-width: 40px; min-width: 40px; width: 40px; overflow-x: auto; white-space: nowrap;">
+												   <?php
+													   $valorData = $linha[$campo] ?? '';
+													   $dataBr = $valorData;
+													   if (!empty($valorData)) {
+														   $dt = DateTime::createFromFormat('Y-m-d', $valorData);
+														   if ($dt instanceof DateTime) {
+															   $dataBr = $dt->format('j/n/y');
+														   } else {
+															   // Tenta converter de outros formatos
+															   $dt2 = DateTime::createFromFormat('d/m/Y', $valorData);
+															   if ($dt2 instanceof DateTime) {
+																   $dataBr = $dt2->format('j/n/y');
+															   }
+														   }
+													   }
+													   echo htmlspecialchars($dataBr, ENT_QUOTES, 'UTF-8');
+												   ?>
+											   </td>
 										<?php elseif ($campo === 'DiaUtil'): ?>
-											<td style="max-width: 80px; min-width: 60px; width: 80px; overflow-x: auto; white-space: nowrap;">
-												<?php echo htmlspecialchars((string)($linha[$campo] ?? ''), ENT_QUOTES, 'UTF-8') . 'º'; ?>
-											</td>
+											   <td style="max-width: 40px; min-width: 40px; width: 40px; overflow-x: auto; white-space: nowrap;">
+												   <?php echo htmlspecialchars((string)($linha[$campo] ?? ''), ENT_QUOTES, 'UTF-8') . 'º'; ?>
+											   </td>
 										<?php elseif (strcasecmp($campo, 'Feriado') === 0): ?>
-											<td style="max-width: 45px; min-width: 35px; width: 45px; overflow-x: auto; white-space: nowrap;">
-												<?php echo htmlspecialchars((string)($linha[$campo] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
-											</td>
+											   <td style="max-width: 40px; min-width: 40px; width: 40px; overflow-x: auto; white-space: nowrap;">
+												   <?php echo htmlspecialchars((string)($linha[$campo] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+											   </td>
 										<?php elseif ($campo === 'UPAm'): ?>
-											<td style="max-width: 120px; min-width: 90px; width: 120px; overflow-x: auto; white-space: nowrap;">
-												<?php echo htmlspecialchars((string)($linha[$campo] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
-											</td>
+											   <td style="max-width: 40px; min-width: 40px; width: 40px; overflow-x: auto; white-space: nowrap;">
+												   <?php echo htmlspecialchars((string)($linha[$campo] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+											   </td>
 										<?php else: ?>
 											<td>
 												<?php echo htmlspecialchars((string)($linha[$campo] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
