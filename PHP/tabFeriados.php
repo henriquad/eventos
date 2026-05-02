@@ -29,9 +29,9 @@ mysqli_close($conn);
 	<style>
 		   .tabela-scroll th,
 		   .tabela-scroll td {
-			   max-width: 200px;
-			   min-width: 200px;
-			   width: 120px;
+			   max-width: 140px;
+			   min-width: 140px;
+			   width: 140px;
 			   text-align: center;
 			   white-space: nowrap;
 			   overflow-x: auto;

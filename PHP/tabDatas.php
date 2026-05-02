@@ -465,7 +465,7 @@ mysqli_close($conn);
 										$titulo = $descricoesDatas[$campo]['título'];
 										$tooltip = $descricoesDatas[$campo]['tooltip'];
 									}
-									   $style = 'style="max-width: 40px; min-width: 40px; width: 40px;"';
+									   $style = 'style="max-width: 40px; min-width: 50px; width: 40px;"';
 									?>
 									<th <?php echo $style; ?>>
 										<?php if ($tooltip !== ''): ?>
