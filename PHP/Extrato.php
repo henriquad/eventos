@@ -683,13 +683,33 @@ if (count($movimentos) === 0) {
                     </tr>';
 } else {
     $saldoAcumulado = $saldoAnterior;
+
+    // Cores para alternar entre datas
+    $extratoCores = [
+        '#f8fafc', // cor1
+        '#e6f7ff', // cor2
+        '#fffbe6', // cor3
+        '#f6ffed', // cor4
+        '#fff0f6', // cor5
+    ];
+    $ultimaData = null;
+    $corIndex = 0;
+
     foreach ($movimentos as $mov) {
         $dc = (string)$mov['DC'];
         $classe = ($dc === 'D') ? 'deb' : 'cre';
         $valor = (float)$mov['ValorE'];
         $valorComSinal = ($dc === 'D') ? ($valor * -1) : $valor;
         $saldoAcumulado += $valorComSinal;
-        echo '<tr>';
+
+        // Troca de cor ao mudar a data
+        if ($ultimaData !== $mov['dataM']) {
+            $corIndex = ($corIndex + 1) % count($extratoCores);
+            $ultimaData = $mov['dataM'];
+        }
+        $corFundo = $extratoCores[$corIndex];
+
+        echo '<tr style="background:' . $corFundo . '">';
         echo '<td>' . htmlspecialchars(extratoFormatoDataComSemana((string)$mov['dataM']), ENT_QUOTES, 'UTF-8') . '</td>';
         echo '<td>' . htmlspecialchars((int)$mov['diaUtil'], ENT_QUOTES, 'UTF-8') . '</td>';
         echo '<td>' . htmlspecialchars((string)$mov['evento'], ENT_QUOTES, 'UTF-8') . '</td>';
