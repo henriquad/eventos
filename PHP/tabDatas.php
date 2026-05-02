@@ -164,7 +164,7 @@ mysqli_close($conn);
 		}
 
 		.tabela-scroll table {
-			min-width: 1200px;
+			min-width: 900px;
 			width: 100%;
 			border-collapse: collapse;
 			background: #fffdf9;
@@ -177,10 +177,10 @@ mysqli_close($conn);
 			top: 0;
 			z-index: 2;
 			box-shadow: 0 2px 4px rgba(44, 34, 19, 0.04);
-			padding-top: 0.25rem;
-			padding-bottom: 0.25rem;
+			padding-top: 1.4rem;
+			padding-bottom: 1.4rem;
 			min-height: 0;
-			height: 32px;
+			height: 96px;
 		}
 
 
@@ -225,7 +225,7 @@ mysqli_close($conn);
 		}
 
 		.tabela-scroll table {
-			min-width: 1400px;
+			min-width: 900px;
 		}
 
 		.tabela-scroll td,
@@ -331,6 +331,57 @@ mysqli_close($conn);
 			border-color: #214c78;
 		}
 	</style>
+	</style>
+	<style>
+		.coluna-com-tooltip {
+			position: relative;
+			display: inline-block;
+			cursor: help;
+		}
+		.coluna-com-tooltip .tooltip-text {
+			visibility: hidden;
+			width: max-content;
+			max-width: 260px;
+			background: #333;
+			color: #fff;
+			text-align: left;
+			border-radius: 6px;
+			padding: 7px 12px;
+			position: absolute;
+			z-index: 9999;
+			bottom: 120%;
+			left: 50%;
+			transform: translateX(-50%);
+			opacity: 0;
+			transition: opacity 0.2s;
+			font-size: 0.82em;
+			pointer-events: none;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+			white-space: pre-line !important;
+			word-break: break-word !important;
+		}
+
+		.tabela-scroll th, .tabela-scroll tr, .tabela-scroll thead {
+			overflow: visible !important;
+		}
+
+		/* Garante contexto de empilhamento para tooltips */
+		.tabela-scroll {
+			position: relative;
+			z-index: 1;
+		}
+
+		.coluna-com-tooltip {
+			position: relative;
+			z-index: 10000;
+		}
+		.coluna-com-tooltip:hover .tooltip-text,
+		.coluna-com-tooltip:focus .tooltip-text {
+			visibility: visible;
+			opacity: 1;
+			pointer-events: auto;
+		}
+	</style>
 </head>
 
 <body>
@@ -388,12 +439,65 @@ mysqli_close($conn);
 					<table>
 						<thead>
 							<tr>
+								<?php
+								$descricoesDatas = [
+									'DataMes' => ['título' => 'Data',   'tooltip' => "aaaa-mm-dd"],
+									'N'       => ['título' => 'Dia',    'tooltip' => "dia\n(1-31)"],
+									'Sem'     => ['título' => 'Sem',    'tooltip' => "dia da\nsemana"],
+									'M'       => ['título' => 'Mês',    'tooltip' => "mês\n(1-12)"],
+									'A'       => ['título' => 'Ano',    'tooltip' => "ano com\n4 dígitos"],
+									'Util'    => ['título' => 'Útil',   'tooltip' => "1=útil\n0=não útil"],
+									'DiaUtil' => ['título' => 'Dia útil', 'tooltip' => "dia útil\nno mês"],
+									'SemN'    => ['título' => 'semN',  'tooltip' => "ordem da\nsemana"],
+									'UPAm'    => ['título' => 'UPA',   'tooltip' => "último, penúltimo\nou antepenúltimo"],
+									'U'       => ['título' => 'Úteis',    'tooltip' => "dias úteis\nno mês"],									
+								];
+								?>
 								<?php foreach ($campos as $campo): ?>
-									<?php if ($campo === 'DataMes'): ?>
-										<th style="max-width: 80px; min-width: 70px; width: 80px;">DataMes</th>
-									<?php else: ?>
-										<th><?php echo htmlspecialchars((string)$campo, ENT_QUOTES, 'UTF-8'); ?></th>
-									<?php endif; ?>
+									<?php
+									$titulo = $campo;
+									$tooltip = '';
+									if (isset($descricoesDatas[$campo])) {
+										$titulo = $descricoesDatas[$campo]['título'];
+										$tooltip = $descricoesDatas[$campo]['tooltip'];
+									}
+									if ($campo === 'diaM') {
+										$style = 'style="max-width: 60px; min-width: 60px; width: 60px;"';
+									} elseif ($campo === 'DiaUtil') {
+										$style = 'style="max-width: 80px; min-width: 60px; width: 80px;"';
+									} elseif ($campo === 'Sem') {
+										$style = 'style="max-width: 60px; min-width: 60px; width: 60px;"';									
+									} elseif ($campo === 'A') {
+										$style = 'style="max-width: 60px; min-width: 60px; width: 60px;"';
+									} elseif ($campo === 'UPAm') {
+										$style = 'style="max-width: 80px; min-width: 90px; width: 70px;"';
+									} elseif (strcasecmp($campo, 'Feriado') === 0) {
+										$style = 'style="max-width: 75px; min-width: 55px; width: 75px;"';
+									}  elseif ($campo === 'SemN') {
+										$style = 'style="max-width: 60px; min-width: 60px; width: 60px;"';
+									} elseif ($campo === 'Util') {
+										$style = 'style="max-width: 60px; min-width: 60px; width: 60px;"';
+									} elseif ($campo === 'U') {
+										$style = 'style="max-width: 80px; min-width: 90px; width: 70px;"';
+									} elseif ($campo === 'M') {
+										$style = 'style="max-width: 60px; min-width: 60px; width: 60px;"';
+									} elseif ($campo === 'N') {
+										$style = 'style="max-width: 60px; min-width: 60px; width: 60px;"';
+									} 
+									else {
+										$style = '';
+									}
+									?>
+									<th <?php echo $style; ?>>
+										<?php if ($tooltip !== ''): ?>
+											<div class="coluna-com-tooltip">
+												<span><?php echo htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8'); ?></span>
+												<span class="tooltip-text"><?php echo htmlspecialchars($tooltip, ENT_QUOTES, 'UTF-8'); ?></span>
+											</div>
+										<?php else: ?>
+											<?php echo htmlspecialchars((string)$campo, ENT_QUOTES, 'UTF-8'); ?>
+										<?php endif; ?>
+									</th>
 								<?php endforeach; ?>
 							</tr>
 						</thead>
@@ -405,8 +509,22 @@ mysqli_close($conn);
 											<td style="max-width: 80px; min-width: 70px; width: 80px; overflow-x: auto; white-space: nowrap;">
 												<?php echo htmlspecialchars((string)($linha[$campo] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
 											</td>
+										<?php elseif ($campo === 'DiaUtil'): ?>
+											<td style="max-width: 80px; min-width: 60px; width: 80px; overflow-x: auto; white-space: nowrap;">
+												<?php echo htmlspecialchars((string)($linha[$campo] ?? ''), ENT_QUOTES, 'UTF-8') . 'º'; ?>
+											</td>
+										<?php elseif (strcasecmp($campo, 'Feriado') === 0): ?>
+											<td style="max-width: 45px; min-width: 35px; width: 45px; overflow-x: auto; white-space: nowrap;">
+												<?php echo htmlspecialchars((string)($linha[$campo] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+											</td>
+										<?php elseif ($campo === 'UPAm'): ?>
+											<td style="max-width: 120px; min-width: 90px; width: 120px; overflow-x: auto; white-space: nowrap;">
+												<?php echo htmlspecialchars((string)($linha[$campo] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+											</td>
 										<?php else: ?>
-											<td><?php echo htmlspecialchars((string)($linha[$campo] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
+											<td>
+												<?php echo htmlspecialchars((string)($linha[$campo] ?? ''), ENT_QUOTES, 'UTF-8'); ?>
+											</td>
 										<?php endif; ?>
 									<?php endforeach; ?>
 								</tr>
