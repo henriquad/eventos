@@ -1,14 +1,15 @@
 :root {
-  --bg: #f6f2e9;
+  --bg: #efe4d6;
+  --bg-soft: #f9f4ed;
+  --ink: #241b14;
+  --muted: #6e5e4f;
+  --brand: #1f4f7f;
+  --brand-dark: #143551;
+  --accent: #c87428;
   --panel: #fffdf9;
+  --border: #d8cab8;
+  --shadow: 0 20px 40px rgba(33, 23, 14, 0.17);
   --panel-soft: #f3e8d9;
-  --ink: #2f2419;
-  --muted: #6b5c4d;
-  --brand: #214c78;
-  --brand-dark: #16324f;
-  --accent: #d27b2a;
-  --border: #d9ccbb;
-  --shadow: 0 14px 34px rgba(49, 34, 18, 0.12);
 }
 
 * {
@@ -21,13 +22,13 @@
 body {
   min-height: 100vh;
   background:
+    radial-gradient(circle at 12% 14%, rgba(31, 79, 127, 0.2), transparent 40%),
     radial-gradient(
-      circle at top left,
-      rgba(210, 123, 42, 0.12),
-      transparent 30%
+      circle at 90% 84%,
+      rgba(200, 116, 40, 0.18),
+      transparent 38%
     ),
-    linear-gradient(180deg, #fbf7f1 0%, var(--bg) 55%, #efe6da 100%);
-    
+    linear-gradient(160deg, var(--bg-soft) 0%, var(--bg) 48%, #e4d5c3 100%);
   color: var(--ink);
 }
 
@@ -391,9 +392,11 @@ footer a {
   font-weight: 700;
 }
 .menu-shell {
-  padding: 3.4rem;
+  padding: 1.5rem 2.4rem;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
-
 .menu-shell__header {
   display: flex;
   justify-content: space-between;
@@ -470,7 +473,7 @@ footer a {
   align-items: center;
   gap: 0.5rem;
   border-radius: 12px;
-  background: linear-gradient(120deg, #fff 70%, #e0e7ff 100%);
+  background: linear-gradient(120deg, #fff 70%, #f9f4ed 100%);
   border: 1.2px solid var(--border);
   color: var(--brand-dark);
   text-decoration: none;

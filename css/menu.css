@@ -33,20 +33,28 @@ td {
 }
 
 :root {
-  --bg: #f4f7fa;
-  --panel: #fff;
-  --panel-soft: #e9f0f7;
-  --ink: #1a2233;
-  --muted: #6b7a90;
-  --brand: #2563eb;
-  --brand-dark: #1e40af;
-  --accent: #f59e42;
-  --border: #e2e8f0;
-  --shadow: 0 8px 32px rgba(37, 99, 235, 0.1);
+  --bg: #efe4d6;
+  --bg-soft: #f9f4ed;
+  --ink: #241b14;
+  --muted: #6e5e4f;
+  --brand: #1f4f7f;
+  --brand-dark: #143551;
+  --accent: #c87428;
+  --panel: #fffdf9;
+  --border: #d8cab8;
+  --shadow: 0 20px 40px rgba(33, 23, 14, 0.17);
+  --panel-soft: #f3e8d9;
 }
 
 body {
-  background: linear-gradient(120deg, #e0e7ff 0%, #f4f7fa 100%);
+  background:
+    radial-gradient(circle at 12% 14%, rgba(31, 79, 127, 0.2), transparent 40%),
+    radial-gradient(
+      circle at 90% 84%,
+      rgba(200, 116, 40, 0.18),
+      transparent 38%
+    ),
+    linear-gradient(160deg, var(--bg-soft) 0%, var(--bg) 48%, #e4d5c3 100%);
   color: var(--ink);
   min-height: 100vh;
 }
@@ -63,7 +71,7 @@ body {
   margin: auto;
   max-width: 1180px;
   margin: 0 auto;
-  
+
   border-radius: 32px;
 
   background: linear-gradient(
@@ -517,6 +525,4 @@ label {
   .menu-page {
     padding: 0 0.5rem 1rem;
   }
-
-  
 }

@@ -257,11 +257,26 @@ if ($exportarExcel) {
 echo '<!doctype html><html lang="pt-br"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">';
 echo '<title>Resumo mensal</title>';
 echo '<style>
+:root {
+  --bg: #efe4d6;
+  --bg-soft: #f9f4ed;
+  --ink: #241b14;
+  --muted: #6e5e4f;
+  --brand: #1f4f7f;
+  --brand-dark: #143551;
+  --accent: #c87428;
+  --panel: #fffdf9;
+  --border: #d8cab8;
+  --shadow: 0 20px 40px rgba(33, 23, 14, 0.17);
+  --panel-soft: #f3e8d9;
+}
 .menu-shell {
-  padding: 1.4rem;
+  padding: 1.5rem 2.4rem;
   width: 100%;
   max-width: 980px;
-    
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .menu-shell__header {
@@ -366,7 +381,21 @@ echo '<style>
   background: linear-gradient(120deg, #e0e7ff 60%, #fff 100%);
   color: var(--brand);
 }
-body{font-family:Arial,sans-serif;background:#f2f4f7;margin:0;padding:20px;color:#222}
+body {
+  font-family: Arial, sans-serif;
+  background:
+    radial-gradient(circle at 12% 14%, rgba(31, 79, 127, 0.2), transparent 40%),
+    radial-gradient(
+      circle at 90% 84%,
+      rgba(200, 116, 40, 0.18),
+      transparent 38%
+    ),
+    linear-gradient(160deg, var(--bg-soft) 0%, var(--bg) 48%, #e4d5c3 100%);
+  color: var(--ink);
+  min-height: 100vh;
+  margin: 0;
+  padding: 20px;
+}
 .container{max-width:980px;margin:0 auto}
 .topo{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
 .topo a{background:#1f4f82;color:#fff;padding:7px 12px;text-decoration:none;border-radius:4px}

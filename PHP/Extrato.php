@@ -353,14 +353,34 @@ echo '
     <meta name="viewport" content="width=device-width, initial-scale=1">';
 echo '<title>Extrato</title>';
 echo '<style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f2f4f7;
-            margin: 0;
-            padding: 20px;
-            color: #222
+        :root {
+          --bg: #efe4d6;
+          --bg-soft: #f9f4ed;
+          --ink: #241b14;
+          --muted: #6e5e4f;
+          --brand: #1f4f7f;
+          --brand-dark: #143551;
+          --accent: #c87428;
+          --panel: #fffdf9;
+          --border: #d8cab8;
+          --shadow: 0 20px 40px rgba(33, 23, 14, 0.17);
+          --panel-soft: #f3e8d9;
         }
-
+        body {
+          font-family: Arial, sans-serif;
+          background:
+            radial-gradient(circle at 12% 14%, rgba(31, 79, 127, 0.2), transparent 40%),
+            radial-gradient(
+              circle at 90% 84%,
+              rgba(200, 116, 40, 0.18),
+              transparent 38%
+            ),
+            linear-gradient(160deg, var(--bg-soft) 0%, var(--bg) 48%, #e4d5c3 100%);
+          color: var(--ink);
+          min-height: 100vh;
+          margin: 0;
+          padding: 20px;
+        }
         .container {
             max-width: 1100px;
             margin: 0 auto
@@ -486,7 +506,7 @@ echo '<style>
             min-height: 320px;
             max-height: 600px;
             max-width: 1200vw;
-            background: #f2f4f7;
+            background: transparent;
             border-radius: 8px;
             padding: 2px 0 8px 0;
             box-shadow: 0 1px 4px rgba(0,0,0,.08);
@@ -529,9 +549,11 @@ echo '<style>
             background: #f8fafc
         }
             .menu-shell {
-  padding: 1.4rem;
+  padding: 1.5rem 2.4rem;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
-
 .menu-shell__header {
   display: flex;
   justify-content: space-between;
