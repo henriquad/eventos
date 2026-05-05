@@ -13,5 +13,5 @@ if ($apelido === '' || $senha === '') {
 $_SESSION['apelido'] = $apelido;
 $_SESSION['senha'] = $senha;
 
-header('Location: ../menu.html?fresh=1', true, 303);
+header('Location: ../incluir.html?fresh=1', true, 303);
 exit();

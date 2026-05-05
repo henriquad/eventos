@@ -266,6 +266,10 @@ if ($saldoAnteriorAtivo && $eventoFiltro !== '') {
             font-size: 12px;
         }
 
+        .is-invalid {
+            color: #d9534f !important;
+        }
+
         .menu-shell__clear {
             border: none;
             border-radius: 6px;

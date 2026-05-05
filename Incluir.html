@@ -6,26 +6,66 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="css/incluir.css?v=20260418g" />
   <title>Eventos-Inclusão</title>
+  <style>
+    .is-invalid {
+      color: #d9534f !important;
+    }
+  </style>
 </head>
 
 <body>
-  <header class="incluir-hero">
+  <section class="menu-shell">
 
-    <h1>Fluxo de caixa - Inclusão de eventos</h1>
-    <p class="incluir-hero__text">Cadastre eventos com recorrências e regras de prorrogação para manter sua agenda
-      financeira organizada.</p>
-    <div class="button_linha">
+    <nav id="menu-h" aria-label="Menu principal">
+      <ul>
 
-      <button type="submit" form="formIncluir" class="icon-button" title="Salvar evento">
-        <img src="images/salvar.png" alt="Salvar"></button>
+        <li><a href="PHP/ListaEventos.php">Lista de eventos</a></li>
+        <li><a id="gerarExtratoBtn" href="#">Gerar extrato</a></li>
+        <li><a href="PHP/tabFeriados.php">Consulta Feriados</a></li>
+        <li><a href="PHP/tabDatas.php">Consulta Datas</a></li>
+        <li><a href="PHP/logout.php" style="color:dimgray;"
+            onclick="return confirm('Tem certeza que deseja trocar de usuário? Isso encerrará sua sessão atual.');">Trocar
+            usuário</a></li>
+      </ul>
+      </ul>
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          var btn = document.getElementById('gerarExtratoBtn');
+          if (btn) {
+            btn.addEventListener('click', function (e) {
+              e.preventDefault();
+              var hoje = new Date();
+              var umAnoDepois = new Date();
+              umAnoDepois.setFullYear(hoje.getFullYear() + 1);
+              function formatarData(dt) {
+                var m = String(dt.getMonth() + 1).padStart(2, '0');
+                var d = String(dt.getDate()).padStart(2, '0');
+                return dt.getFullYear() + '-' + m + '-' + d;
+              }
+              var dataI = formatarData(hoje);
+              var dataF = formatarData(umAnoDepois);
+              var url = 'PHP/Extrato.php?DataI=' + encodeURIComponent(dataI) + '&DataF=' + encodeURIComponent(dataF);
+              window.location.href = url;
+            });
+          }
+        });
+      </script>
 
-      <a class="menu-shell__logout" href="menu.html">Voltar ao menu</a>
+    </nav>
 
-    </div>
-  </header>
+    <br><br>
+
+
+  </section>
 
 
   <main>
+
+    <button type="submit" form="formIncluir" class="icon-button" title="Salvar evento">
+      <img src="./images/salvar.png" alt="Salvar"></button>
+
+
+
     <h2>Informações do evento a incluir - (*) campos obrigatórios</h2>
 
     <form id="formIncluir" action="PHP/salvar.php" method="post">
@@ -35,9 +75,12 @@
           <legend>Informações do evento</legend>
 
           <div class="linha-evento-grupo-valor">
-            <input type="text" name="evento" id="evento" placeholder="(*) nome do evento..." />
-            <input type="text" id="grupo" name="grupo" placeholder="(*) digite grupo ou conta..." />
-            <input type="text" name="valorE" id="valorE" placeholder="valor R$ apenas digitos..." />
+            <input type="text" name="evento" id="evento" style="margin: 12px;font-weight:bold;font-size:20px;"
+              placeholder="(*) nome do evento..." />
+            <input type="text" id="grupo" name="grupo" style="margin: 12px;font-weight:bold;font-size:20px;"
+              placeholder="(*) digite grupo ou conta..." />
+            <input type="text" name="valorE" id="valorE" style="margin: 12px;font-weight:bold;font-size:20px;"
+              placeholder="valor R$ apenas digitos..." />
           </div>
           <div class="radio-option">
             <input type="radio" id="ativo" name="ativo" checked="True" value="sim" />

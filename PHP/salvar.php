@@ -95,7 +95,7 @@ if ($ativo !== 'sim' && $ativo !== 'não') {
     $ativo = null;
 }
 
-if ($prorroga !== 'sim' && $prorroga !== 'não' && $prorroga !== 'nul') {
+if ($prorroga !== 'sim' && $prorroga !== 'não' && $prorroga !== 'nulo') {
     $prorroga = null;
 }
 
@@ -109,6 +109,10 @@ if (isBlankValue($grupo)) {
     $camposObrigatorios[] = 'Grupo';
 }
 
+if (isBlankValue(getPostValue('valorE'))) {
+    $camposObrigatorios[] = 'Valor R$';
+}
+
 if ($DC === null) {
     $camposObrigatorios[] = 'DC';
 }
@@ -120,7 +124,7 @@ if ($prorroga === null) {
 if (!empty($camposObrigatorios)) {
     $campos = urlencode(implode(', ', $camposObrigatorios));
     mysqli_close($dbcon);
-    header('Location: ListaEventos.php?erro=1&msg=campos_obrigatorios&campos=' . $campos);
+    header('Location: ../Incluir.html?erro=1&msg=campos_obrigatorios&campos=' . $campos);
     exit();
 }
 

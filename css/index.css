@@ -283,6 +283,10 @@ ol {
   color: #1b5e20;
 }
 
+.is-invalid {
+  color: #d9534f !important;
+}
+
 .login-form__status.is-info {
   color: var(--brand-dark);
 }

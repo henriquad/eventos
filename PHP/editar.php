@@ -133,6 +133,23 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     mysqli_stmt_close($stmtSelect);
     mysqli_close($dbcon);
 
+    $erroParam = filter_input(INPUT_GET, 'erro', FILTER_VALIDATE_INT);
+    $msgParam = trim((string)($_GET['msg'] ?? ''));
+    $camposParam = trim((string)($_GET['campos'] ?? ''));
+    $mensagemErro = '';
+
+    if ($erroParam === 1) {
+        if ($msgParam === 'campos_obrigatorios') {
+            $mensagemErro = 'Preencha os campos obrigatórios: ' . h($camposParam) . '.';
+        } elseif ($msgParam === 'grupo_obrigatorio') {
+            $mensagemErro = 'Campo Grupo é obrigatório.';
+        } elseif ($msgParam === 'recorrencia_obrigatoria') {
+            $mensagemErro = 'Ao menos uma recorrência deve ser selecionada.';
+        } else {
+            $mensagemErro = 'Não foi possível salvar as alterações.';
+        }
+    }
+
 ?>
     <!doctype html>
     <html lang="pt-br">
@@ -142,34 +159,80 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" href="../css/incluir.css?v=20260418f" />
         <title>Eventos-Edição</title>
+        <style>
+            .is-invalid {
+                color: #d9534f !important;
+            }
+        </style>
     </head>
 
     <body>
-        <header class="incluir-hero">
-            <h1>Fluxo de caixa - Edição de eventos</h1>
-            <div class="button_linha">
+        <section class="menu-shell">
+            
+            <nav id="menu-h" aria-label="Menu principal">
+                <ul>
+                    <li><a href="../Incluir.html">(*) Incluir evento</a></li>
+                    <li><a href="ListaEventos.php">Lista de eventos</a></li>
+                    <li><a id="gerarExtratoBtn" href="./">Gerar extrato</a></li>
+                    <li><a href="tabFeriados.php">Consulta Feriados</a></li>
+                    <li><a href="tabDatas.php">Consulta Datas</a></li>
+                    <li><a href="logout.php" style="color:dimgray;"
+                            onclick="return confirm('Tem certeza que deseja trocar de usuário? Isso encerrará sua sessão atual.');">Trocar
+                            usuário</a></li>
+                </ul>
+                </ul>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var btn = document.getElementById('gerarExtratoBtn');
+                        if (btn) {
+                            btn.addEventListener('click', function (e) {
+                                e.preventDefault();
+                                var hoje = new Date();
+                                var umAnoDepois = new Date();
+                                umAnoDepois.setFullYear(hoje.getFullYear() + 1);
+                                function formatarData(dt) {
+                                    var m = String(dt.getMonth() + 1).padStart(2, '0');
+                                    var d = String(dt.getDate()).padStart(2, '0');
+                                    return dt.getFullYear() + '-' + m + '-' + d;
+                                }
+                                var dataI = formatarData(hoje);
+                                var dataF = formatarData(umAnoDepois);
+                                var url = 'Extrato.php?DataI=' + encodeURIComponent(dataI) + '&DataF=' + encodeURIComponent(dataF);
+                                window.location.href = url;
+                            });
+                        }
+                    });
+                </script>
 
-                <button type="submit" form="formEditar" style="background: none; border: none; cursor: pointer; padding: 0;">
-                    <img src="../images/salvar.png" alt="Salvar"></button>
+            </nav>
 
-                <a class="menu-shell__logout" href="../php/ListaEventos.php">Voltar para a lista de eventos</a>
-            </div>
-        </header>
+            <br><br>
+
+
+        </section>
 
         <main>
+        
+        <br><br><br><br><br>
 
+        <?php if ($mensagemErro !== ''): ?>
+            <p class="periodo-status is-invalid" id="area-mensagens"><?php echo $mensagemErro; ?></p>
+        <?php endif; ?>
 
-            <form id="formEditar" action="editar.php" method="post">
+        <button type="submit" form="formEditar" title="Salvar evento" style="position:absolute; background: none; border: none; cursor: pointer; padding: 0;">
+                    <img src="../images/salvar.png" alt="Salvar"></button>
+
+            <form id="formEditar" action="editar.php" method="post" onsubmit="return validarFormulario(event)">
                 <input type="hidden" name="id" value="<?php echo h($evento['id']); ?>" />
-
+            <h2>Informações do evento em edição</h2>
                 <section>
                     <fieldset>
                         <legend>Informações do evento em edição</legend>
 
                         <div class="linha-evento-grupo-valor">
-                            <input type="text" name="evento" style="margin: 12px;" id="evento" value="<?php echo h($evento['evento']); ?>" placeholder="nome do evento..." />
-                            <input type="text" id="grupo" name="grupo" style="margin: 12px;" value="<?php echo h($evento['grupo']); ?>" placeholder="digite grupo ou conta..." />
-                            <input type="text" name="valorE" id="valorE" value="<?php echo h($evento['valorE']); ?>" style="margin: 12px;" placeholder="apenas digitos..." />
+                            <input type="text" name="evento" style="margin: 12px;font-weight:bold;font-size:20px;" id="evento" value="<?php echo h($evento['evento']); ?>" placeholder="nome do evento..." />
+                            <input type="text" id="grupo" name="grupo" style="margin: 12px;font-weight:bold;font-size:20px;" value="<?php echo h($evento['grupo']); ?>" placeholder="digite grupo ou conta..." />
+                            <input type="text" name="valorE" id="valorE" value="<?php echo h($evento['valorE']); ?>" style="margin: 12px;font-weight:bold;font-size:20px;" placeholder="apenas digitos..." />
                         </div>
                         <div class="radio-option">
                             <input type="radio" id="ativo" name="ativo" checked="True" value="sim" />
@@ -546,6 +609,14 @@ if (isBlankValue($grupo)) {
     $camposObrigatorios[] = 'Grupo';
 }
 
+if (isBlankValue(getPostValue('valorE'))) {
+    $camposObrigatorios[] = 'Valor R$';
+}
+
+if (isBlankValue(getPostValue('valorE'))) {
+    $camposObrigatorios[] = 'Valor R$';
+}
+
 if ($DC === null) {
     $camposObrigatorios[] = 'DC';
 }
@@ -556,7 +627,7 @@ if (!empty($camposObrigatorios)) {
         return strtolower($campo) !== 'prorroga';
     })));
     mysqli_close($dbcon);
-    header('Location: ListaEventos.php?erro=1&msg=campos_obrigatorios&campos=' . $campos . '&id=' . $id);
+    header('Location: editar.php?id=' . $id . '&erro=1&msg=campos_obrigatorios&campos=' . $campos);
     exit();
 }
 

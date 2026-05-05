@@ -156,6 +156,10 @@ mysqli_close($conn);
             text-align: center !important;
         }
 
+        .is-invalid {
+            color: #d9534f !important;
+        }
+
         .hero__content,
         .menu-page {
             max-width: min(110vw, 2100px);
@@ -391,18 +395,48 @@ mysqli_close($conn);
 
 <body>
 
-    <header class="hero">
-        <div class="hero__content">
-            <h1>Lista de eventos</h1>
-            <p class="hero__text" style="text-align: center;">Consulte, edite ou exclua eventos cadastrados para manter o planejamento atualizado.</p>
-            <div class="button_linha">
-                <button type="button" onclick="window.location.href='../Incluir.html'" class="icon-button" title="Incluir novo evento">
-                    <img src="../images/new.png" alt="Incluir novo evento" style="vertical-align: middle; width: 64px; height: 64px;">
-                </button>
-                <a class="menu-shell__logout" href="../Php/Extrato.php">Ir p/ ao Extrato</a>
-            </div>
-        </div>
-    </header>
+   <section class="menu-shell">
+            
+            <nav id="menu-h" aria-label="Menu principal">
+                <ul>
+                    <li><a href="../Incluir.html">(*) Incluir evento</a></li>
+                    <li><a id="gerarExtratoBtn" href="#">Gerar extrato</a></li>
+                    <li><a href="tabFeriados.php">Consulta Feriados</a></li>
+                    <li><a href="tabDatas.php">Consulta Datas</a></li>
+                    <li><a href="logout.php" style="color:dimgray;"
+                            onclick="return confirm('Tem certeza que deseja trocar de usuário? Isso encerrará sua sessão atual.');">Trocar
+                            usuário</a></li>
+                </ul>
+                </ul>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var btn = document.getElementById('gerarExtratoBtn');
+                        if (btn) {
+                            btn.addEventListener('click', function (e) {
+                                e.preventDefault();
+                                var hoje = new Date();
+                                var umAnoDepois = new Date();
+                                umAnoDepois.setFullYear(hoje.getFullYear() + 1);
+                                function formatarData(dt) {
+                                    var m = String(dt.getMonth() + 1).padStart(2, '0');
+                                    var d = String(dt.getDate()).padStart(2, '0');
+                                    return dt.getFullYear() + '-' + m + '-' + d;
+                                }
+                                var dataI = formatarData(hoje);
+                                var dataF = formatarData(umAnoDepois);
+                                var url = 'Extrato.php?DataI=' + encodeURIComponent(dataI) + '&DataF=' + encodeURIComponent(dataF);
+                                window.location.href = url;
+                            });
+                        }
+                    });
+                </script>
+
+            </nav>
+
+            <br><br>
+
+
+        </section>
 
     <main class="menu-page">
         <section class="menu-shell">

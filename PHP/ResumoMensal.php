@@ -257,6 +257,115 @@ if ($exportarExcel) {
 echo '<!doctype html><html lang="pt-br"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">';
 echo '<title>Resumo mensal</title>';
 echo '<style>
+.menu-shell {
+  padding: 1.4rem;
+  width: 100%;
+  max-width: 980px;
+    
+}
+
+.menu-shell__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.2rem;  
+}
+
+.menu-shell__header p,
+.periodo-card__intro p,
+.ajuda-intro p {
+  color: var(--muted);
+  line-height: 1.65;
+  font-size: 20px;
+}
+
+.menu-shell__logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 1.15rem;
+  border-radius: 999px;
+  background: var(--panel-soft);
+  color: var(--brand-dark);
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 700;
+  width: max-content;
+}
+
+.menu-shell__header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.menu-shell__clear {
+  border: 1px solid rgba(33, 76, 120, 0.28);
+  border-radius: 999px;
+  padding: 0.85rem 1.15rem;
+  background: #fff8ef;
+  color: var(--brand-dark);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.menu-shell__clear:hover {
+  background: #f7ebdb;
+}
+
+#menu-h {
+  margin-bottom: 1.25rem;
+}
+
+#menu-h ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0;
+  justify-content: center;
+}
+
+#menu-h li {
+  display: block;
+}
+
+#menu-h ul li a {
+  min-height: 38px;
+  padding: 0.4rem 0.7rem 0.4rem 1.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 12px;
+  background: linear-gradient(120deg, #fff 70%, #e0e7ff 100%);
+  border: 1.2px solid var(--border);
+  color: var(--brand-dark);
+  text-decoration: none;
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.03);
+  position: relative;
+  transition:
+    transform 0.18s cubic-bezier(0.4, 2, 0.3, 1),
+    box-shadow 0.18s,
+    border-color 0.18s;
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#menu-h ul li a:hover {
+  transform: translateY(-4px) scale(1.04);
+  box-shadow: 0 8px 32px rgba(37, 99, 235, 0.13);
+  border-color: var(--brand);
+  background: linear-gradient(120deg, #e0e7ff 60%, #fff 100%);
+  color: var(--brand);
+}
 body{font-family:Arial,sans-serif;background:#f2f4f7;margin:0;padding:20px;color:#222}
 .container{max-width:980px;margin:0 auto}
 .topo{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
@@ -283,10 +392,53 @@ tfoot td{font-weight:bold;background:#eef4fa}
 .filtro-form .btn-limpar{background:#eef2f7;color:#1f4f82}
 </style>';
 echo '<div class="container">';
-echo '<h2>Resumo mensal dos valores diários</h2>';
+
+echo '<section class="menu-shell">
+            
+            <nav id="menu-h" aria-label="Menu principal">
+                <ul>
+                    <li><a href="../Incluir.html">(*) Incluir evento</a></li>
+                    <li><a href="ListaEventos.php">Lista de eventos</a></li>                    
+                    <li><a href="tabFeriados.php">Consulta Feriados</a></li>
+                    <li><a href="tabDatas.php">Consulta Datas</a></li>
+                    <li><a href="logout.php" style="color:dimgray;"
+                            onclick="return confirm("Tem certeza que deseja trocar de usuário? Isso encerrará sua sessão atual.");">Trocar
+                            usuário</a></li>
+                </ul>
+                </ul>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        var btn = document.getElementById("gerarExtratoBtn");
+                        if (btn) {
+                            btn.addEventListener("click", function (e) {
+                                e.preventDefault();
+                                var hoje = new Date();
+                                var umAnoDepois = new Date();
+                                umAnoDepois.setFullYear(hoje.getFullYear() + 1);
+                                function formatarData(dt) {
+                                    var m = String(dt.getMonth() + 1).padStart(2, "0");
+                                    var d = String(dt.getDate()).padStart(2, "0");
+                                    return dt.getFullYear() + "-" + m + "-" + d;
+                                }
+                                var dataI = formatarData(hoje);
+                                var dataF = formatarData(umAnoDepois);
+                                var url = "Extrato.php?DataI=" + encodeURIComponent(dataI) + "&DataF=" + encodeURIComponent(dataF);
+                                window.location.href = url;
+                            });
+                        }
+                    });
+                </script>
+
+            </nav>
+
+            <br><br>
+
+
+        </section>';
+
+
 echo '<div class="topo">';
-echo '<a href="../menu.html">Menu</a>';
-echo '<a href="' . htmlspecialchars($extratoUrl, ENT_QUOTES, 'UTF-8') . '">Extrato</a>';
+echo '<a href="' . htmlspecialchars($extratoUrl, ENT_QUOTES, "UTF-8") . '">Voltar p/ Extrato</a>';
 echo '<a href="' . htmlspecialchars($resumoBaseUrl . '&export=excel', ENT_QUOTES, 'UTF-8') . '">Exportar Excel</a>';
 echo '</div>';
 echo '<div class="filtro">Período: <strong>' . htmlspecialchars(resumoDataBr($dataInicial), ENT_QUOTES, 'UTF-8') . '</strong> até <strong>' . htmlspecialchars(resumoDataBr($dataFinal), ENT_QUOTES, 'UTF-8') . '</strong></div>';

@@ -1,4 +1,4 @@
-﻿// Limpa todos os campos de recorrência ao escolher dataFixa
+﻿﻿// Limpa todos os campos de recorrência ao escolher dataFixa
 document.addEventListener("DOMContentLoaded", function () {
   var dataFixa = document.getElementById("dataFixa");
   if (dataFixa) {
@@ -91,6 +91,21 @@ document.addEventListener("DOMContentLoaded", function () {
     // Limpa o formulário
     document.getElementById("formIncluir").reset();
     // Remove o parâmetro da URL
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  // Verifica se a página carregou com parâmetro de erro vindo do PHP
+  var erro = getQueryParam("erro");
+  if (erro === "1") {
+    var msg = getQueryParam("msg");
+    var campos = getQueryParam("campos");
+    var textoErro = "Erro ao salvar o evento.";
+    if (msg === "campos_obrigatorios") {
+      textoErro = "Preencha os campos obrigatórios: " + campos + ".";
+    } else if (msg === "grupo_obrigatorio") {
+      textoErro = "O campo Grupo é obrigatório.";
+    }
+    mostrarErro(textoErro);
     window.history.replaceState({}, document.title, window.location.pathname);
   }
 
@@ -510,8 +525,15 @@ document.addEventListener("DOMContentLoaded", function () {
 function validarFormulario(e) {
   var nomeEl = document.getElementById("evento");
   var grupoEl = document.getElementById("grupo");
+  var valorEEl = document.getElementById("valorE");
   var nome = nomeEl ? nomeEl.value.trim() : "";
   var grupo = grupoEl ? grupoEl.value.trim() : "";
+  var valorE = valorEEl ? valorEEl.value.trim() : "";
+
+  // Limpa mensagens de erro anteriores antes de validar novamente
+  var container = document.getElementById("area-mensagens");
+  if (container) container.innerHTML = "";
+
   var dc = document.querySelector('input[name="DC"]:checked');
   var prorroga = document.querySelector('input[name="prorroga"]:checked');
 
@@ -525,6 +547,10 @@ function validarFormulario(e) {
     erros.push('Campo "Grupo" é obrigatório.');
   }
 
+  if (!valorE) {
+    erros.push('Campo "Valor R$" é obrigatório.');
+  }
+
   if (!dc) {
     erros.push("Selecione Débito ou Crédito (DC).");
   }
@@ -535,7 +561,7 @@ function validarFormulario(e) {
 
   if (erros.length > 0) {
     e.preventDefault();
-    mostrarErro(erros.join("\n"));
+    mostrarErro(erros.join("<br>"));
     return false;
   }
 
@@ -547,7 +573,22 @@ function mostrarMensagem(mensagem) {
 }
 
 function mostrarErro(mensagem) {
-  alert("Erros encontrados:\n\n" + mensagem);
+  var container = document.getElementById("area-mensagens");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "area-mensagens";
+    var form =
+      document.getElementById("formIncluir") ||
+      document.getElementById("formEditar");
+    if (form) {
+      form.parentNode.insertBefore(container, form);
+    } else {
+      document.body.prepend(container);
+    }
+  }
+  container.innerHTML =
+    '<p class="periodo-status is-invalid">' + mensagem + "</p>";
+  container.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 // Função para formatar data ao digitar

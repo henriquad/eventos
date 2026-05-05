@@ -35,6 +35,7 @@ mysqli_close($conn);
 			   text-align: center;
 			   white-space: nowrap;
 			   overflow-x: auto;
+			   font-size: 18px;
 		   }
 
 		   .tabela-scroll tbody tr {
@@ -69,14 +70,50 @@ mysqli_close($conn);
 </head>
 
 <body>
-	<header class="hero">
-		<div class="hero__content">
-			
-			<h1>Tabela de feriados</h1>			
-			<p class="hero__text">Consulte os feriados cadastrados para planejar prorrogacoes e antecipacoes de eventos.</p>
-			<a class="menu-shell__logout" href="../menu.html">Voltar ao menu</a>
-		</div>
-	</header>
+
+<section class="menu-shell">
+            
+            <nav id="menu-h" aria-label="Menu principal">
+                <ul>
+                    <li><a href="../Incluir.html">(*) Incluir evento</a></li>
+                    <li><a href="ListaEventos.php">Lista de eventos</a></li>
+                    <li><a id="gerarExtratoBtn" href="./">Gerar extrato</a></li>
+                    <li><a href="tabFeriados.php">Consulta Feriados</a></li>
+                    <li><a href="tabDatas.php">Consulta Datas</a></li>
+                    <li><a href="logout.php" style="color:dimgray;"
+                            onclick="return confirm('Tem certeza que deseja trocar de usuário? Isso encerrará sua sessão atual.');">Trocar
+                            usuário</a></li>
+                </ul>
+                </ul>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var btn = document.getElementById('gerarExtratoBtn');
+                        if (btn) {
+                            btn.addEventListener('click', function (e) {
+                                e.preventDefault();
+                                var hoje = new Date();
+                                var umAnoDepois = new Date();
+                                umAnoDepois.setFullYear(hoje.getFullYear() + 1);
+                                function formatarData(dt) {
+                                    var m = String(dt.getMonth() + 1).padStart(2, '0');
+                                    var d = String(dt.getDate()).padStart(2, '0');
+                                    return dt.getFullYear() + '-' + m + '-' + d;
+                                }
+                                var dataI = formatarData(hoje);
+                                var dataF = formatarData(umAnoDepois);
+                                var url = 'Extrato.php?DataI=' + encodeURIComponent(dataI) + '&DataF=' + encodeURIComponent(dataF);
+                                window.location.href = url;
+                            });
+                        }
+                    });
+                </script>
+
+            </nav>
+
+            <br><br>
+
+
+        </section>
 
 	<main class="menu-page">
 		<section class="menu-shell">
