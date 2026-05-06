@@ -2,6 +2,11 @@
 
 session_start();
 
+// Exibe aviso de logout, se aplicável
+if (isset($_GET['logout']) && $_GET['logout'] == '1') {
+    echo '<div style="background:#fff0e0;border:1.5px solid #e0a040;color:#a05a00;padding:14px 18px;margin:18px 0;border-radius:10px;font-size:1.15em;font-weight:bold;text-align:center;">Sessão encerrada com sucesso.</div>';
+}
+
 // --- GARANTIR MOVTOS PARA 1 ANO À FRENTE ---
 
 
@@ -694,6 +699,7 @@ echo '<section class="menu-shell">
                     
                     <li><a href="tabFeriados.php">Consulta Feriados</a></li>
                     <li><a href="tabDatas.php">Consulta Datas</a></li>
+                    
                     <li><a href="logout.php" style="color:dimgray;"
                             onclick="return confirm("Tem certeza que deseja trocar de usuário? Isso encerrará sua sessão atual.");">Trocar
                             usuário</a></li>
