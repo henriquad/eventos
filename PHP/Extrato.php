@@ -905,6 +905,7 @@ if (count($movimentos) === 0) {
     ];
     $ultimaData = null;
     $corIndex = 0;
+    $ultimoMes = null;
 
     foreach ($movimentos as $mov) {
         $dc = (string)$mov['DC'];
@@ -920,7 +921,15 @@ if (count($movimentos) === 0) {
         }
         $corFundo = $extratoCores[$corIndex];
 
-        echo '<tr style="background:' . $corFundo . '">';
+        // Borda superior ao iniciar um novo mês (exceto o primeiro mês exibido)
+        $mesMov = substr((string)$mov['dataM'], 0, 7);
+        $estiloTr = 'background:' . $corFundo;
+        if ($ultimoMes !== null && $mesMov !== $ultimoMes) {
+            $estiloTr .= ';border-top:3px solid #1f4f82';
+        }
+        $ultimoMes = $mesMov;
+
+        echo '<tr style="' . $estiloTr . '">';
         echo '<td>' . htmlspecialchars(extratoFormatoDataComSemana((string)$mov['dataM']), ENT_QUOTES, 'UTF-8') . '</td>';
         echo '<td>' . htmlspecialchars((int)$mov['diaUtil'], ENT_QUOTES, 'UTF-8') . '</td>';
         echo '<td>' . htmlspecialchars((string)$mov['evento'], ENT_QUOTES, 'UTF-8') . '</td>';
