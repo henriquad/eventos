@@ -477,7 +477,8 @@ echo '<section class="menu-shell">
 
 echo '<div class="topo">';
 echo '<a href="' . htmlspecialchars($extratoUrl, ENT_QUOTES, "UTF-8") . '">Voltar p/ Extrato</a>';
-echo '<a href="' . htmlspecialchars($resumoBaseUrl . '&export=excel', ENT_QUOTES, 'UTF-8') . '">Exportar Excel</a>';
+
+echo '<a href="' . htmlspecialchars($resumoBaseUrl . '&export=excel', ENT_QUOTES, 'UTF-8') . '">Exportar...<img src="../images/excel.png" alt="Excel" style="width:20px;height:20px;vertical-align:middle;"> Excel</a>';
 echo '</div>';
 echo '<div class="filtro">Período: <strong>' . htmlspecialchars(resumoDataBr($dataInicial), ENT_QUOTES, 'UTF-8') . '</strong> até <strong>' . htmlspecialchars(resumoDataBr($dataFinal), ENT_QUOTES, 'UTF-8') . '</strong></div>';
 

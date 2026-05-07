@@ -767,8 +767,9 @@ echo '<section class="menu-shell">
 
 
 echo '<div class="topo">
-<a href="' . htmlspecialchars($resumoMensalUrl, ENT_QUOTES, 'UTF-8') . '">Resumo por grupo</a>
-<a href="' . htmlspecialchars($exportUrl, ENT_QUOTES, 'UTF-8') . '">Exportar Excel</a>';
+<a href="' . htmlspecialchars($resumoMensalUrl, ENT_QUOTES, 'UTF-8') . '">Resumo mensal por grupo</a>
+
+<a href="' . htmlspecialchars($exportUrl, ENT_QUOTES, 'UTF-8') . '">Exportar...<img src="../images/excel.png" alt="Excel" style="width:20px;height:20px;vertical-align:middle;"> Excel</a>';
 
 // Botões de período rápido
 $hoje = date('Y-m-d');
