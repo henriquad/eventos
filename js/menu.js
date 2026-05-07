@@ -390,10 +390,18 @@ function inicializarPeriodo() {
           : "";
     }
   } else {
-    var hoje = new Date();
-    var primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-    dataIEl.value = formatarDataBr(primeiroDia);
-    dataFEl.value = formatarDataBr(hoje);
+    var periodoPadrao =
+      typeof window.eventosObterPeriodoPadraoExtrato === "function"
+        ? window.eventosObterPeriodoPadraoExtrato(new Date())
+        : (function () {
+            var hoje = new Date();
+            return {
+              inicio: new Date(hoje.getFullYear(), hoje.getMonth(), 1),
+              fim: new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0),
+            };
+          })();
+    dataIEl.value = formatarDataBr(periodoPadrao.inicio);
+    dataFEl.value = formatarDataBr(periodoPadrao.fim);
   }
 
   validarPeriodo(dataIEl, dataFEl, statusEl, saldoAnteriorEl);

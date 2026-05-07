@@ -78,29 +78,36 @@ mysqli_close($conn);
                     <li><a href="../Incluir.html">(*) Incluir evento</a></li>
                     <li><a href="ListaEventos.php">Lista de eventos</a></li>
                     <li><a id="gerarExtratoBtn" href="./">Gerar extrato</a></li>
-                    <li><a href="tabFeriados.php">Consulta Feriados</a></li>
+					<li><a href="tabFeriados.php">Consulta Feriados</a></li>
                     <li><a href="tabDatas.php">Consulta Datas</a></li>
-                    <li><a href="logout.php" style="color:dimgray;"
+					    <li><a href="logout.php" style="color:dimgray;"
                             onclick="return confirm('Tem certeza que deseja trocar de usuário? Isso encerrará sua sessão atual.');">Trocar
                             usuário</a></li>
                 </ul>
                 </ul>
+                <script src="../js/extrato-periodo-config.js?v=20260507"></script>
                 <script>
                     document.addEventListener('DOMContentLoaded', function () {
                         var btn = document.getElementById('gerarExtratoBtn');
                         if (btn) {
                             btn.addEventListener('click', function (e) {
                                 e.preventDefault();
-                                var hoje = new Date();
-                                var umAnoDepois = new Date();
-                                umAnoDepois.setFullYear(hoje.getFullYear() + 1);
+                                var periodo = typeof window.eventosObterPeriodoPadraoExtrato === 'function'
+                                    ? window.eventosObterPeriodoPadraoExtrato(new Date())
+                                    : (function () {
+                                        var hoje = new Date();
+                                        return {
+                                            inicio: new Date(hoje.getFullYear(), hoje.getMonth(), 1),
+                                            fim: new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0)
+                                        };
+                                    })();
                                 function formatarData(dt) {
                                     var m = String(dt.getMonth() + 1).padStart(2, '0');
                                     var d = String(dt.getDate()).padStart(2, '0');
                                     return dt.getFullYear() + '-' + m + '-' + d;
                                 }
-                                var dataI = formatarData(hoje);
-                                var dataF = formatarData(umAnoDepois);
+                                var dataI = formatarData(periodo.inicio);
+                                var dataF = formatarData(periodo.fim);
                                 var url = 'Extrato.php?DataI=' + encodeURIComponent(dataI) + '&DataF=' + encodeURIComponent(dataF);
                                 window.location.href = url;
                             });

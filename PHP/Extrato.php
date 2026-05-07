@@ -1,20 +1,44 @@
 <?php
-
 session_start();
+
 
 // Exibe aviso de logout, se aplicável
 if (isset($_GET['logout']) && $_GET['logout'] == '1') {
     echo '<div style="background:#fff0e0;border:1.5px solid #e0a040;color:#a05a00;padding:14px 18px;margin:18px 0;border-radius:10px;font-size:1.15em;font-weight:bold;text-align:center;">Sessão encerrada com sucesso.</div>';
 }
 
-// --- GARANTIR MOVTOS PARA 1 ANO À FRENTE ---
+$periodoPadraoExtratoTipo = 'mes-atual';
 
+function extratoPeriodoPadraoDatas($tipo)
+{
+    $tipoNormalizado = strtolower(trim((string)$tipo));
+    if ($tipoNormalizado === 'ano-atual') {
+        return [
+            'inicio' => date('Y-01-01'),
+            'fim' => date('Y-12-31'),
+        ];
+    }
+
+    if ($tipoNormalizado === 'proximos-30') {
+        return [
+            'inicio' => date('Y-m-d'),
+            'fim' => date('Y-m-d', strtotime('+29 days')),
+        ];
+    }
+
+    return [
+        'inicio' => date('Y-m-01'),
+        'fim' => date('Y-m-t'),
+    ];
+}
+
+$periodoPadraoExtrato = extratoPeriodoPadraoDatas($periodoPadraoExtratoTipo);
 
 // --- GARANTIR MOVTOS PARA O PERÍODO SELECIONADO ---
 $apelidoMov = $_SESSION['apelido'] ?? '';
 $senhaMov = $_SESSION['senha'] ?? '';
-$periodoI = isset($_GET['DataI']) ? extratoNormalizarData($_GET['DataI']) : date('Y-m-d');
-$periodoF = isset($_GET['DataF']) ? extratoNormalizarData($_GET['DataF']) : date('Y-m-d', strtotime('+1 year'));
+$periodoI = isset($_GET['DataI']) ? extratoNormalizarData($_GET['DataI']) : $periodoPadraoExtrato['inicio'];
+$periodoF = isset($_GET['DataF']) ? extratoNormalizarData($_GET['DataF']) : $periodoPadraoExtrato['fim'];
 if ($apelidoMov && $senhaMov) {
     $dbconMov = new mysqli('MYSQL8002.site4now.net', 'a90b7e_baseh', 'Amanti_#9', 'db_a90b7e_baseh');
     if ($dbconMov && !$dbconMov->connect_error) {
@@ -158,13 +182,13 @@ if (!$dbcon) {
 
 
 
-// Define datas padrão de 1 ano à frente se não vierem por GET
+// Define datas padrão com base no tipo configurado se não vierem por GET
 if (isset($_GET['DataI']) && isset($_GET['DataF'])) {
     $dataInicial = extratoNormalizarData($_GET['DataI']);
     $dataFinal = extratoNormalizarData($_GET['DataF']);
 } else {
-    $dataInicial = date('Y-m-d');
-    $dataFinal = date('Y-m-d', strtotime('+1 year'));
+    $dataInicial = $periodoPadraoExtrato['inicio'];
+    $dataFinal = $periodoPadraoExtrato['fim'];
 }
 $saldoAnteriorInformado = array_key_exists('SaldoAnterior', $_GET);
 $saldoAnterior = extratoNormalizarValorMonetario($_GET['SaldoAnterior'] ?? '');
@@ -526,6 +550,7 @@ echo '<style>
 
         th,
         td {
+        
             border: 1px solid #e5e9ef;
             padding: 8px 10px;
             font-size: 14px
@@ -662,31 +687,28 @@ echo '<style>
   background: linear-gradient(120deg, #e0e7ff 60%, #fff 100%);
   color: var(--brand);
 }
-    </style>
-    <style>
-        .periodo-rapido-btn {
-            background: linear-gradient(90deg, #1f4f82 60%, #3a7bd5 100%);
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 0 18px;
-            height: 36px;
-            min-width: 140px;
-            margin-left: 5px;
-            font-size: 15px;
-            font-weight: 500;
-            box-shadow: 0 2px 8px rgba(31, 79, 130, 0.08);
-            transition: background 0.2s, transform 0.1s;
-            cursor: pointer;
-        }
+.periodo-rapido-btn {
+    background: linear-gradient(90deg, #1f4f82 60%, #3a7bd5 100%);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0 18px;
+    height: 36px;
+    min-width: 140px;
+    margin-left: 5px;
+    font-size: 15px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(31, 79, 130, 0.08);
+    transition: background 0.2s, transform 0.1s;
+    cursor: pointer;
+}
+.periodo-rapido-btn:hover {
+    background: linear-gradient(90deg, #3a7bd5 60%, #1f4f82 100%);
+    transform: translateY(-2px) scale(1.04);
+}
+</style>';
 
-        .periodo-rapido-btn:hover {
-            background: linear-gradient(90deg, #3a7bd5 60%, #1f4f82 100%);
-            transform: translateY(-2px) scale(1.04);
-        }
-    </style>
-</head>
-
+echo '</head>
 <body>';
 
 echo '<div class="container">';
@@ -695,36 +717,39 @@ echo '<section class="menu-shell">
             <nav id="menu-h" aria-label="Menu principal">
                 <ul>
                     <li><a href="../Incluir.html">(*) Incluir evento</a></li>
-                    <li><a href="ListaEventos.php">Lista de eventos</a></li>
-                    
+                    <li><a href="ListaEventos.php">Lista de eventos</a></li>                    
                     <li><a href="tabFeriados.php">Consulta Feriados</a></li>
-                    <li><a href="tabDatas.php">Consulta Datas</a></li>
-                    
-                    <li><a href="logout.php" style="color:dimgray;"
-                            onclick="return confirm("Tem certeza que deseja trocar de usuário? Isso encerrará sua sessão atual.");">Trocar
-                            usuário</a></li>
+                    <li><a href="tabDatas.php">Consulta Datas</a></li>                    
+                        <li><a href="logout.php" style="color:dimgray;"
+                            onclick="return confirm(\'Tem certeza que deseja trocar de usuário? Isso encerrará sua sessão atual.\');">Trocar usuário</a></li>
                     
                     
                     
                     
                 </ul>
-                </ul>
+                <script src="../js/extrato-periodo-config.js?v=20260507"></script>
                 <script>
                     document.addEventListener("DOMContentLoaded", function () {
                         var btn = document.getElementById("gerarExtratoBtn");
                         if (btn) {
                             btn.addEventListener("click", function (e) {
                                 e.preventDefault();
-                                var hoje = new Date();
-                                var umAnoDepois = new Date();
-                                umAnoDepois.setFullYear(hoje.getFullYear() + 1);
+                                var periodo = typeof window.eventosObterPeriodoPadraoExtrato === "function"
+                                    ? window.eventosObterPeriodoPadraoExtrato(new Date())
+                                    : (function () {
+                                        var hoje = new Date();
+                                        return {
+                                            inicio: new Date(hoje.getFullYear(), hoje.getMonth(), 1),
+                                            fim: new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0)
+                                        };
+                                    })();
                                 function formatarData(dt) {
                                     var m = String(dt.getMonth() + 1).padStart(2, "0");
                                     var d = String(dt.getDate()).padStart(2, "0");
                                     return dt.getFullYear() + "-" + m + "-" + d;
                                 }
-                                var dataI = formatarData(hoje);
-                                var dataF = formatarData(umAnoDepois);
+                                var dataI = formatarData(periodo.inicio);
+                                var dataF = formatarData(periodo.fim);
                                 var url = "Extrato.php?DataI=" + encodeURIComponent(dataI) + "&DataF=" + encodeURIComponent(dataF);
                                 window.location.href = url;
                             });
@@ -742,7 +767,7 @@ echo '<section class="menu-shell">
 
 
 echo '<div class="topo">
-<a href="' . htmlspecialchars($resumoMensalUrl, ENT_QUOTES, 'UTF-8') . '">Resumo mensal</a>
+<a href="' . htmlspecialchars($resumoMensalUrl, ENT_QUOTES, 'UTF-8') . '">Resumo por grupo</a>
 <a href="' . htmlspecialchars($exportUrl, ENT_QUOTES, 'UTF-8') . '">Exportar Excel</a>';
 
 // Botões de período rápido
@@ -757,13 +782,13 @@ $proximos30Fim = date('Y-m-d', strtotime('+30 days'));
 
 // Campos de data manual + botões de período rápido
 
-// Corrige datas padrão para 1 ano à frente ao abrir o formulário
+// Corrige datas padrão com base no tipo configurado ao abrir o formulário
 if (isset($_GET['DataI']) && isset($_GET['DataF'])) {
     $dataInicialPadrao = extratoNormalizarData($_GET['DataI']);
     $dataFinalPadrao = extratoNormalizarData($_GET['DataF']);
 } else {
-    $dataInicialPadrao = date('Y-m-d');
-    $dataFinalPadrao = date('Y-m-d', strtotime('+1 year'));
+    $dataInicialPadrao = $periodoPadraoExtrato['inicio'];
+    $dataFinalPadrao = $periodoPadraoExtrato['fim'];
 }
 echo '<form class="filtro filtro-form" method="get" action="Extrato.php" style="margin-bottom:12px;" onsubmit="return prepararDatasFiltro(this)">';
 echo '<div style="display:flex;gap:8px;align-items:end;">';
@@ -848,14 +873,15 @@ if (count($movimentos) === 0) {
 }
 echo '</div>';
 
-echo '<table>';
-echo '<thead>
+echo '<table>
+                <thead>
                     <tr>
                         <th>Data</th>
                         <th>DiaUtil</th>
                         <th>Evento</th>
                         <th>Grupo</th>
                         <th>Débito (R$)</th>
+                        <th>Crédito (R$)</th>
                         <th>Saldo Acumulado (R$)</th>
                     </tr>
                 </thead>
@@ -899,6 +925,7 @@ if (count($movimentos) === 0) {
         echo '<td>' . htmlspecialchars((string)$mov['evento'], ENT_QUOTES, 'UTF-8') . '</td>';
         echo '<td>' . htmlspecialchars((string)$mov['grupo'], ENT_QUOTES, 'UTF-8') . '</td>';
         echo '<td class="num deb">' . ($dc === 'D' ? extratoValorFormatado($valor) : '-') . '</td>';
+        echo '<td class="num cre">' . ($dc === 'C' ? extratoValorFormatado($valor) : '-') . '</td>';
         echo '<td class="num">' . extratoValorFormatado($saldoAcumulado) . '</td>';
         echo '</tr>';
     }

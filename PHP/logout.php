@@ -21,18 +21,9 @@ if (ini_get('session.use_cookies')) {
 
 session_destroy();
 
-$destino = null;
-// Detecta de onde veio o logout
-$referer = $_SERVER['HTTP_REFERER'] ?? '';
-if (stripos($referer, 'ResumoMensal.php') !== false) {
-    $destino = 'ResumoMensal.php?logout=1';
-} elseif (stripos($referer, 'Extrato.php') !== false) {
-    $destino = 'Extrato.php?logout=1';
-} else {
+$destino = '../index.html?limparLogin=1';
+if (!$limparLogin) {
     $destino = '../index.html';
-    if ($limparLogin) {
-        $destino .= '?limparLogin=1';
-    }
 }
 
 header('Location: ' . $destino, true, 303);
