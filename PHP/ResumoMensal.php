@@ -34,7 +34,7 @@ function resumoValor($valor) {
 }
 
 
-// Função para normalizar valores monetários (copiada de ResumoMovtos.php)
+
 if (!function_exists('normalizarValorMonetarioResumoMensal')) {
     function normalizarValorMonetarioResumoMensal($valor)
     {
