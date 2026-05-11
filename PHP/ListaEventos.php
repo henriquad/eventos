@@ -400,7 +400,7 @@ mysqli_close($conn);
             <nav id="menu-h" aria-label="Menu principal">
                 <ul>
                     <li><a href="../Incluir.html">(*) Incluir evento</a></li>
-                    <li><a id="gerarExtratoBtn" href="#">Gerar extrato</a></li>
+                    <li><a id="gerarExtratoBtn" href="#">Gerar planilha</a></li>
                     <li><a href="tabFeriados.php">Consulta Feriados</a></li>
                     <li><a href="tabDatas.php">Consulta Datas</a></li>
                         <li><a href="logout.php" style="color:dimgray;"

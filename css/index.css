@@ -1,7 +1,7 @@
 .ajuda-titulo {
   max-width: 100%;
   width: 100%;
-  font-size: clamp(1.2rem, 4vw, 2.1rem);
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
   text-align: center;
   margin-bottom: 1.2rem;
   word-break: break-word;
@@ -82,7 +82,7 @@ td {
 th,
 td {
   font-size: 0.95rem;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: "Courier New", Courier, monospace;
 }
 
 ol {
@@ -360,7 +360,6 @@ ol {
   .ajuda-panel tr {
     margin-bottom: 1.2em;
     border-bottom: 1px solid #fff3;
-    
   }
   .ajuda-panel td {
     padding: 0.5em 0.7em;
@@ -369,7 +368,6 @@ ol {
     min-height: 2.2em;
     font-size: 0.97em;
     word-break: break-word;
-    
   }
   .ajuda-panel td:before {
     content: attr(data-label);
@@ -409,7 +407,7 @@ ol {
     font-size: 0.95em;
   }
   .ajuda-titulo {
-    font-size: 1.1rem;
+    font-size: 1rem;
     margin-bottom: 0.7rem;
   }
 }

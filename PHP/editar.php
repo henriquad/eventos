@@ -173,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 <ul>
                     <li><a href="../Incluir.html">(*) Incluir evento</a></li>
                     <li><a href="ListaEventos.php">Lista de eventos</a></li>
-                    <li><a id="gerarExtratoBtn" href="./">Gerar extrato</a></li>
+                    <li><a id="gerarExtratoBtn" href="./">Gerar planilha</a></li>
                     <li><a href="tabFeriados.php">Consulta Feriados</a></li>
                     <li><a href="tabDatas.php">Consulta Datas</a></li>
                         <li><a href="logout.php" style="color:dimgray;"
