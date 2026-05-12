@@ -890,7 +890,7 @@ echo '<table>
 
 if (count($movimentos) === 0) {
     echo '<tr>
-                        <td colspan="7">Nenhum movimento encontrado para o período selecionado.</td>
+                        <td colspan="7">Nenhum evento cadastrado...!</td>
                     </tr>';
 } else {
     $saldoAcumulado = $saldoAnterior;
