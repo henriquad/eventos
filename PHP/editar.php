@@ -227,8 +227,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             <p class="periodo-status is-invalid" id="area-mensagens"><?php echo $mensagemErro; ?></p>
         <?php endif; ?>
 
-        <button type="submit" form="formEditar" title="Salvar evento" style="position:absolute; background: none; border: none; cursor: pointer; padding: 0; display:inline-flex; align-items:center; gap:0.45rem;">
-            <img src="../images/salvar.png" alt="Salvar"><span style="font-weight:700;font-size:1.35rem;">Salvar</span></button>
+        <button type="submit" form="formEditar" title="Salvar o evento alterado" style="position:absolute; background: none; border: none; cursor: pointer; padding: 0; display:inline-flex; align-items:center; gap:0.45rem;">
+            <img src="../images/salvar.png" alt="Salvar"><span style="font-weight:700;font-size:1.4rem;">Salvar a edição do evento</span></button>
 
             <form id="formEditar" action="editar.php" method="post" onsubmit="return validarFormulario(event)">
                 <input type="hidden" name="id" value="<?php echo h($evento['id']); ?>" />
