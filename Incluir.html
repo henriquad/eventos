@@ -18,15 +18,12 @@
 
     <nav id="menu-h" aria-label="Menu principal">
       <ul>
-
         <li><a href="PHP/ListaEventos.php">Lista de eventos</a></li>
         <li><a id="gerarExtratoBtn" href="#">Gerar planilha</a></li>
-        <li><a href="PHP/tabFeriados.php">Consulta Feriados</a></li>
         <li><a href="PHP/tabDatas.php">Consulta Datas</a></li>
         <li><a href="PHP/logout.php" style="color:dimgray;"
             onclick="return confirm('Tem certeza que deseja trocar de usuário? Isso encerrará sua sessão atual.');">Trocar
             usuário</a></li>
-      </ul>
       </ul>
       <script src="js/extrato-periodo-config.js?v=20260507"></script>
       <script>
@@ -44,11 +41,13 @@
                     fim: new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0)
                   };
                 })();
+
               function formatarData(dt) {
                 var m = String(dt.getMonth() + 1).padStart(2, '0');
                 var d = String(dt.getDate()).padStart(2, '0');
                 return dt.getFullYear() + '-' + m + '-' + d;
               }
+
               var dataI = formatarData(periodo.inicio);
               var dataF = formatarData(periodo.fim);
               var url = 'PHP/Extrato.php?DataI=' + encodeURIComponent(dataI) + '&DataF=' + encodeURIComponent(dataF);
@@ -137,7 +136,7 @@
       <section>
 
         <fieldset>
-          <legend>escolha apenas uma das 6 opções...</legend>
+          <legend style="color:yellow; background-color: grey;">escolha apenas uma das 6 opções...</legend>
 
           <div
             style="border: 1px solid #cfcfcf; border-radius: 12px; padding: 8px 10px; margin-bottom: 8px; background: #fff;">
@@ -152,7 +151,9 @@
           </div>
 
 
-
+          <div <small class="dica-texto">Dica do dia do mês: contas de luz, água, Internet, tv
+            a cabo, etc.</small>
+          </div>
 
           <select id="diaM" name="diaM">
             <option value="0">escolha o dia do mês ou decêncio...</option>
@@ -190,6 +191,10 @@
           </select>
 
 
+          <div <small class="dica-texto">Dica do dia da semana: "happy-hour" na sexta, cursos
+            etc.</small>
+          </div>
+
 
           <select id="diaS" name="diaS">
             <option value="">ou escolha o dia da semana...</option>
@@ -204,7 +209,8 @@
 
 
 
-
+          <div <small class="dica-texto">Dica do dia útil: impostos, taxas etc.</small>
+          </div>
 
 
 
@@ -236,6 +242,8 @@
           </select>
 
 
+          <div <small class="dica-texto">Dica do fim do mês: impostos, taxas etc.</small>
+          </div>
 
           <select id="UPA" name="UPA">
             <option value="0">ou escolha o fim do mês...</option>
@@ -247,6 +255,10 @@
 
 
           <label for="dataFixa">ou escolha uma data em que o evento ocorre...</label>
+
+          <div <span class="dica-texto">Dica da data fixa: datas fixas, shows, teatros, cinema etc.</span>
+          </div>
+
           <input type="date" id="dataFixa" name="dataFixa" placeholder="digite uma data..." />
         </fieldset>
       </section>
@@ -255,7 +267,10 @@
 
       <section>
         <fieldset>
-          <legend>ou escolha as 2 opções juntas abaixo...</legend>
+          <legend style="color:yellow; background-color: grey;">ou escolha as 2 opções juntas abaixo...</legend>
+
+          <div <span class="dica-texto">Dica do dia e mês que repete: aniversário, datas comemorativas etc.</span>
+          </div>
 
           <select id="diaR" name="diaR">
             <option value="0">escolha o dia do mês que repete...</option>
@@ -317,9 +332,10 @@
 
 
         <fieldset>
-          <legend>ou escolha as 3 opções juntas abaixo...</legend>
+          <legend style="color:yellow; background-color: grey;">ou escolha as 3 opções juntas abaixo...</legend>
 
-
+          <div <span class="dica-texto">Dica: Dia das Mães, Dia dos Pais etc.</span>
+          </div>
 
           <select id="semN" name="semN">
             <option value="">escolha a semana do mês...</option>

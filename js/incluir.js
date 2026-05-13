@@ -4,12 +4,10 @@ document.addEventListener("DOMContentLoaded", function () {
   if (dataFixa) {
     dataFixa.addEventListener("input", function () {
       if (dataFixa.value) {
-        // Só limpa o campo diário se ele for 'sim'
-        var radioDiarioSim = document.querySelector(
-          'input[name="diario"][value="sim"]',
-        );
-        if (radioDiarioSim && radioDiarioSim.checked) {
-          radioDiarioSim.checked = false;
+        // Ao escolher data fixa, diário deve voltar para "não"
+        var radioDiarioNao = document.getElementById("diarioN");
+        if (radioDiarioNao) {
+          radioDiarioNao.checked = true;
         }
 
         // Limpa todos os selects de recorrência
@@ -295,18 +293,33 @@ function inicializarExclusividadePrimeiroFieldset() {
     : [];
 
   function limparRadiosDiario() {
-    // Só limpa se o valor selecionado for 'sim'
-    var radioSim = null;
+    // Ao escolher qualquer outro campo de recorrência, diário volta para "não"
+    var radioNao = document.getElementById("diarioN");
+    if (radioNao) {
+      radioNao.checked = true;
+      return;
+    }
+
+    // Fallback caso o id mude: procura pelo valor "não" no grupo diário
     eachNode(radiosDiario, function (radio) {
-      if (radio.value === "sim" && radio.checked) {
-        radioSim = radio;
+      if (radio.value === "não") {
+        radio.checked = true;
+      } else {
+        radio.checked = false;
       }
     });
-    if (radioSim) {
-      eachNode(radiosDiario, function (radio) {
-        radio.checked = false;
-      });
+  }
+
+  function marcarDiarioComoNao() {
+    var radioNao = document.getElementById("diarioN");
+    if (radioNao) {
+      radioNao.checked = true;
+      return;
     }
+
+    eachNode(radiosDiario, function (radio) {
+      radio.checked = radio.value === "não";
+    });
   }
 
   function limparSelects(selects, excecao) {
@@ -399,11 +412,8 @@ function inicializarExclusividadePrimeiroFieldset() {
       }
 
       // Limpa todos os campos de recorrência ao escolher dataFixa
-      // Limpa todos os radios de diário
-      var radiosDiario = document.querySelectorAll('input[name="diario"]');
-      eachNode(radiosDiario, function (radio) {
-        radio.checked = false;
-      });
+      // Diário deve retornar para "não"
+      marcarDiarioComoNao();
 
       // Limpa todos os selects do primeiro grupo
       var selectsPrimeiro = [
