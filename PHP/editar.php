@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
     if (!$id || $id <= 0) {
         mysqli_close($dbcon);
-        header('Location: ListaEventos.php?erro=1&msg=id_invalido_edicao');
+        header('Location: ListaEventosResumo.php?erro=1&msg=id_invalido_edicao');
         exit();
     }
 
@@ -95,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
     if (!$stmtSelect) {
         mysqli_close($dbcon);
-        header('Location: ListaEventos.php?erro=1&msg=preparo_edicao');
+        header('Location: ListaEventosResumo.php?erro=1&msg=preparo_edicao');
         exit();
     }
 
@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     if (!mysqli_stmt_execute($stmtSelect)) {
         mysqli_stmt_close($stmtSelect);
         mysqli_close($dbcon);
-        header('Location: ListaEventos.php?erro=1&msg=execucao_edicao&id=' . $id);
+        header('Location: ListaEventosResumo.php?erro=1&msg=execucao_edicao&id=' . $id);
         exit();
     }
 
@@ -113,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     if (!$resultado || mysqli_num_rows($resultado) === 0) {
         mysqli_stmt_close($stmtSelect);
         mysqli_close($dbcon);
-        header('Location: ListaEventos.php?erro=1&msg=registro_nao_encontrado&id=' . $id);
+        header('Location: ListaEventosResumo.php?erro=1&msg=registro_nao_encontrado&id=' . $id);
         exit();
     }
 
@@ -172,7 +172,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             <nav id="menu-h" aria-label="Menu principal">
                 <ul>
                     <li><a href="../Incluir.html">(*) Incluir evento</a></li>
-                    <li><a href="ListaEventos.php">Lista de eventos</a></li>
+                    
+                    <li><a href="ListaEventosResumo.php">Lista dos eventos</a></li>
                     <li><a id="gerarExtratoBtn" href="./">Gerar planilha</a></li>
                     <li><a href="tabFeriados.php">Consulta Feriados</a></li>
                     <li><a href="tabDatas.php">Consulta Datas</a></li>
@@ -226,8 +227,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             <p class="periodo-status is-invalid" id="area-mensagens"><?php echo $mensagemErro; ?></p>
         <?php endif; ?>
 
-        <button type="submit" form="formEditar" title="Salvar evento" style="position:absolute; background: none; border: none; cursor: pointer; padding: 0;">
-                    <img src="../images/salvar.png" alt="Salvar"></button>
+        <button type="submit" form="formEditar" title="Salvar evento" style="position:absolute; background: none; border: none; cursor: pointer; padding: 0; display:inline-flex; align-items:center; gap:0.45rem;">
+            <img src="../images/salvar.png" alt="Salvar"><span style="font-weight:700;font-size:1.35rem;">Salvar</span></button>
 
             <form id="formEditar" action="editar.php" method="post" onsubmit="return validarFormulario(event)">
                 <input type="hidden" name="id" value="<?php echo h($evento['id']); ?>" />
@@ -291,18 +292,24 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
                     <br>
                     <fieldset>
-                        <legend>escolha apenas uma das 6 opções...</legend>
+                        <legend style="color:yellow; background-color: grey;">escolha apenas uma das 6 opções...</legend>
 
-                        <div class="radio-option">
-                            <input type="radio" id="diarioS" value="sim" name="diario" <?php echo checkedAttr(($evento['diario'] ?? '') === 'sim'); ?> />
-                            <label for="diarioS">Sim, ocorre todos os dias...</label>
-                        </div>
-                        <div class="radio-option">
-                            <input type="radio" id="diarioN" value="não" name="diario" <?php echo checkedAttr(($evento['diario'] ?? '') === 'não'); ?> />
-                            <label for="diarioN">Não, não é diario...</label>
-                        </div>
+                          <div
+            style="border: 1px solid #cfcfcf; border-radius: 12px; padding: 8px 10px; margin-bottom: 8px; background: #fff;">
+            <div class="radio-option">
+              <input type="radio" id="diarioS" value="sim" name="diario" />
+              <label for="diarioS">Sim, ocorre todos os dias...</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" id="diarioN" checked="True" value="não" name="diario" />
+              <label for="diarioN">Não, não é diario...</label>
+            </div>
+          </div>
 
                         <br>
+                        <div <small class="dica-texto">Dica do dia do mês: contas de luz, água, Internet, tv
+            a cabo, etc.</small>
+          </div>
 
                         <select id="diaM" name="diaM">
                             <option value="0">escolha o dia do mês ou decêncio...</option>
@@ -340,6 +347,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                         </select>
                         <br>
 
+                        <div <small class="dica-texto">Dica do dia da semana: "happy-hour" na sexta, cursos
+            etc.</small>
+          </div>
                         <select id="diaS" name="diaS">
                             <option value="">ou escolha o dia da semana...</option>
                             <option value="Seg" <?php echo selectedAttr($evento['diaS'] ?? '', 'Seg'); ?>>Segunda-feira</option>
@@ -351,7 +361,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                             <option value="Dom" <?php echo selectedAttr($evento['diaS'] ?? '', 'Dom'); ?>>Domingo</option>
                         </select>
                         <br>
-
+<div <small class="dica-texto">Dica do dia útil: impostos, taxas etc.</small>
+          </div>
 
                         <select id="diaU" name="diaU">
                             <option value="0">ou escolha o dia útil no mês...</option>
@@ -360,7 +371,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                             <?php } ?>
                         </select>
                         <br>
-
+<div <small class="dica-texto">Dica do fim do mês: impostos, taxas etc.</small>
+          </div>
 
                         <select id="UPA" name="UPA">
                             <option value="0">ou escolha o fim do mês...</option>
@@ -368,12 +380,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                             <option value="8" <?php echo selectedAttr($evento['UPA'] ?? '0', '8'); ?>>Penúltimo dia útil</option>
                             <option value="9" <?php echo selectedAttr($evento['UPA'] ?? '0', '9'); ?>>Último dia útil</option>
                         </select>
-                        <br>
-
-
-                        <br>
-                        <br>
+                
                         <label for="dataFixa">ou escolha uma data em que o evento ocorre...</label>
+                           <div <span class="dica-texto">Dica da data fixa: datas fixas, shows, teatros, cinema etc.</span>
+          </div>
                         <input type="date" id="dataFixa" style="margin:12px;" name="dataFixa" value="<?php echo h($evento['dataFixa']); ?>" />
                     </fieldset>
 
@@ -384,7 +394,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                     <br />
 
                     <fieldset>
-                        <legend>ou escolha as 2 opções juntas abaixo...</legend>
+                        <legend style="color:yellow; background-color: grey;">ou escolha as 2 opções juntas abaixo...</legend>
+
+                         <div <span class="dica-texto">Dica: aniversário, Dia dos Pais etc.</span>
+          </div>
+
                         <select id="diaR" name="diaR">
                             <option value="0">escolha o dia do mês que repete...</option>
                             <?php for ($i = 1; $i <= 31; $i++) { ?>
@@ -416,7 +430,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
                     <br>
                     <fieldset>
-                        <legend>ou escolha as 3 opções juntas abaixo...</legend>
+                        <legend style="color:yellow; background-color: grey;">ou escolha as 3 opções juntas abaixo...</legend>
+                         <div <span class="dica-texto">Dica: Dia das Mães etc.</span>
+          </div>
                         <select id="semN" name="semN">
                             <option value="">escolha a semana do mês...</option>
                             <option value="1" <?php echo selectedAttr($evento['semN'] ?? '', '1'); ?>>1ª semana do mês</option>
@@ -530,7 +546,7 @@ $id = getPostValue('id', 'int');
 
 if (!$id || $id <= 0) {
     mysqli_close($dbcon);
-    header('Location: ListaEventos.php?erro=1&msg=id_invalido_edicao');
+    header('Location: ListaEventosResumo.php?erro=1&msg=id_invalido_edicao');
     exit();
 }
 
@@ -558,7 +574,7 @@ if ($DC !== 'D' && $DC !== 'C') {
 
 if (isBlankValue($grupo)) {
     mysqli_close($dbcon);
-    header('Location: ListaEventos.php?erro=1&msg=grupo_obrigatorio&id=' . $id);
+    header('Location: ListaEventosResumo.php?erro=1&msg=grupo_obrigatorio&id=' . $id);
     exit();
 }
 
@@ -604,7 +620,7 @@ if (
 
 if (!$recorrenciaPreenchida) {
     mysqli_close($dbcon);
-    header('Location: ListaEventos.php?erro=1&msg=recorrencia_obrigatoria&id=' . $id);
+    header('Location: ListaEventosResumo.php?erro=1&msg=recorrencia_obrigatoria&id=' . $id);
     exit();
 }
 
@@ -651,7 +667,7 @@ $stmtExiste = mysqli_prepare($dbcon, $sqlExiste);
 
 if (!$stmtExiste) {
     mysqli_close($dbcon);
-    header('Location: ListaEventos.php?erro=1&msg=preparo_edicao');
+    header('Location: ListaEventosResumo.php?erro=1&msg=preparo_edicao');
     exit();
 }
 
@@ -660,7 +676,7 @@ mysqli_stmt_bind_param($stmtExiste, "iss", $id, $apelido, $senha);
 if (!mysqli_stmt_execute($stmtExiste)) {
     mysqli_stmt_close($stmtExiste);
     mysqli_close($dbcon);
-    header('Location: ListaEventos.php?erro=1&msg=execucao_edicao&id=' . $id);
+    header('Location: ListaEventosResumo.php?erro=1&msg=execucao_edicao&id=' . $id);
     exit();
 }
 
@@ -669,7 +685,7 @@ $resultadoExiste = mysqli_stmt_get_result($stmtExiste);
 if (!$resultadoExiste || mysqli_num_rows($resultadoExiste) === 0) {
     mysqli_stmt_close($stmtExiste);
     mysqli_close($dbcon);
-    header('Location: ListaEventos.php?erro=1&msg=registro_nao_encontrado&id=' . $id);
+    header('Location: ListaEventosResumo.php?erro=1&msg=registro_nao_encontrado&id=' . $id);
     exit();
 }
 
@@ -700,7 +716,7 @@ $stmt = mysqli_prepare($dbcon, $sql);
 
 if (!$stmt) {
     mysqli_close($dbcon);
-    header('Location: ListaEventos.php?erro=1&msg=preparo_edicao');
+    header('Location: ListaEventosResumo.php?erro=1&msg=preparo_edicao');
     exit();
 }
 
@@ -733,7 +749,7 @@ mysqli_stmt_bind_param(
 if (!mysqli_stmt_execute($stmt)) {
     mysqli_stmt_close($stmt);
     mysqli_close($dbcon);
-    header('Location: ListaEventos.php?erro=1&msg=execucao_edicao&id=' . $id);
+    header('Location: ListaEventosResumo.php?erro=1&msg=execucao_edicao&id=' . $id);
     exit();
 }
 
@@ -743,9 +759,9 @@ mysqli_stmt_close($stmt);
 mysqli_close($dbcon);
 
 if ($registrosAfetados >= 0) {
-    header('Location: ListaEventos.php?editado=1&id=' . $id);
+    header('Location: ListaEventosResumo.php?editado=1&id=' . $id);
     exit();
 }
 
-header('Location: ListaEventos.php?erro=1&msg=registro_nao_alterado&id=' . $id);
+header('Location: ListaEventosResumo.php?erro=1&msg=registro_nao_alterado&id=' . $id);
 exit();

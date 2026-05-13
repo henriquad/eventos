@@ -18,7 +18,8 @@
 
     <nav id="menu-h" aria-label="Menu principal">
       <ul>
-        <li><a href="PHP/ListaEventos.php">Lista de eventos</a></li>
+
+        <li><a href="PHP/ListaEventosResumo.php">Lista dos eventos</a></li>
         <li><a id="gerarExtratoBtn" href="#">Gerar planilha</a></li>
         <li><a href="PHP/tabDatas.php">Consulta Datas</a></li>
         <li><a href="PHP/logout.php" style="color:dimgray;"
@@ -81,12 +82,16 @@
           <legend>Informações do evento</legend>
 
           <div class="linha-evento-grupo-valor">
-            <input type="text" name="evento" id="evento" style="margin: 12px;font-weight:bold;font-size:20px;"
-              placeholder="(*) nome do evento..." />
-            <input type="text" id="grupo" name="grupo" style="margin: 12px;font-weight:bold;font-size:20px;"
-              placeholder="(*) digite grupo ou conta..." />
-            <input type="text" name="valorE" id="valorE" style="margin: 12px;font-weight:bold;font-size:20px;"
-              placeholder="valor R$ apenas digitos..." />
+
+            <input type="text" name="evento" id="evento" style="margin: 12px;font-weight:bold;font-size:20px;width: 400px;"
+              placeholder="(*) evento: escola, combustível, água etc..." />
+
+            <input type="text" id="grupo" name="grupo" style="margin: 12px;font-weight:bold;font-size:20px;width: 400px;"
+              placeholder="(*) grupo... moradia, transporte, saúde, etc..." />
+
+            <input type="text" name="valorE" id="valorE" style="margin: 12px;font-weight:bold;font-size:20px;width: 300px;"
+              placeholder="(*) valor (só digitos)... 123" />
+
           </div>
           <div class="radio-option">
             <input type="radio" id="ativo" name="ativo" checked="True" value="sim" />
@@ -269,7 +274,7 @@
         <fieldset>
           <legend style="color:yellow; background-color: grey;">ou escolha as 2 opções juntas abaixo...</legend>
 
-          <div <span class="dica-texto">Dica do dia e mês que repete: aniversário, datas comemorativas etc.</span>
+          <div <span class="dica-texto">Dica: aniversário, Dia dos Pais etc.</span>
           </div>
 
           <select id="diaR" name="diaR">
@@ -334,7 +339,7 @@
         <fieldset>
           <legend style="color:yellow; background-color: grey;">ou escolha as 3 opções juntas abaixo...</legend>
 
-          <div <span class="dica-texto">Dica: Dia das Mães, Dia dos Pais etc.</span>
+          <div <span class="dica-texto">Dica: Dia das Mães etc.</span>
           </div>
 
           <select id="semN" name="semN">

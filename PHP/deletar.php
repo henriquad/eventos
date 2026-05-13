@@ -15,7 +15,7 @@ $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
 if (!$id || $id <= 0) {
     mysqli_close($dbcon);
-    header('Location: ListaEventos.php?erro=1&msg=id_invalido');
+    header('Location: ListaEventosResumo.php?erro=1&msg=id_invalido');
     exit();
 }
 
@@ -24,7 +24,7 @@ $stmt = mysqli_prepare($dbcon, $sql);
 
 if (!$stmt) {
     mysqli_close($dbcon);
-    header('Location: ListaEventos.php?erro=1&msg=preparo_delete');
+    header('Location: ListaEventosResumo.php?erro=1&msg=preparo_delete');
     exit();
 }
 
@@ -33,7 +33,7 @@ mysqli_stmt_bind_param($stmt, "iss", $id, $apelido, $senha);
 if (!mysqli_stmt_execute($stmt)) {
     mysqli_stmt_close($stmt);
     mysqli_close($dbcon);
-    header('Location: ListaEventos.php?erro=1&msg=execucao_delete');
+    header('Location: ListaEventosResumo.php?erro=1&msg=execucao_delete');
     exit();
 }
 
@@ -43,9 +43,9 @@ mysqli_stmt_close($stmt);
 mysqli_close($dbcon);
 
 if ($registrosAfetados > 0) {
-    header('Location: ListaEventos.php?excluido=1&id=' . $id);
+    header('Location: ListaEventosResumo.php?excluido=1&id=' . $id);
     exit();
 }
 
-header('Location: ListaEventos.php?erro=1&msg=registro_nao_encontrado&id=' . $id);
+header('Location: ListaEventosResumo.php?erro=1&msg=registro_nao_encontrado&id=' . $id);
 exit();

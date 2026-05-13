@@ -400,6 +400,7 @@ mysqli_close($conn);
             <nav id="menu-h" aria-label="Menu principal">
                 <ul>
                     <li><a href="../Incluir.html">(*) Incluir evento</a></li>
+                    <li><a href="ListaEventosResumo.php">Lista dos eventos</a></li>
                     <li><a id="gerarExtratoBtn" href="#">Gerar planilha</a></li>
                     <li><a href="tabFeriados.php">Consulta Feriados</a></li>
                     <li><a href="tabDatas.php">Consulta Datas</a></li>
@@ -533,19 +534,19 @@ mysqli_close($conn);
                                     // Força largura de 50px para colunas específicas
                                     // Remover larguras fixas para todas as colunas
                                     if (strtolower($field->name) === 'ativo') {
-                                        $style = 'style="width:100px;min-width:100px;max-width:100px;text-align:center;"';
+                                        $style = 'style="width:100px;min-width:30px;max-width:60px;text-align:center;"';
                                     } elseif (strtolower($field->name) === 'diaR') {
-                                        $style = 'style="width:80px;min-width:80px;max-width:80px;text-align:center;"';
+                                        $style = 'style="width:80px;min-width:30px;max-width:30px;text-align:center;"';
                                     } elseif (strtolower($field->name) === 'diario') {
-                                        $style = 'style="width:100px;min-width:100px;max-width:100px;text-align:center;"';
+                                        $style = 'style="width:100px;min-width:30px;max-width:70px;text-align:center;"';
                                     } elseif (strtolower($field->name) === 'prorroga') {
-                                        $style = 'style="width:110px;min-width:110px;max-width:110px;text-align:center;"';
+                                        $style = 'style="width:110px;min-width:30px;max-width:70px;text-align:center;"';
                                     } elseif (strtolower($field->name) === 'mesR') {
-                                        $style = 'style="width:60px;min-width:60px;max-width:60px;text-align:center;"';
+                                        $style = 'style="width:60px;min-width:30px;max-width:30px;text-align:center;"';
                                     } elseif (strtolower($field->name) === 'diaS') {
-                                        $style = 'style="width:80px;min-width:80px;max-width:80px;text-align:center;"';
+                                        $style = 'style="width:80px;min-width:30px;max-width:30px;text-align:center;"';
                                     } elseif (strtolower($field->name) === 'semM') {
-                                        $style = 'style="width:80px;min-width:80px;max-width:80px;text-align:center;"';
+                                        $style = 'style="width:80px;min-width:30px;max-width:30px;text-align:center;"';
                                     } else {
                                         $style = '';
                                     }

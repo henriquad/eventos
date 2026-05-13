@@ -717,7 +717,8 @@ echo '<section class="menu-shell">
             <nav id="menu-h" aria-label="Menu principal">
                 <ul>
                     <li><a href="../Incluir.html">(*) Incluir evento</a></li>
-                    <li><a href="ListaEventos.php">Lista de eventos</a></li>                    
+                    
+                    <li><a href="ListaEventosResumo.php">Lista dos eventos</a></li>
                     <li><a href="tabFeriados.php">Consulta Feriados</a></li>
                     <li><a href="tabDatas.php">Consulta Datas</a></li>                    
                         <li><a href="logout.php" style="color:dimgray;"
